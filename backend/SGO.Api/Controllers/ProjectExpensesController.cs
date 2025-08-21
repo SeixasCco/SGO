@@ -19,10 +19,25 @@ namespace SGO.Api.Controllers
             _context = context;
         }
 
+        // GET: api/projectexpenses/{id}
+        [HttpGet("{id}")]
+        public async Task<ActionResult<ProjectExpense>> GetExpenseById(Guid id)
+        {
+            var expense = await _context.ProjectExpenses
+                                        .Include(e => e.CostCenter)
+                                        .FirstOrDefaultAsync(e => e.Id == id);
+            if (expense == null)
+            {
+                return NotFound();
+            }
+            return Ok(expense);
+        }
+
         // POST: api/projectexpenses
         [HttpPost]
-        public async Task<ActionResult<ProjectExpense>> CreateExpense([FromBody] CreateExpenseDto expenseDto)        {
-            
+        public async Task<ActionResult<ProjectExpense>> CreateExpense([FromBody] CreateExpenseDto expenseDto)
+        {
+
             var costCenter = await _context.CostCenters
                 .FirstOrDefaultAsync(c => c.Name.ToUpper() == expenseDto.CostCenterName.ToUpper());
 
@@ -31,11 +46,11 @@ namespace SGO.Api.Controllers
                 costCenter = new CostCenter
                 {
                     Id = Guid.NewGuid(),
-                    Name = expenseDto.CostCenterName                   
+                    Name = expenseDto.CostCenterName
                 };
                 _context.CostCenters.Add(costCenter);
             }
-                        
+
             var newExpense = new ProjectExpense
             {
                 Id = Guid.NewGuid(),
@@ -47,44 +62,44 @@ namespace SGO.Api.Controllers
                 Observations = expenseDto.Observations,
                 SupplierName = expenseDto.SupplierName,
                 InvoiceNumber = expenseDto.InvoiceNumber,
-                AttachmentPath = expenseDto.AttachmentPath, 
-                CostCenter = costCenter 
+                AttachmentPath = expenseDto.AttachmentPath,
+                CostCenter = costCenter
             };
-            
+
             _context.ProjectExpenses.Add(newExpense);
             await _context.SaveChangesAsync();
 
-            return Ok(newExpense); 
+            return Ok(newExpense);
         }
-        
-        // PUT: api/projectexpenses/{id}
+
+        // PUT: api/projectexpenses/{id}        
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateExpense(Guid id, [FromBody] ProjectExpense updatedExpense)
+        public async Task<IActionResult> UpdateExpense(Guid id, [FromBody] UpdateExpenseDto expenseDto)
         {
-            if (id != updatedExpense.Id)
+            if (id != expenseDto.Id)
             {
-                return BadRequest("O ID da despesa na URL não corresponde ao ID no corpo da requisição.");
+                return BadRequest();
             }
 
-            _context.Entry(updatedExpense).State = EntityState.Modified;
+            var expense = await _context.ProjectExpenses.FindAsync(id);
+            if (expense == null)
+            {
+                return NotFound();
+            }
+           
+            expense.Description = expenseDto.Description;
+            expense.Amount = expenseDto.Amount;
+            expense.Date = expenseDto.Date.ToUniversalTime();           
 
             try
             {
                 await _context.SaveChangesAsync();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (DbUpdateException)
             {
-                if (!_context.ProjectExpenses.Any(e => e.Id == id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                if (!_context.ProjectExpenses.Any(e => e.Id == id)) { return NotFound(); } else { throw; }
             }
-
-            return NoContent(); 
+            return NoContent();
         }
 
         // DELETE: api/projectexpenses/{id}
@@ -100,7 +115,8 @@ namespace SGO.Api.Controllers
             _context.ProjectExpenses.Remove(expense);
             await _context.SaveChangesAsync();
 
-            return NoContent(); 
+            return NoContent();
         }
+
     }
 }

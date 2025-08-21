@@ -5,6 +5,7 @@ using SGO.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using SGO.Api.Dtos;
 
 namespace SGO.Api.Controllers
 {
@@ -24,6 +25,55 @@ namespace SGO.Api.Controllers
         public async Task<ActionResult<IEnumerable<Employee>>> GetEmployees()
         {
             return await _context.Employees.ToListAsync();
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateEmployee(Guid id, [FromBody] UpdateEmployeeDto employeeDto)
+        {
+            var employee = await _context.Employees.FindAsync(id);
+            if (employee == null)
+            {
+                return NotFound();
+            }
+
+            // Atualiza a entidade com os dados do DTO
+            employee.Name = employeeDto.Name;
+            employee.Position = employeeDto.Position;
+            employee.HireDate = employeeDto.HireDate.ToUniversalTime();
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!_context.Employees.Any(e => e.Id == id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
+        }
+
+        // DELETE: api/employees/{id}
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteEmployee(Guid id)
+        {
+            var employee = await _context.Employees.FindAsync(id);
+            if (employee == null)
+            {
+                return NotFound();
+            }
+
+            _context.Employees.Remove(employee);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
         }
 
         //GET :api/employee/{id}
@@ -50,6 +100,6 @@ namespace SGO.Api.Controllers
 
             return Ok(employee);
         }
-        
+
     }
 }

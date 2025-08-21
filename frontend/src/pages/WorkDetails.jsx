@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import AddExpenseForm from '../components/AddExpenseForm';
+import ContractsManager from '../components/ContractsManager';
 
 const WorkDetails = () => {
     const { id } = useParams();
@@ -55,6 +56,7 @@ const WorkDetails = () => {
             <h1>Detalhes: {project.contractor} - {project.name}</h1>
             <p><strong>CNO:</strong> {project.cno}</p>
 
+            <ContractsManager projectId={project.id} />
             <hr />
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -107,7 +109,10 @@ const WorkDetails = () => {
                                     )}
                                 </td>
                                 <td>
-                                    <button onClick={() => handleDeleteExpense(expense.id)}>
+                                    <Link to={`/expense/edit/${expense.id}`}>
+                                        <button>✏️ Editar</button>
+                                    </Link>
+                                    <button onClick={() => handleDeleteExpense(expense.id)} style={{ marginLeft: '10px' }}>
                                         🗑️ Deletar
                                     </button>
                                 </td>

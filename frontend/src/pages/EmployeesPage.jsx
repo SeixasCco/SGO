@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
 
 const EmployeesPage = () => {
@@ -17,6 +18,20 @@ const EmployeesPage = () => {
                 setError('Falha ao carregar funcionários.');
                 setLoading(false);
             });
+    };
+
+    const handleDelete = (employeeId) => {
+        if (window.confirm("Tem certeza que deseja deletar este funcionário?")) {
+            axios.delete(`http://localhost:5145/api/employees/${employeeId}`)
+                .then(() => {
+                    alert("Funcionário deletado com sucesso!");
+                    fetchEmployees();
+                })
+                .catch(error => {
+                    alert("Falha ao deletar o funcionário.");
+                    console.error(error);
+                });
+        }
     };
 
     useEffect(() => {
@@ -64,17 +79,30 @@ const EmployeesPage = () => {
                 </div>
                 <button type="submit">Salvar Funcionário</button>
             </form>
-
             <h2>Funcionários Cadastrados</h2>
-            <table /* ... */ >
-                <thead>{/* ... */}</thead>
+            <table border="1" style={{ width: '100%' }}>
+                <thead>
+                    <tr>
+                      <th>Nome</th>
+                      <th>Cargo</th>
+                      <th>Data de Contratação</th>
+                      <th>Ações</th>
+                    </tr>
+                </thead>
                 <tbody>
                     {employees.map(emp => (
-                        // Envolvendo a linha da tabela com o Link
-                        <tr key={emp.id} style={{ cursor: 'pointer' }} onClick={() => window.location.href = `/employee/${emp.id}`}>
+                        <tr key={emp.id}>
                             <td>{emp.name}</td>
                             <td>{emp.position}</td>
                             <td>{new Date(emp.hireDate).toLocaleDateString()}</td>
+                            <td>
+                                <Link to={`/employee/edit/${emp.id}`}>
+                                    <button>✏️ Editar</button>
+                                </Link>
+                                <button onClick={() => handleDelete(emp.id)} style={{ marginLeft: '10px' }}>
+                                    🗑️ Deletar
+                                </button>
+                            </td>
                         </tr>
                     ))}
                 </tbody>
