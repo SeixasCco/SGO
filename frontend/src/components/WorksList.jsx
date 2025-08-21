@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import AddWorkForm from './AddWorkForm';
-// A importação do 'Link' foi removida
+import { Link } from 'react-router-dom'; // Importando o Link
 
 const WorksList = () => {
   const [projects, setProjects] = useState([]);
@@ -13,8 +13,9 @@ const WorksList = () => {
   const fetchProjects = () => {
     setLoading(true);
     axios.get('http://localhost:5145/api/projects')
-      .then(response => {
-        setProjects(response.data);
+      .then(response => {        
+        const projectsArray = response.data.$values || response.data || [];
+        setProjects(response.data || []); 
         setLoading(false);
       })
       .catch(error => {
@@ -51,13 +52,15 @@ const WorksList = () => {
       ) : projects.length === 0 ? (
         <p>Nenhuma obra cadastrada ainda.</p>
       ) : (
-        // A tag <Link> foi removida daqui
         projects.map(project => (
-          <div key={project.id} style={{ border: '1px solid #ccc', margin: '10px', padding: '10px' }}>
-            <h2>{project.contractor} - {project.name}</h2>
-            <p>📍 {project.city}/{project.state}</p>
-            <p>🔢 CNO: {project.cno}</p>
-          </div>
+          // Adicionando o Link para envolver o card da obra
+          <Link to={`/project/${project.id}`} key={project.id} style={{ textDecoration: 'none', color: 'inherit' }}>
+            <div style={{ border: '1px solid #ccc', margin: '10px', padding: '10px', cursor: 'pointer' }}>
+              <h2>{project.contractor} - {project.name}</h2>
+              <p>📍 {project.city}/{project.state}</p>
+              <p>🔢 CNO: {project.cno}</p>
+            </div>
+          </Link>
         ))
       )}
     </div>

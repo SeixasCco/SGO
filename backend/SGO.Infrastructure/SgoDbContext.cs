@@ -7,7 +7,7 @@ public class SgoDbContext : DbContext
 {
     public SgoDbContext(DbContextOptions<SgoDbContext> options) : base(options)
     {
-    }
+    }   
 
     public DbSet<Project> Projects { get; set; }
     public DbSet<Contract> Contracts { get; set; }

@@ -1,9 +1,12 @@
+// SGO.Api/Controllers/ProjectsController.cs
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using SGO.Api.Dtos; // Importe os DTOs
 using SGO.Core;
 using SGO.Infrastructure;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace SGO.Api.Controllers
@@ -13,38 +16,58 @@ namespace SGO.Api.Controllers
     public class ProjectsController : ControllerBase
     {
         private readonly SgoDbContext _context;
-       
-        public ProjectsController(SgoDbContext context)
-        {
-            _context = context;
-        }
+        public ProjectsController(SgoDbContext context) { _context = context; }
 
-        // GET: api/projects
+        // GetAllProjects continua simples, pois não precisa de dados aninhados
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Project>>> GetAllProjects()
         {
-            var projects = await _context.Projects.ToListAsync();
-            return Ok(projects);
+            return await _context.Projects.ToListAsync();
         }
 
-        // GET: api/projects/{id}
+        // GetProjectById agora retorna nosso DTO
         [HttpGet("{id}")]
-        public async Task<ActionResult<Project>> GetProjectById(Guid id)
+        public async Task<ActionResult<ProjectDetailsDto>> GetProjectById(Guid id)
         {
-            var project = await _context.Projects.FindAsync(id);
+            var project = await _context.Projects
+                .Include(p => p.Contracts)
+                .Include(p => p.Expenses)
+                    .ThenInclude(e => e.CostCenter)
+                .FirstOrDefaultAsync(p => p.Id == id);
 
-            if (project == null)
+            if (project == null) return NotFound();
+
+            // Mapeamento manual para o DTO - AQUI QUEBRAMOS O CICLO
+            var projectDto = new ProjectDetailsDto
             {
-                return NotFound();
-            }
+                Id = project.Id,
+                CNO = project.CNO,
+                Name = project.Name,
+                Contractor = project.Contractor,
+                City = project.City,
+                State = project.State,
+                Contracts = project.Contracts.Select(c => new ContractDto
+                {
+                    Id = c.Id,
+                    ContractNumber = c.ContractNumber,
+                    TotalValue = c.TotalValue
+                }).ToList(),
+                Expenses = project.Expenses.Select(e => new ExpenseDto
+                {
+                    Id = e.Id,
+                    Date = e.Date,
+                    Description = e.Description,
+                    Amount = e.Amount,
+                    CostCenterName = e.CostCenter?.Name ?? "N/A"
+                }).ToList()
+            };
 
-            return Ok(project);
+            return Ok(projectDto);
         }
-
-        // POST: api/projects
+        
         [HttpPost]
         public async Task<ActionResult<Project>> CreateProject(Project project)
-        {           
+        {
             project.Id = Guid.NewGuid();
             project.StartDate = DateTime.UtcNow;
 
@@ -52,6 +75,6 @@ namespace SGO.Api.Controllers
             await _context.SaveChangesAsync();
             
             return CreatedAtAction(nameof(GetProjectById), new { id = project.Id }, project);
-        }        
+        }
     }
 }
