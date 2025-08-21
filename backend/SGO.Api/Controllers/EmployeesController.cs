@@ -26,6 +26,19 @@ namespace SGO.Api.Controllers
             return await _context.Employees.ToListAsync();
         }
 
+        //GET :api/employee/{id}
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Employee>> GetEmployeeById(Guid id)
+        {
+            var employee = await _context.Employees.FindAsync(id);
+
+            if (employee == null)
+            {
+                return NotFound();
+            }
+            return Ok(employee);
+        }
+
         // POST: api/employees
         [HttpPost]
         public async Task<ActionResult<Employee>> CreateEmployee(Employee employee)
@@ -37,5 +50,6 @@ namespace SGO.Api.Controllers
 
             return Ok(employee);
         }
+        
     }
 }

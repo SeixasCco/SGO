@@ -31,3 +31,15 @@ public class ExpenseDto
 
     public string? AttachmentPath { get; set; }
 }
+
+public class UpdateProjectDto
+{
+    public string Name { get; set; } = string.Empty;
+    public string Contractor { get; set; } = string.Empty;
+    public string CNO { get; set; } = string.Empty;
+    public string City { get; set; } = string.Empty;
+    public string State { get; set; } = string.Empty;
+    public string? Address { get; set; }
+    public string? Description { get; set; }
+    public int Status { get; set; }
+}

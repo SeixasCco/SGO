@@ -1,7 +1,6 @@
-// SGO.Api/Controllers/ProjectsController.cs
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using SGO.Api.Dtos; // Importe os DTOs
+using SGO.Api.Dtos;
 using SGO.Core;
 using SGO.Infrastructure;
 using System;
@@ -17,14 +16,14 @@ namespace SGO.Api.Controllers
     {
         private readonly SgoDbContext _context;
         public ProjectsController(SgoDbContext context) { _context = context; }
-        
+
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Project>>> GetAllProjects()
         {
             return await _context.Projects.ToListAsync();
         }
 
-        
+
         [HttpGet("{id}")]
         public async Task<ActionResult<ProjectDetailsDto>> GetProjectById(Guid id)
         {
@@ -35,7 +34,7 @@ namespace SGO.Api.Controllers
                 .FirstOrDefaultAsync(p => p.Id == id);
 
             if (project == null) return NotFound();
-           
+
             var projectDto = new ProjectDetailsDto
             {
                 Id = project.Id,
@@ -63,7 +62,7 @@ namespace SGO.Api.Controllers
 
             return Ok(projectDto);
         }
-        
+
         [HttpPost]
         public async Task<ActionResult<Project>> CreateProject(Project project)
         {
@@ -72,8 +71,62 @@ namespace SGO.Api.Controllers
 
             _context.Projects.Add(project);
             await _context.SaveChangesAsync();
-            
+
             return CreatedAtAction(nameof(GetProjectById), new { id = project.Id }, project);
+        }
+
+        // PUT: api/projects/{id}
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateProject(Guid id, [FromBody] UpdateProjectDto projectDto)
+        {
+            var project = await _context.Projects.FindAsync(id);
+            if (project == null)
+            {
+                return NotFound();
+            }
+
+            project.Name = projectDto.Name;
+            project.Contractor = projectDto.Contractor;
+            project.CNO = projectDto.CNO;
+            project.City = projectDto.City;
+            project.State = projectDto.State;
+            project.Address = projectDto.Address;
+            project.Description = projectDto.Description;
+            project.Status = (ProjectStatus)projectDto.Status;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!_context.Projects.Any(p => p.Id == id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
+        }
+
+        // DELETE: api/projects/{id}
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteProject(Guid id)
+        {
+            var project = await _context.Projects.FindAsync(id);
+            if (project == null)
+            {
+                return NotFound();
+            }
+
+            _context.Projects.Remove(project);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
         }
     }
 }
