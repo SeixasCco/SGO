@@ -28,4 +28,6 @@ public class ExpenseDto
     public string Description { get; set; } = string.Empty;
     public decimal Amount { get; set; }
     public string CostCenterName { get; set; } = string.Empty;
+
+    public string? AttachmentPath { get; set; }
 }

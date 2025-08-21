@@ -13,5 +13,6 @@ namespace SGO.Api.Dtos
         public string? Observations { get; set; }
         public string? SupplierName { get; set; }
         public string? InvoiceNumber { get; set; }
+        public string? AttachmentPath { get; set; }
     }
 }

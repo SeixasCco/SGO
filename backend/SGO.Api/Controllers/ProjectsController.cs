@@ -17,15 +17,14 @@ namespace SGO.Api.Controllers
     {
         private readonly SgoDbContext _context;
         public ProjectsController(SgoDbContext context) { _context = context; }
-
-        // GetAllProjects continua simples, pois não precisa de dados aninhados
+        
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Project>>> GetAllProjects()
         {
             return await _context.Projects.ToListAsync();
         }
 
-        // GetProjectById agora retorna nosso DTO
+        
         [HttpGet("{id}")]
         public async Task<ActionResult<ProjectDetailsDto>> GetProjectById(Guid id)
         {
@@ -36,8 +35,7 @@ namespace SGO.Api.Controllers
                 .FirstOrDefaultAsync(p => p.Id == id);
 
             if (project == null) return NotFound();
-
-            // Mapeamento manual para o DTO - AQUI QUEBRAMOS O CICLO
+           
             var projectDto = new ProjectDetailsDto
             {
                 Id = project.Id,
@@ -58,7 +56,8 @@ namespace SGO.Api.Controllers
                     Date = e.Date,
                     Description = e.Description,
                     Amount = e.Amount,
-                    CostCenterName = e.CostCenter?.Name ?? "N/A"
+                    CostCenterName = e.CostCenter?.Name ?? "N/A",
+                    AttachmentPath = e.AttachmentPath
                 }).ToList()
             };
 

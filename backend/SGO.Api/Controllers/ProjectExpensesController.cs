@@ -43,10 +43,11 @@ namespace SGO.Api.Controllers
                 ContractId = expenseDto.ContractId,
                 Description = expenseDto.Description,
                 Amount = expenseDto.Amount,
-                Date = expenseDto.Date,
+                Date = expenseDto.Date.ToUniversalTime(),
                 Observations = expenseDto.Observations,
                 SupplierName = expenseDto.SupplierName,
                 InvoiceNumber = expenseDto.InvoiceNumber,
+                AttachmentPath = expenseDto.AttachmentPath, 
                 CostCenter = costCenter 
             };
             
@@ -54,6 +55,52 @@ namespace SGO.Api.Controllers
             await _context.SaveChangesAsync();
 
             return Ok(newExpense); 
+        }
+        
+        // PUT: api/projectexpenses/{id}
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateExpense(Guid id, [FromBody] ProjectExpense updatedExpense)
+        {
+            if (id != updatedExpense.Id)
+            {
+                return BadRequest("O ID da despesa na URL não corresponde ao ID no corpo da requisição.");
+            }
+
+            _context.Entry(updatedExpense).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!_context.ProjectExpenses.Any(e => e.Id == id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent(); 
+        }
+
+        // DELETE: api/projectexpenses/{id}
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteExpense(Guid id)
+        {
+            var expense = await _context.ProjectExpenses.FindAsync(id);
+            if (expense == null)
+            {
+                return NotFound();
+            }
+
+            _context.ProjectExpenses.Remove(expense);
+            await _context.SaveChangesAsync();
+
+            return NoContent(); 
         }
     }
 }
