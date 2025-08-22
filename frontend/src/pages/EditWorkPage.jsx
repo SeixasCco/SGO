@@ -64,7 +64,7 @@ const EditWorkPage = () => {
     axios.put(`http://localhost:5145/api/projects/${id}`, projectDto)
       .then(() => {
         alert('Obra atualizada com sucesso!');
-        navigate('/projects'); 
+        navigate('/projects');
       })
       .catch(err => {
         setError('Falha ao atualizar a obra. Tente novamente.');
@@ -83,7 +83,7 @@ const EditWorkPage = () => {
     };
 
     const style = statusMap[status] || statusMap[2];
-    
+
     return (
       <span style={{
         display: 'inline-flex',
@@ -179,12 +179,12 @@ const EditWorkPage = () => {
       margin: '0 auto',
       padding: '48px'
     }}>
-      
+
       {/* ✅ BREADCRUMB/NAVEGAÇÃO */}
       <div style={{
         marginBottom: '32px'
       }}>
-        <Link 
+        <Link
           to="/projects"
           style={{
             textDecoration: 'none',
@@ -235,7 +235,7 @@ const EditWorkPage = () => {
         border: '1px solid #e2e8f0',
         boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
       }}>
-        
+
         {/* Header da Obra */}
         <div style={{
           display: 'flex',
@@ -287,7 +287,7 @@ const EditWorkPage = () => {
         </div>
 
         <form onSubmit={handleSubmit}>
-          
+
           {/* Seção: Informações Básicas */}
           <div style={{
             marginBottom: '32px'
@@ -311,7 +311,7 @@ const EditWorkPage = () => {
               gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
               gap: '20px'
             }}>
-              
+
               {/* CNO */}
               <div>
                 <label style={{
@@ -323,17 +323,19 @@ const EditWorkPage = () => {
                 }}>
                   CNO (Número da Obra)
                 </label>
-                <input 
-                  type="text" 
-                  name="cno" 
-                  value={formData.cno} 
-                  onChange={handleChange} 
+                <input
+                  type="text"
+                  name="cno"
+                  value={formData.cno}
+                  onChange={handleChange}
                   required
                   style={{
                     width: '100%',
                     padding: '12px 16px',
                     border: '1px solid #d1d5db',
                     borderRadius: '8px',
+                    backgroundColor: '#dcdedfff',
+                    color: '#1f2937',
                     fontSize: '1rem',
                     transition: 'border-color 0.2s ease',
                     boxSizing: 'border-box'
@@ -355,16 +357,18 @@ const EditWorkPage = () => {
                 }}>
                   Nome da Obra
                 </label>
-                <input 
-                  type="text" 
-                  name="name" 
-                  value={formData.name} 
-                  onChange={handleChange} 
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
                   required
                   style={{
                     width: '100%',
                     padding: '12px 16px',
                     border: '1px solid #d1d5db',
+                    backgroundColor: '#dcdedfff',
+                    color: '#1f2937',
                     borderRadius: '8px',
                     fontSize: '1rem',
                     transition: 'border-color 0.2s ease',
@@ -387,16 +391,18 @@ const EditWorkPage = () => {
                 }}>
                   Contratante
                 </label>
-                <input 
-                  type="text" 
-                  name="contractor" 
-                  value={formData.contractor} 
-                  onChange={handleChange} 
+                <input
+                  type="text"
+                  name="contractor"
+                  value={formData.contractor}
+                  onChange={handleChange}
                   required
                   style={{
                     width: '100%',
                     padding: '12px 16px',
                     border: '1px solid #d1d5db',
+                    backgroundColor: '#dcdedfff',
+                    color: '#1f2937',
                     borderRadius: '8px',
                     fontSize: '1rem',
                     transition: 'border-color 0.2s ease',
@@ -419,15 +425,17 @@ const EditWorkPage = () => {
                 }}>
                   Tomador do Serviço
                 </label>
-                <input 
-                  type="text" 
-                  name="serviceTaker" 
-                  value={formData.serviceTaker} 
-                  onChange={handleChange} 
+                <input
+                  type="text"
+                  name="serviceTaker"
+                  value={formData.serviceTaker}
+                  onChange={handleChange}
                   required
                   style={{
                     width: '100%',
                     padding: '12px 16px',
+                    backgroundColor: '#dcdedfff',
+                    color: '#1f2937',
                     border: '1px solid #d1d5db',
                     borderRadius: '8px',
                     fontSize: '1rem',
@@ -451,16 +459,18 @@ const EditWorkPage = () => {
                 }}>
                   Responsável pela Obra
                 </label>
-                <input 
-                  type="text" 
-                  name="responsible" 
-                  value={formData.responsible} 
-                  onChange={handleChange} 
+                <input
+                  type="text"
+                  name="responsible"
+                  value={formData.responsible}
+                  onChange={handleChange}
                   required
                   style={{
                     width: '100%',
                     padding: '12px 16px',
                     border: '1px solid #d1d5db',
+                    backgroundColor: '#dcdedfff',
+                    color: '#1f2937',
                     borderRadius: '8px',
                     fontSize: '1rem',
                     transition: 'border-color 0.2s ease',
@@ -497,7 +507,7 @@ const EditWorkPage = () => {
               gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
               gap: '20px'
             }}>
-              
+
               {/* Cidade */}
               <div>
                 <label style={{
@@ -509,16 +519,18 @@ const EditWorkPage = () => {
                 }}>
                   Cidade
                 </label>
-                <input 
-                  type="text" 
-                  name="city" 
-                  value={formData.city} 
-                  onChange={handleChange} 
+                <input
+                  type="text"
+                  name="city"
+                  value={formData.city}
+                  onChange={handleChange}
                   required
                   style={{
                     width: '100%',
                     padding: '12px 16px',
                     border: '1px solid #d1d5db',
+                    backgroundColor: '#dcdedfff',
+                    color: '#1f2937',
                     borderRadius: '8px',
                     fontSize: '1rem',
                     transition: 'border-color 0.2s ease',
@@ -541,18 +553,20 @@ const EditWorkPage = () => {
                 }}>
                   Estado (UF)
                 </label>
-                <input 
-                  type="text" 
-                  name="state" 
-                  value={formData.state} 
-                  onChange={handleChange} 
-                  maxLength="2" 
+                <input
+                  type="text"
+                  name="state"
+                  value={formData.state}
+                  onChange={handleChange}
+                  maxLength="2"
                   required
                   style={{
                     width: '100%',
                     padding: '12px 16px',
                     border: '1px solid #d1d5db',
                     borderRadius: '8px',
+                    backgroundColor: '#dcdedfff',
+                    color: '#1f2937',
                     fontSize: '1rem',
                     transition: 'border-color 0.2s ease',
                     boxSizing: 'border-box'
@@ -574,15 +588,17 @@ const EditWorkPage = () => {
                 }}>
                   Endereço Completo (Opcional)
                 </label>
-                <input 
-                  type="text" 
-                  name="address" 
-                  value={formData.address} 
+                <input
+                  type="text"
+                  name="address"
+                  value={formData.address}
                   onChange={handleChange}
                   style={{
                     width: '100%',
                     padding: '12px 16px',
                     border: '1px solid #d1d5db',
+                    backgroundColor: '#dcdedfff',
+                    color: '#1f2937',
                     borderRadius: '8px',
                     fontSize: '1rem',
                     transition: 'border-color 0.2s ease',
@@ -619,7 +635,7 @@ const EditWorkPage = () => {
               gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
               gap: '20px'
             }}>
-              
+
               {/* Data Início */}
               <div>
                 <label style={{
@@ -631,17 +647,19 @@ const EditWorkPage = () => {
                 }}>
                   Data de Início
                 </label>
-                <input 
-                  type="date" 
-                  name="startDate" 
-                  value={formData.startDate} 
-                  onChange={handleChange} 
+                <input
+                  type="date"
+                  name="startDate"
+                  value={formData.startDate}
+                  onChange={handleChange}
                   required
                   style={{
                     width: '100%',
                     padding: '12px 16px',
                     border: '1px solid #d1d5db',
                     borderRadius: '8px',
+                    backgroundColor: '#dcdedfff',
+                    color: '#1f2937',
                     fontSize: '1rem',
                     transition: 'border-color 0.2s ease',
                     boxSizing: 'border-box'
@@ -662,15 +680,17 @@ const EditWorkPage = () => {
                 }}>
                   Data de Fim (Opcional)
                 </label>
-                <input 
-                  type="date" 
-                  name="endDate" 
-                  value={formData.endDate} 
+                <input
+                  type="date"
+                  name="endDate"
+                  value={formData.endDate}
                   onChange={handleChange}
                   style={{
                     width: '100%',
                     padding: '12px 16px',
                     border: '1px solid #d1d5db',
+                    backgroundColor: '#dcdedfff',
+                    color: '#1f2937',
                     borderRadius: '8px',
                     fontSize: '1rem',
                     transition: 'border-color 0.2s ease',
@@ -692,20 +712,19 @@ const EditWorkPage = () => {
                 }}>
                   Status da Obra
                 </label>
-                <select 
-                  name="status" 
-                  value={formData.status} 
-                  onChange={handleChange} 
+                <select
+                  name="status"
+                  value={formData.status}
+                  onChange={handleChange}
                   required
                   style={{
-                    width: '100%',
                     padding: '12px 16px',
-                    border: '1px solid #d1d5db',
+                    border: '2px solid #d1d5db',
                     borderRadius: '8px',
                     fontSize: '1rem',
-                    transition: 'border-color 0.2s ease',
-                    backgroundColor: 'white',
-                    boxSizing: 'border-box'
+                    backgroundColor: '#dcdedfff',
+                    color: '#1f2937',
+                    fontWeight: '600'
                   }}
                   onFocus={(e) => e.target.style.borderColor = '#3b82f6'}
                   onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
@@ -749,9 +768,9 @@ const EditWorkPage = () => {
               }}>
                 Descrição da Obra (Opcional)
               </label>
-              <textarea 
-                name="description" 
-                value={formData.description} 
+              <textarea
+                name="description"
+                value={formData.description}
                 onChange={handleChange}
                 rows="4"
                 style={{
@@ -761,6 +780,8 @@ const EditWorkPage = () => {
                   borderRadius: '8px',
                   fontSize: '1rem',
                   transition: 'border-color 0.2s ease',
+                  backgroundColor: '#dcdedfff',
+                  color: '#1f2937',
                   resize: 'vertical',
                   fontFamily: 'inherit',
                   boxSizing: 'border-box'
@@ -780,7 +801,7 @@ const EditWorkPage = () => {
             paddingTop: '24px',
             borderTop: '1px solid #f1f5f9'
           }}>
-            <button 
+            <button
               type="submit"
               disabled={submitting}
               style={{
@@ -807,13 +828,13 @@ const EditWorkPage = () => {
               {submitting ? '⏳ Salvando...' : '💾 Salvar Alterações'}
             </button>
 
-            <Link 
+            <Link
               to="/projects"
               style={{
                 textDecoration: 'none'
               }}
             >
-              <button 
+              <button
                 type="button"
                 style={{
                   backgroundColor: 'transparent',
@@ -841,13 +862,13 @@ const EditWorkPage = () => {
               </button>
             </Link>
 
-            <Link 
+            <Link
               to={`/project/${id}`}
               style={{
                 textDecoration: 'none'
               }}
             >
-              <button 
+              <button
                 type="button"
                 style={{
                   backgroundColor: '#10b981',

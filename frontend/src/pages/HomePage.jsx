@@ -16,64 +16,59 @@ const HomePage = () => {
     useEffect(() => {
         const fetchDashboardData = async () => {
             try {
-                console.log('Iniciando carregamento do dashboard...');
-                
+
                 try {
-                    console.log('Carregando summary...');
                     const summaryRes = await axios.get('http://localhost:5145/api/dashboard/summary');
                     setDashboardData(summaryRes.data);
-                    console.log('Summary carregado:', summaryRes.data);
                 } catch (err) {
-                    console.error('Erro no summary:', err);
                     setError('Erro ao carregar resumo');
                 }
 
                 try {
-                    console.log('Carregando projects-by-status...');
                     const statusRes = await axios.get('http://localhost:5145/api/dashboard/projects-by-status');
                     setProjectsByStatus(statusRes.data);
-                    console.log('Projects by status carregado:', statusRes.data);
+
                 } catch (err) {
                     console.error('Erro no projects-by-status:', err);
                 }
 
                 try {
-                    console.log('Carregando monthly-expenses...');
+
                     const expensesRes = await axios.get('http://localhost:5145/api/dashboard/monthly-expenses');
                     setMonthlyExpenses(expensesRes.data);
-                    console.log('Monthly expenses carregado:', expensesRes.data);
+
                 } catch (err) {
                     console.error('Erro no monthly-expenses:', err);
                 }
 
                 try {
-                    console.log('Carregando top-projects...');
+
                     const topRes = await axios.get('http://localhost:5145/api/dashboard/top-projects');
                     setTopProjects(topRes.data);
-                    console.log('Top projects carregado:', topRes.data);
+
                 } catch (err) {
                     console.error('Erro no top-projects:', err);
                 }
 
                 try {
-                    console.log('Carregando recent-activity...');
+
                     const activityRes = await axios.get('http://localhost:5145/api/dashboard/recent-activity');
                     setRecentActivity(activityRes.data);
-                    console.log('Recent activity carregado:', activityRes.data);
+
                 } catch (err) {
                     console.error('Erro no recent-activity:', err);
                 }
 
                 try {
-                    console.log('Carregando alerts...');
+
                     const alertsRes = await axios.get('http://localhost:5145/api/dashboard/alerts');
                     setAlerts(alertsRes.data);
-                    console.log('Alerts carregado:', alertsRes.data);
+
                 } catch (err) {
                     console.error('Erro no alerts:', err);
                 }
 
-                console.log('Dashboard carregado com sucesso!');
+
             } catch (error) {
                 console.error("Erro geral ao carregar dashboard:", error);
                 setError('Erro ao carregar dashboard');
@@ -142,7 +137,7 @@ const HomePage = () => {
             backgroundColor: '#f1f5f9',
             padding: '0'
         }}>
-            
+
             {/* ✅ HEADER LARGURA COMPLETA */}
             <div style={{
                 backgroundColor: 'white',
@@ -191,7 +186,7 @@ const HomePage = () => {
                         >
                             🏗️ Ver Obras
                         </button>
-                        
+
                         <button
                             onClick={() => navigate('/employees')}
                             style={{
@@ -249,7 +244,7 @@ const HomePage = () => {
                         gap: '20px',
                         marginBottom: '32px'
                     }}>
-                        
+
                         <div style={{
                             backgroundColor: 'white',
                             borderRadius: '12px',
@@ -355,7 +350,7 @@ const HomePage = () => {
                     gap: '24px',
                     marginBottom: '32px'
                 }}>
-                    
+
                     {/* ✅ TOP PROJETOS - LARGURA FLEXÍVEL */}
                     {topProjects.length > 0 && (
                         <div style={{
@@ -430,7 +425,7 @@ const HomePage = () => {
                             flexDirection: 'column'
                         }}>
                             <h3 style={{ marginBottom: '20px', flexShrink: 0 }}>⚡ Atividades Recentes</h3>
-                            <div style={{ 
+                            <div style={{
                                 overflowY: 'auto',
                                 flex: 1
                             }}>
@@ -445,8 +440,8 @@ const HomePage = () => {
                                         <div style={{ fontSize: '0.8rem', color: '#64748b', marginBottom: '4px' }}>
                                             {activity.projectContractor} - {activity.projectName}
                                         </div>
-                                        <div style={{ 
-                                            display: 'flex', 
+                                        <div style={{
+                                            display: 'flex',
                                             justifyContent: 'space-between',
                                             alignItems: 'center'
                                         }}>

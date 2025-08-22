@@ -440,13 +440,12 @@ const EditExpensePage = () => {
                                 style={{
                                     width: '100%',
                                     padding: '12px 16px',
-                                    border: '1px solid #d1d5db',
+                                    border: '1px solid #d1d5db', 
                                     backgroundColor: '#dcdedfff',
-                                    color: '#1f2937',
+                                    color: '#1f2937',  
                                     borderRadius: '8px',
                                     fontSize: '1rem',
-                                    transition: 'border-color 0.2s ease',
-                                    backgroundColor: 'white',
+                                    transition: 'border-color 0.2s ease',                                  
                                     boxSizing: 'border-box'
                                 }}
                                 onFocus={(e) => e.target.style.borderColor = '#3b82f6'}
@@ -466,6 +465,7 @@ const EditExpensePage = () => {
                                 Centro de Custo
                             </label>
                             <input
+                                id="costCenter"
                                 type="text"
                                 value={formData.costCenter?.name || 'Não informado'}
                                 disabled
@@ -477,8 +477,6 @@ const EditExpensePage = () => {
                                     fontSize: '1rem',
                                     backgroundColor: '#dcdedfff',
                                     color: '#1f2937',
-                                    backgroundColor: '#f8fafc',
-                                    color: '#64748b',
                                     cursor: 'not-allowed',
                                     boxSizing: 'border-box'
                                 }}

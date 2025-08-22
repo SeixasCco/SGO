@@ -352,6 +352,8 @@ const EditContractPage = () => {
                     width: '100%',
                     padding: '12px 16px',
                     border: '1px solid #d1d5db',
+                    backgroundColor: '#dcdedfff',
+                    color: '#1f2937',
                     borderRadius: '8px',
                     fontSize: '1rem',
                     transition: 'border-color 0.2s ease',
@@ -386,6 +388,8 @@ const EditContractPage = () => {
                     border: '1px solid #d1d5db',
                     borderRadius: '8px',
                     fontSize: '1rem',
+                    backgroundColor: '#dcdedfff',
+                    color: '#1f2937',
                     transition: 'border-color 0.2s ease',
                     boxSizing: 'border-box'
                   }}
@@ -419,6 +423,8 @@ const EditContractPage = () => {
                     padding: '12px 16px',
                     border: '1px solid #d1d5db',
                     borderRadius: '8px',
+                    backgroundColor: '#dcdedfff',
+                    color: '#1f2937',
                     fontSize: '1rem',
                     transition: 'border-color 0.2s ease',
                     boxSizing: 'border-box'
@@ -562,6 +568,8 @@ const EditContractPage = () => {
                   padding: '12px 16px',
                   border: '1px solid #d1d5db',
                   borderRadius: '8px',
+                  backgroundColor: '#dcdedfff',
+                  color: '#1f2937',
                   fontSize: '1rem',
                   transition: 'border-color 0.2s ease',
                   resize: 'vertical',
