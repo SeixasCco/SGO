@@ -36,16 +36,16 @@ const ProjectFilters = ({ onFilter }) => {
   const hasActiveFilters = Object.values(filters).some(value => value !== '');
 
   return (
-    <div style={{ 
+    <div style={{
       backgroundColor: 'white',
       border: '1px solid #e2e8f0',
       borderRadius: '16px',
       padding: '24px',
       boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
     }}>
-      
+
       {/* ✅ HEADER DOS FILTROS SEMPRE VISÍVEL */}
-      <div style={{ 
+      <div style={{
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
@@ -55,10 +55,10 @@ const ProjectFilters = ({ onFilter }) => {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <span style={{ fontSize: '1.5rem' }}>🔍</span>
-          <span style={{ 
-            fontSize: '1.25rem', 
-            fontWeight: '700', 
-            color: '#0f172a' 
+          <span style={{
+            fontSize: '1.25rem',
+            fontWeight: '700',
+            color: '#0f172a'
           }}>
             Filtros de Pesquisa
           </span>
@@ -75,7 +75,7 @@ const ProjectFilters = ({ onFilter }) => {
             </span>
           )}
         </div>
-        
+
         {hasActiveFilters && (
           <button
             onClick={handleClearFilters}
@@ -110,16 +110,16 @@ const ProjectFilters = ({ onFilter }) => {
       </div>
 
       {/* ✅ GRID DESKTOP - 5 COLUNAS */}
-      <div style={{ 
+      <div style={{
         display: 'grid',
         gridTemplateColumns: '1fr 1fr 1fr 150px 150px',
         gap: '20px',
         marginBottom: '24px'
       }}>
-        
+
         {/* Filtro Cidade */}
         <div>
-          <label style={{ 
+          <label style={{
             display: 'block',
             fontSize: '0.9rem',
             fontWeight: '600',
@@ -128,21 +128,20 @@ const ProjectFilters = ({ onFilter }) => {
           }}>
             🏙️ Cidade
           </label>
-          <input 
-            type="text" 
-            name="city" 
-            placeholder="Ex: São Paulo..." 
-            value={filters.city} 
+          <input
+            type="text"
+            name="city"
+            placeholder="Ex: São Paulo..."
+            value={filters.city}
             onChange={handleChange}
             style={{
-              width: '100%',
               padding: '12px 16px',
-              border: '1px solid #d1d5db',
+              border: '2px solid #d1d5db',
               borderRadius: '8px',
-              fontSize: '0.95rem',
-              backgroundColor: 'white',
-              boxSizing: 'border-box',
-              transition: 'all 0.2s ease'
+              fontSize: '1rem',
+              backgroundColor: '#dcdedfff',
+              color: '#1f2937',
+              fontWeight: '600'
             }}
             onFocus={(e) => {
               e.target.style.borderColor = '#3b82f6';
@@ -157,7 +156,7 @@ const ProjectFilters = ({ onFilter }) => {
 
         {/* Filtro Tomador */}
         <div>
-          <label style={{ 
+          <label style={{
             display: 'block',
             fontSize: '0.9rem',
             fontWeight: '600',
@@ -166,21 +165,20 @@ const ProjectFilters = ({ onFilter }) => {
           }}>
             🏢 Tomador do Serviço
           </label>
-          <input 
-            type="text" 
-            name="serviceTaker" 
-            placeholder="Ex: Empresa ABC..." 
-            value={filters.serviceTaker} 
+          <input
+            type="text"
+            name="serviceTaker"
+            placeholder="Ex: Empresa ABC..."
+            value={filters.serviceTaker}
             onChange={handleChange}
             style={{
-              width: '100%',
               padding: '12px 16px',
-              border: '1px solid #d1d5db',
+              border: '2px solid #d1d5db',
               borderRadius: '8px',
-              fontSize: '0.95rem',
-              backgroundColor: 'white',
-              boxSizing: 'border-box',
-              transition: 'all 0.2s ease'
+              fontSize: '1rem',
+              backgroundColor: '#dcdedfff',
+              color: '#1f2937',
+              fontWeight: '600'
             }}
             onFocus={(e) => {
               e.target.style.borderColor = '#3b82f6';
@@ -195,7 +193,7 @@ const ProjectFilters = ({ onFilter }) => {
 
         {/* Filtro Status */}
         <div>
-          <label style={{ 
+          <label style={{
             display: 'block',
             fontSize: '0.9rem',
             fontWeight: '600',
@@ -204,20 +202,18 @@ const ProjectFilters = ({ onFilter }) => {
           }}>
             📊 Status da Obra
           </label>
-          <select 
-            name="status" 
-            value={filters.status} 
+          <select
+            name="status"
+            value={filters.status}
             onChange={handleChange}
             style={{
-              width: '100%',
               padding: '12px 16px',
-              border: '1px solid #d1d5db',
+              border: '2px solid #d1d5db',
               borderRadius: '8px',
-              fontSize: '0.95rem',
-              backgroundColor: 'white',
-              boxSizing: 'border-box',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease'
+              fontSize: '1rem',              
+              backgroundColor: '#dcdedfff',
+              color: '#1f2937',
+              fontWeight: '600'
             }}
             onFocus={(e) => {
               e.target.style.borderColor = '#3b82f6';
@@ -240,7 +236,7 @@ const ProjectFilters = ({ onFilter }) => {
 
         {/* Filtro Data Início */}
         <div>
-          <label style={{ 
+          <label style={{
             display: 'block',
             fontSize: '0.9rem',
             fontWeight: '600',
@@ -249,20 +245,19 @@ const ProjectFilters = ({ onFilter }) => {
           }}>
             📅 Data Início
           </label>
-          <input 
-            type="date" 
-            name="startDate" 
-            value={filters.startDate} 
+          <input
+            type="date"
+            name="startDate"
+            value={filters.startDate}
             onChange={handleChange}
             style={{
-              width: '100%',
               padding: '12px 16px',
-              border: '1px solid #d1d5db',
+              border: '2px solid #d1d5db',
               borderRadius: '8px',
-              fontSize: '0.95rem',
-              backgroundColor: 'white',
-              boxSizing: 'border-box',
-              transition: 'all 0.2s ease'
+              fontSize: '1rem',
+              backgroundColor: '#dcdedfff',
+              color: '#1f2937',
+              fontWeight: '600'
             }}
             onFocus={(e) => {
               e.target.style.borderColor = '#3b82f6';
@@ -277,7 +272,7 @@ const ProjectFilters = ({ onFilter }) => {
 
         {/* Filtro Data Fim */}
         <div>
-          <label style={{ 
+          <label style={{
             display: 'block',
             fontSize: '0.9rem',
             fontWeight: '600',
@@ -286,20 +281,20 @@ const ProjectFilters = ({ onFilter }) => {
           }}>
             🏁 Data Fim
           </label>
-          <input 
-            type="date" 
-            name="endDate" 
-            value={filters.endDate} 
+          <input
+            type="date"
+            name="endDate"
+            value={filters.endDate}
             onChange={handleChange}
             style={{
-              width: '100%',
               padding: '12px 16px',
-              border: '1px solid #d1d5db',
+              border: '2px solid #d1d5db',
               borderRadius: '8px',
-              fontSize: '0.95rem',
-              backgroundColor: 'white',
-              boxSizing: 'border-box',
-              transition: 'all 0.2s ease'
+              fontSize: '1rem',
+              backgroundColor: '#dcdedfff',
+              color: '#1f2937',
+              fontWeight: '600',
+              boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)'
             }}
             onFocus={(e) => {
               e.target.style.borderColor = '#3b82f6';
@@ -315,7 +310,7 @@ const ProjectFilters = ({ onFilter }) => {
 
       {/* ✅ BOTÃO APLICAR FILTROS CENTRALIZADO */}
       <div style={{ textAlign: 'center' }}>
-        <button 
+        <button
           onClick={handleFilterClick}
           style={{
             padding: '12px 32px',

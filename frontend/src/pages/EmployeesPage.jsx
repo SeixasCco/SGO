@@ -5,12 +5,12 @@ import axios from 'axios';
 
 const EmployeesPage = () => {
   const [employees, setEmployees] = useState([]);
-  const [formData, setFormData] = useState({ 
-      name: '', 
-      position: '', 
-      salary: '', 
-      startDate: new Date().toISOString().split('T')[0],
-      endDate: '' 
+  const [formData, setFormData] = useState({
+    name: '',
+    position: '',
+    salary: '',
+    startDate: new Date().toISOString().split('T')[0],
+    endDate: ''
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -40,9 +40,9 @@ const EmployeesPage = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     const employeeDto = {
-        ...formData,
-        salary: parseFloat(formData.salary),
-        endDate: formData.endDate || null
+      ...formData,
+      salary: parseFloat(formData.salary),
+      endDate: formData.endDate || null
     };
     axios.post('http://localhost:5145/api/employees', employeeDto)
       .then(() => {
@@ -123,7 +123,7 @@ const EmployeesPage = () => {
       margin: '0 auto',
       padding: '48px'
     }}>
-      
+
       {/* ✅ HEADER DA PÁGINA */}
       <div style={{
         marginBottom: '32px'
@@ -177,7 +177,7 @@ const EmployeesPage = () => {
             gap: '20px',
             marginBottom: '24px'
           }}>
-            
+
             {/* Campo Nome */}
             <div>
               <label style={{
@@ -189,16 +189,17 @@ const EmployeesPage = () => {
               }}>
                 Nome Completo
               </label>
-              <input 
-                type="text" 
-                name="name" 
-                value={formData.name} 
-                onChange={handleChange} 
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
                 required
                 style={{
                   width: '100%',
                   padding: '12px 16px',
                   border: '1px solid #d1d5db',
+                  backgroundColor: '#dcdedfff',
                   borderRadius: '8px',
                   fontSize: '1rem',
                   transition: 'border-color 0.2s ease',
@@ -221,11 +222,11 @@ const EmployeesPage = () => {
               }}>
                 Cargo/Função
               </label>
-              <input 
-                type="text" 
-                name="position" 
-                value={formData.position} 
-                onChange={handleChange} 
+              <input
+                type="text"
+                name="position"
+                value={formData.position}
+                onChange={handleChange}
                 required
                 style={{
                   width: '100%',
@@ -234,6 +235,7 @@ const EmployeesPage = () => {
                   borderRadius: '8px',
                   fontSize: '1rem',
                   transition: 'border-color 0.2s ease',
+                  backgroundColor: '#dcdedfff',
                   boxSizing: 'border-box'
                 }}
                 onFocus={(e) => e.target.style.borderColor = '#3b82f6'}
@@ -253,19 +255,20 @@ const EmployeesPage = () => {
               }}>
                 Salário (R$)
               </label>
-              <input 
-                type="number" 
-                step="0.01" 
-                min="0" 
-                name="salary" 
-                value={formData.salary} 
-                onChange={handleChange} 
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                name="salary"
+                value={formData.salary}
+                onChange={handleChange}
                 required
                 style={{
                   width: '100%',
                   padding: '12px 16px',
                   border: '1px solid #d1d5db',
                   borderRadius: '8px',
+                  backgroundColor: '#dcdedfff',
                   fontSize: '1rem',
                   transition: 'border-color 0.2s ease',
                   boxSizing: 'border-box'
@@ -287,17 +290,19 @@ const EmployeesPage = () => {
               }}>
                 Data de Início
               </label>
-              <input 
-                type="date" 
-                name="startDate" 
-                value={formData.startDate} 
-                onChange={handleChange} 
+              <input
+                type="date"
+                name="startDate"
+                value={formData.startDate}
+                onChange={handleChange}
                 required
                 style={{
                   width: '100%',
                   padding: '12px 16px',
                   border: '1px solid #d1d5db',
                   borderRadius: '8px',
+                  backgroundColor: '#dcdedfff',
+                  color: '#1f2937',
                   fontSize: '1rem',
                   transition: 'border-color 0.2s ease',
                   boxSizing: 'border-box'
@@ -318,10 +323,10 @@ const EmployeesPage = () => {
               }}>
                 Data Fim (Opcional)
               </label>
-              <input 
-                type="date" 
-                name="endDate" 
-                value={formData.endDate} 
+              <input
+                type="date"
+                name="endDate"
+                value={formData.endDate}
                 onChange={handleChange}
                 style={{
                   width: '100%',
@@ -329,6 +334,8 @@ const EmployeesPage = () => {
                   border: '1px solid #d1d5db',
                   borderRadius: '8px',
                   fontSize: '1rem',
+                  backgroundColor: '#dcdedfff',
+                  color: '#1f2937',
                   transition: 'border-color 0.2s ease',
                   boxSizing: 'border-box'
                 }}
@@ -339,7 +346,7 @@ const EmployeesPage = () => {
           </div>
 
           {/* Botão de Submissão */}
-          <button 
+          <button
             type="submit"
             style={{
               backgroundColor: '#3b82f6',
@@ -371,7 +378,7 @@ const EmployeesPage = () => {
         boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
         overflow: 'hidden'
       }}>
-        
+
         {/* Header da Lista */}
         <div style={{
           padding: '24px 32px',
@@ -426,20 +433,20 @@ const EmployeesPage = () => {
                   transition: 'all 0.2s ease',
                   backgroundColor: '#fafafa'
                 }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#f8fafc';
-                  e.currentTarget.style.borderColor = '#c7d2fe';
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 4px 12px 0 rgba(0, 0, 0, 0.1)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#fafafa';
-                  e.currentTarget.style.borderColor = '#e2e8f0';
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#f8fafc';
+                    e.currentTarget.style.borderColor = '#c7d2fe';
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.boxShadow = '0 4px 12px 0 rgba(0, 0, 0, 0.1)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = '#fafafa';
+                    e.currentTarget.style.borderColor = '#e2e8f0';
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = 'none';
+                  }}
                 >
-                  
+
                   {/* Layout responsivo do card do funcionário */}
                   <div style={{
                     display: 'grid',
@@ -447,7 +454,7 @@ const EmployeesPage = () => {
                     gap: '20px',
                     alignItems: 'center'
                   }}>
-                    
+
                     {/* Avatar e Info Principal */}
                     <div style={{
                       display: 'flex',
@@ -467,7 +474,7 @@ const EmployeesPage = () => {
                       }}>
                         👤
                       </div>
-                      
+
                       <div>
                         <h3 style={{
                           fontSize: '1.2rem',
@@ -494,7 +501,7 @@ const EmployeesPage = () => {
                       gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
                       gap: '16px'
                     }}>
-                      
+
                       {/* Salário */}
                       <div style={{
                         textAlign: 'center',
@@ -572,8 +579,8 @@ const EmployeesPage = () => {
                           fontWeight: '600',
                           color: emp.endDate ? '#b45309' : '#10b981'
                         }}>
-                          {emp.endDate ? 
-                            new Date(emp.endDate).toLocaleDateString('pt-BR') : 
+                          {emp.endDate ?
+                            new Date(emp.endDate).toLocaleDateString('pt-BR') :
                             'ATIVO'
                           }
                         </div>
@@ -585,7 +592,7 @@ const EmployeesPage = () => {
                       display: 'flex',
                       gap: '8px'
                     }}>
-                      <Link 
+                      <Link
                         to={`/employee/edit/${emp.id}`}
                         style={{
                           textDecoration: 'none'
@@ -605,14 +612,14 @@ const EmployeesPage = () => {
                           alignItems: 'center',
                           gap: '6px'
                         }}
-                        onMouseEnter={(e) => e.target.style.backgroundColor = '#2563eb'}
-                        onMouseLeave={(e) => e.target.style.backgroundColor = '#3b82f6'}
+                          onMouseEnter={(e) => e.target.style.backgroundColor = '#2563eb'}
+                          onMouseLeave={(e) => e.target.style.backgroundColor = '#3b82f6'}
                         >
                           ✏️ Editar
                         </button>
                       </Link>
-                      
-                      <button 
+
+                      <button
                         onClick={() => handleDelete(emp.id)}
                         style={{
                           backgroundColor: '#ef4444',

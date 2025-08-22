@@ -42,7 +42,7 @@ const EditEmployeePage = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     setSubmitting(true);
-    
+
     const employeeDto = {
       ...formData,
       salary: parseFloat(formData.salary),
@@ -136,12 +136,12 @@ const EditEmployeePage = () => {
       margin: '0 auto',
       padding: '48px'
     }}>
-      
+
       {/* ✅ BREADCRUMB/NAVEGAÇÃO */}
       <div style={{
         marginBottom: '32px'
       }}>
-        <Link 
+        <Link
           to="/employees"
           style={{
             textDecoration: 'none',
@@ -188,7 +188,7 @@ const EditEmployeePage = () => {
         border: '1px solid #e2e8f0',
         boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
       }}>
-        
+
         {/* Avatar e Info do Funcionário */}
         <div style={{
           display: 'flex',
@@ -264,7 +264,7 @@ const EditEmployeePage = () => {
             gap: '20px',
             marginBottom: '24px'
           }}>
-            
+
             {/* Campo Nome */}
             <div>
               <label style={{
@@ -276,15 +276,17 @@ const EditEmployeePage = () => {
               }}>
                 Nome Completo
               </label>
-              <input 
-                type="text" 
-                name="name" 
-                value={formData.name} 
-                onChange={handleChange} 
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
                 required
                 style={{
                   width: '100%',
                   padding: '12px 16px',
+                  backgroundColor: '#dcdedfff',
+                  color: '#1f2937',
                   border: '1px solid #d1d5db',
                   borderRadius: '8px',
                   fontSize: '1rem',
@@ -307,15 +309,17 @@ const EditEmployeePage = () => {
               }}>
                 Cargo/Função
               </label>
-              <input 
-                type="text" 
-                name="position" 
-                value={formData.position} 
-                onChange={handleChange} 
+              <input
+                type="text"
+                name="position"
+                value={formData.position}
+                onChange={handleChange}
                 required
                 style={{
                   width: '100%',
                   padding: '12px 16px',
+                  backgroundColor: '#dcdedfff',
+                  color: '#1f2937',
                   border: '1px solid #d1d5db',
                   borderRadius: '8px',
                   fontSize: '1rem',
@@ -338,19 +342,21 @@ const EditEmployeePage = () => {
               }}>
                 Salário (R$)
               </label>
-              <input 
-                type="number" 
-                step="0.01" 
-                min="0" 
-                name="salary" 
-                value={formData.salary} 
-                onChange={handleChange} 
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                name="salary"
+                value={formData.salary}
+                onChange={handleChange}
                 required
                 style={{
                   width: '100%',
                   padding: '12px 16px',
                   border: '1px solid #d1d5db',
                   borderRadius: '8px',
+                  backgroundColor: '#dcdedfff',
+                  color: '#1f2937',
                   fontSize: '1rem',
                   transition: 'border-color 0.2s ease',
                   boxSizing: 'border-box'
@@ -371,16 +377,18 @@ const EditEmployeePage = () => {
               }}>
                 Data de Início
               </label>
-              <input 
-                type="date" 
-                name="startDate" 
-                value={formData.startDate} 
-                onChange={handleChange} 
+              <input
+                type="date"
+                name="startDate"
+                value={formData.startDate}
+                onChange={handleChange}
                 required
                 style={{
                   width: '100%',
                   padding: '12px 16px',
                   border: '1px solid #d1d5db',
+                  backgroundColor: '#dcdedfff',
+                  color: '#1f2937',
                   borderRadius: '8px',
                   fontSize: '1rem',
                   transition: 'border-color 0.2s ease',
@@ -402,10 +410,10 @@ const EditEmployeePage = () => {
               }}>
                 Data Fim (Opcional)
               </label>
-              <input 
-                type="date" 
-                name="endDate" 
-                value={formData.endDate || ''} 
+              <input
+                type="date"
+                name="endDate"
+                value={formData.endDate || ''}
                 onChange={handleChange}
                 style={{
                   width: '100%',
@@ -413,6 +421,8 @@ const EditEmployeePage = () => {
                   border: '1px solid #d1d5db',
                   borderRadius: '8px',
                   fontSize: '1rem',
+                  backgroundColor: '#dcdedfff',
+                  color: '#1f2937',
                   transition: 'border-color 0.2s ease',
                   boxSizing: 'border-box'
                 }}
@@ -439,10 +449,10 @@ const EditEmployeePage = () => {
               color: '#374151',
               cursor: 'pointer'
             }}>
-              <input 
-                type="checkbox" 
-                name="isActive" 
-                checked={formData.isActive} 
+              <input
+                type="checkbox"
+                name="isActive"
+                checked={formData.isActive}
                 onChange={handleChange}
                 style={{
                   width: '18px',
@@ -467,7 +477,7 @@ const EditEmployeePage = () => {
             gap: '16px',
             alignItems: 'center'
           }}>
-            <button 
+            <button
               type="submit"
               disabled={submitting}
               style={{
@@ -494,13 +504,13 @@ const EditEmployeePage = () => {
               {submitting ? '⏳ Salvando...' : '💾 Salvar Alterações'}
             </button>
 
-            <Link 
+            <Link
               to="/employees"
               style={{
                 textDecoration: 'none'
               }}
             >
-              <button 
+              <button
                 type="button"
                 style={{
                   backgroundColor: 'transparent',
