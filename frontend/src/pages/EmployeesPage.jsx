@@ -66,69 +66,581 @@ const EmployeesPage = () => {
     }
   };
 
-  if (loading) return <p>Carregando...</p>;
-  if (error) return <p style={{ color: 'red' }}>{error}</p>;
+  const formatCurrency = (value) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(value);
+  };
+
+  if (loading) {
+    return (
+      <div style={{
+        padding: '48px',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '400px'
+      }}>
+        <div style={{
+          textAlign: 'center',
+          color: '#64748b'
+        }}>
+          <div style={{ fontSize: '2rem', marginBottom: '16px' }}>⏳</div>
+          <div style={{ fontSize: '1.1rem' }}>Carregando funcionários...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div style={{
+        padding: '48px',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '400px'
+      }}>
+        <div style={{
+          backgroundColor: '#fef2f2',
+          border: '1px solid #fecaca',
+          borderRadius: '12px',
+          padding: '24px',
+          textAlign: 'center',
+          color: '#b91c1c'
+        }}>
+          <div style={{ fontSize: '2rem', marginBottom: '16px' }}>❌</div>
+          <div style={{ fontSize: '1.1rem', fontWeight: '600' }}>{error}</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div>
-      <h1>👥 Gestão de Funcionários</h1>
-      <form onSubmit={handleSubmit} style={{ border: '1px solid #ccc', padding: '15px', marginBottom: '20px' }}>
-        <h3>Cadastrar Novo Funcionário</h3>
-        <div style={{ marginBottom: '10px' }}>
-          <label>Nome: </label>
-          <input type="text" name="name" value={formData.name} onChange={handleChange} required />
-        </div>
-        <div style={{ marginBottom: '10px' }}>
-          <label>Cargo: </label>
-          <input type="text" name="position" value={formData.position} onChange={handleChange} required />
-        </div>
-        <div style={{ marginBottom: '10px' }}>
-          <label>Salário (R$): </label>
-          <input type="number" step="0.01" min="0" name="salary" value={formData.salary} onChange={handleChange} required />
-        </div>
-        <div style={{ marginBottom: '10px' }}>
-          <label>Data Início: </label>
-          <input type="date" name="startDate" value={formData.startDate} onChange={handleChange} required />
-        </div>
-        <div style={{ marginBottom: '10px' }}>
-          <label>Data Fim (Opcional): </label>
-          <input type="date" name="endDate" value={formData.endDate} onChange={handleChange} />
-        </div>
-        <button type="submit">Salvar Funcionário</button>
-      </form>
+    <div style={{
+      maxWidth: '1400px',
+      margin: '0 auto',
+      padding: '48px'
+    }}>
+      
+      {/* ✅ HEADER DA PÁGINA */}
+      <div style={{
+        marginBottom: '32px'
+      }}>
+        <h1 style={{
+          fontSize: '2.5rem',
+          fontWeight: '700',
+          color: '#0f172a',
+          marginBottom: '8px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '16px'
+        }}>
+          👥 Gestão de Funcionários
+        </h1>
+        <p style={{
+          fontSize: '1.1rem',
+          color: '#64748b',
+          margin: '0'
+        }}>
+          Gerencie sua equipe de colaboradores
+        </p>
+      </div>
 
-      <h2>Funcionários Cadastrados</h2>
-      <table border="1" style={{ width: '100%' }}>
-        <thead>
-          <tr>
-            <th>Nome</th>
-            <th>Cargo</th>
-            <th>Salário</th>
-            <th>Data Início</th>
-            <th>Data Fim</th>
-            <th>Ações</th>
-          </tr>
-        </thead>
-        <tbody>
-          {employees.map(emp => (
-            <tr key={emp.id}>
-              <td>{emp.name}</td>
-              <td>{emp.position}</td>
-              <td>R$ {emp.salary.toFixed(2)}</td>
-              <td>{new Date(emp.startDate).toLocaleDateString()}</td>
-              <td>{emp.endDate ? new Date(emp.endDate).toLocaleDateString() : '-'}</td>
-              <td>
-                <Link to={`/employee/edit/${emp.id}`}>
-                  <button>✏️ Editar</button>
-                </Link>
-                <button onClick={() => handleDelete(emp.id)} style={{ marginLeft: '10px' }}>
-                  🗑️ Deletar
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      {/* ✅ FORMULÁRIO DE CADASTRO MODERNIZADO */}
+      <div style={{
+        backgroundColor: 'white',
+        borderRadius: '12px',
+        padding: '32px',
+        border: '1px solid #e2e8f0',
+        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
+        marginBottom: '32px'
+      }}>
+        <h3 style={{
+          fontSize: '1.5rem',
+          fontWeight: '600',
+          color: '#1e293b',
+          marginBottom: '24px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px'
+        }}>
+          ➕ Cadastrar Novo Funcionário
+        </h3>
+
+        <form onSubmit={handleSubmit}>
+          {/* Grid responsivo para campos */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+            gap: '20px',
+            marginBottom: '24px'
+          }}>
+            
+            {/* Campo Nome */}
+            <div>
+              <label style={{
+                display: 'block',
+                fontSize: '0.9rem',
+                fontWeight: '600',
+                color: '#374151',
+                marginBottom: '8px'
+              }}>
+                Nome Completo
+              </label>
+              <input 
+                type="text" 
+                name="name" 
+                value={formData.name} 
+                onChange={handleChange} 
+                required
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '8px',
+                  fontSize: '1rem',
+                  transition: 'border-color 0.2s ease',
+                  boxSizing: 'border-box'
+                }}
+                onFocus={(e) => e.target.style.borderColor = '#3b82f6'}
+                onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+                placeholder="Digite o nome completo"
+              />
+            </div>
+
+            {/* Campo Cargo */}
+            <div>
+              <label style={{
+                display: 'block',
+                fontSize: '0.9rem',
+                fontWeight: '600',
+                color: '#374151',
+                marginBottom: '8px'
+              }}>
+                Cargo/Função
+              </label>
+              <input 
+                type="text" 
+                name="position" 
+                value={formData.position} 
+                onChange={handleChange} 
+                required
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '8px',
+                  fontSize: '1rem',
+                  transition: 'border-color 0.2s ease',
+                  boxSizing: 'border-box'
+                }}
+                onFocus={(e) => e.target.style.borderColor = '#3b82f6'}
+                onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+                placeholder="Ex: Engenheiro Civil"
+              />
+            </div>
+
+            {/* Campo Salário */}
+            <div>
+              <label style={{
+                display: 'block',
+                fontSize: '0.9rem',
+                fontWeight: '600',
+                color: '#374151',
+                marginBottom: '8px'
+              }}>
+                Salário (R$)
+              </label>
+              <input 
+                type="number" 
+                step="0.01" 
+                min="0" 
+                name="salary" 
+                value={formData.salary} 
+                onChange={handleChange} 
+                required
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '8px',
+                  fontSize: '1rem',
+                  transition: 'border-color 0.2s ease',
+                  boxSizing: 'border-box'
+                }}
+                onFocus={(e) => e.target.style.borderColor = '#3b82f6'}
+                onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+                placeholder="5000.00"
+              />
+            </div>
+
+            {/* Campo Data Início */}
+            <div>
+              <label style={{
+                display: 'block',
+                fontSize: '0.9rem',
+                fontWeight: '600',
+                color: '#374151',
+                marginBottom: '8px'
+              }}>
+                Data de Início
+              </label>
+              <input 
+                type="date" 
+                name="startDate" 
+                value={formData.startDate} 
+                onChange={handleChange} 
+                required
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '8px',
+                  fontSize: '1rem',
+                  transition: 'border-color 0.2s ease',
+                  boxSizing: 'border-box'
+                }}
+                onFocus={(e) => e.target.style.borderColor = '#3b82f6'}
+                onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+              />
+            </div>
+
+            {/* Campo Data Fim */}
+            <div>
+              <label style={{
+                display: 'block',
+                fontSize: '0.9rem',
+                fontWeight: '600',
+                color: '#374151',
+                marginBottom: '8px'
+              }}>
+                Data Fim (Opcional)
+              </label>
+              <input 
+                type="date" 
+                name="endDate" 
+                value={formData.endDate} 
+                onChange={handleChange}
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '8px',
+                  fontSize: '1rem',
+                  transition: 'border-color 0.2s ease',
+                  boxSizing: 'border-box'
+                }}
+                onFocus={(e) => e.target.style.borderColor = '#3b82f6'}
+                onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+              />
+            </div>
+          </div>
+
+          {/* Botão de Submissão */}
+          <button 
+            type="submit"
+            style={{
+              backgroundColor: '#3b82f6',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              padding: '12px 32px',
+              fontSize: '1rem',
+              fontWeight: '600',
+              cursor: 'pointer',
+              transition: 'background-color 0.2s ease',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}
+            onMouseEnter={(e) => e.target.style.backgroundColor = '#2563eb'}
+            onMouseLeave={(e) => e.target.style.backgroundColor = '#3b82f6'}
+          >
+            💾 Salvar Funcionário
+          </button>
+        </form>
+      </div>
+
+      {/* ✅ LISTA DE FUNCIONÁRIOS MODERNIZADA */}
+      <div style={{
+        backgroundColor: 'white',
+        borderRadius: '12px',
+        border: '1px solid #e2e8f0',
+        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
+        overflow: 'hidden'
+      }}>
+        
+        {/* Header da Lista */}
+        <div style={{
+          padding: '24px 32px',
+          borderBottom: '1px solid #f1f5f9',
+          backgroundColor: '#f8fafc'
+        }}>
+          <h2 style={{
+            fontSize: '1.5rem',
+            fontWeight: '600',
+            color: '#1e293b',
+            margin: '0',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px'
+          }}>
+            📋 Funcionários Cadastrados
+            <span style={{
+              backgroundColor: '#e0e7ff',
+              color: '#3730a3',
+              padding: '4px 12px',
+              borderRadius: '20px',
+              fontSize: '0.875rem',
+              fontWeight: '700'
+            }}>
+              {employees.length}
+            </span>
+          </h2>
+        </div>
+
+        {/* Lista de Funcionários */}
+        <div style={{ padding: '32px' }}>
+          {employees.length === 0 ? (
+            <div style={{
+              textAlign: 'center',
+              padding: '48px',
+              color: '#64748b'
+            }}>
+              <div style={{ fontSize: '3rem', marginBottom: '16px' }}>👤</div>
+              <h3 style={{ fontSize: '1.2rem', marginBottom: '8px' }}>Nenhum funcionário cadastrado</h3>
+              <p style={{ margin: '0' }}>Comece adicionando o primeiro funcionário da sua equipe.</p>
+            </div>
+          ) : (
+            <div style={{
+              display: 'grid',
+              gap: '16px'
+            }}>
+              {employees.map(emp => (
+                <div key={emp.id} style={{
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '12px',
+                  padding: '24px',
+                  transition: 'all 0.2s ease',
+                  backgroundColor: '#fafafa'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#f8fafc';
+                  e.currentTarget.style.borderColor = '#c7d2fe';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 4px 12px 0 rgba(0, 0, 0, 0.1)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#fafafa';
+                  e.currentTarget.style.borderColor = '#e2e8f0';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
+                >
+                  
+                  {/* Layout responsivo do card do funcionário */}
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'auto 1fr auto',
+                    gap: '20px',
+                    alignItems: 'center'
+                  }}>
+                    
+                    {/* Avatar e Info Principal */}
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '16px'
+                    }}>
+                      <div style={{
+                        width: '56px',
+                        height: '56px',
+                        backgroundColor: '#e0e7ff',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '1.5rem',
+                        border: '2px solid #c7d2fe'
+                      }}>
+                        👤
+                      </div>
+                      
+                      <div>
+                        <h3 style={{
+                          fontSize: '1.2rem',
+                          fontWeight: '600',
+                          color: '#1e293b',
+                          margin: '0 0 4px 0'
+                        }}>
+                          {emp.name}
+                        </h3>
+                        <p style={{
+                          fontSize: '1rem',
+                          color: '#6366f1',
+                          fontWeight: '500',
+                          margin: '0'
+                        }}>
+                          {emp.position}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Informações Detalhadas */}
+                    <div style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+                      gap: '16px'
+                    }}>
+                      
+                      {/* Salário */}
+                      <div style={{
+                        textAlign: 'center',
+                        padding: '12px',
+                        backgroundColor: '#f0fdf4',
+                        borderRadius: '8px',
+                        border: '1px solid #bbf7d0'
+                      }}>
+                        <div style={{
+                          fontSize: '0.75rem',
+                          fontWeight: '600',
+                          color: '#15803d',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.5px',
+                          marginBottom: '4px'
+                        }}>
+                          SALÁRIO
+                        </div>
+                        <div style={{
+                          fontSize: '1rem',
+                          fontWeight: '700',
+                          color: '#166534'
+                        }}>
+                          {formatCurrency(emp.salary)}
+                        </div>
+                      </div>
+
+                      {/* Data Início */}
+                      <div style={{
+                        textAlign: 'center',
+                        padding: '12px',
+                        backgroundColor: '#eff6ff',
+                        borderRadius: '8px',
+                        border: '1px solid #bfdbfe'
+                      }}>
+                        <div style={{
+                          fontSize: '0.75rem',
+                          fontWeight: '600',
+                          color: '#1d4ed8',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.5px',
+                          marginBottom: '4px'
+                        }}>
+                          INÍCIO
+                        </div>
+                        <div style={{
+                          fontSize: '0.9rem',
+                          fontWeight: '600',
+                          color: '#1e40af'
+                        }}>
+                          {new Date(emp.startDate).toLocaleDateString('pt-BR')}
+                        </div>
+                      </div>
+
+                      {/* Data Fim */}
+                      <div style={{
+                        textAlign: 'center',
+                        padding: '12px',
+                        backgroundColor: emp.endDate ? '#fef3c7' : '#f3f4f6',
+                        borderRadius: '8px',
+                        border: `1px solid ${emp.endDate ? '#fbbf24' : '#d1d5db'}`
+                      }}>
+                        <div style={{
+                          fontSize: '0.75rem',
+                          fontWeight: '600',
+                          color: emp.endDate ? '#92400e' : '#6b7280',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.5px',
+                          marginBottom: '4px'
+                        }}>
+                          {emp.endDate ? 'TÉRMINO' : 'STATUS'}
+                        </div>
+                        <div style={{
+                          fontSize: '0.9rem',
+                          fontWeight: '600',
+                          color: emp.endDate ? '#b45309' : '#10b981'
+                        }}>
+                          {emp.endDate ? 
+                            new Date(emp.endDate).toLocaleDateString('pt-BR') : 
+                            'ATIVO'
+                          }
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Ações */}
+                    <div style={{
+                      display: 'flex',
+                      gap: '8px'
+                    }}>
+                      <Link 
+                        to={`/employee/edit/${emp.id}`}
+                        style={{
+                          textDecoration: 'none'
+                        }}
+                      >
+                        <button style={{
+                          backgroundColor: '#3b82f6',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '8px',
+                          padding: '8px 16px',
+                          fontSize: '0.875rem',
+                          fontWeight: '600',
+                          cursor: 'pointer',
+                          transition: 'background-color 0.2s ease',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px'
+                        }}
+                        onMouseEnter={(e) => e.target.style.backgroundColor = '#2563eb'}
+                        onMouseLeave={(e) => e.target.style.backgroundColor = '#3b82f6'}
+                        >
+                          ✏️ Editar
+                        </button>
+                      </Link>
+                      
+                      <button 
+                        onClick={() => handleDelete(emp.id)}
+                        style={{
+                          backgroundColor: '#ef4444',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '8px',
+                          padding: '8px 16px',
+                          fontSize: '0.875rem',
+                          fontWeight: '600',
+                          cursor: 'pointer',
+                          transition: 'background-color 0.2s ease',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px'
+                        }}
+                        onMouseEnter={(e) => e.target.style.backgroundColor = '#dc2626'}
+                        onMouseLeave={(e) => e.target.style.backgroundColor = '#ef4444'}
+                      >
+                        🗑️ Deletar
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
