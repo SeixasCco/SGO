@@ -89,6 +89,10 @@ public class ProjectSummaryDto
     public string City { get; set; } = string.Empty;
     public string State { get; set; } = string.Empty;
     public string CNO { get; set; } = string.Empty;
+
+    public string Responsible { get; set; } = string.Empty;
+    public int Status { get; set; }
+    public string StatusText { get; set; } = string.Empty;
     public int TeamSize { get; set; }
     public decimal TotalContractsValue { get; set; }
     public decimal TotalExpensesValue { get; set; }   

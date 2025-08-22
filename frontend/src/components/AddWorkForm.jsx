@@ -2,13 +2,17 @@ import React, { useState } from 'react';
 import axios from 'axios';
 
 const AddWorkForm = ({ onWorkAdded }) => {
+  // ✅ TODOS os campos sempre definidos com nomenclatura consistente
   const [formData, setFormData] = useState({
     cno: '',
     name: '',
     contractor: '',
-    servicetaker: '',
+    serviceTaker: '',  // ✅ camelCase consistente
+    responsible: '',   // ✅ sempre definido
     city: '',
     state: '',
+    address: '',       // ✅ sempre definido
+    description: '',   // ✅ sempre definido
     startDate: new Date().toISOString().split('T')[0], 
     endDate: '', 
   });
@@ -36,21 +40,26 @@ const AddWorkForm = ({ onWorkAdded }) => {
       responsible: formData.responsible,
       city: formData.city,
       state: formData.state,
+      address: formData.address,
+      description: formData.description,
       startDate: formData.startDate,     
       endDate: formData.endDate || null, 
-    };
-
-    const newWork = {
-      ...formData,
-      status: 2,
     };
 
     axios.post('http://localhost:5145/api/projects', projectDto)
       .then(response => {
         alert('Obra cadastrada com sucesso!');
+        // ✅ Reset com nomenclatura exatamente igual ao estado inicial
         setFormData({ 
-          cno: '', name: '', contractor: '', city: '', state: '',
-          responsible: '', serviceTaker: '',
+          cno: '',
+          name: '',
+          contractor: '',
+          serviceTaker: '',  // ✅ consistente
+          responsible: '',   // ✅ consistente
+          city: '',
+          state: '',
+          address: '',       // ✅ consistente
+          description: '',   // ✅ consistente
           startDate: new Date().toISOString().split('T')[0],
           endDate: '',
         });
@@ -68,41 +77,77 @@ const AddWorkForm = ({ onWorkAdded }) => {
   return (
     <form onSubmit={handleSubmit} style={{ border: '1px solid blue', padding: '15px', margin: '15px 0' }}>
       <h3>Cadastrar Nova Obra</h3>
+      
+      {/* ✅ Informações básicas da obra */}
       <div style={{ marginBottom: '10px' }}>
         <label>CNO: </label>
         <input type="text" name="cno" value={formData.cno} onChange={handleChange} required />
       </div>
+      
       <div style={{ marginBottom: '10px' }}>
         <label>Nome da Obra: </label>
         <input type="text" name="name" value={formData.name} onChange={handleChange} required />
       </div>
+      
       <div style={{ marginBottom: '10px' }}>
         <label>Contratante: </label>
         <input type="text" name="contractor" value={formData.contractor} onChange={handleChange} required />
       </div>
+      
       <div style={{ marginBottom: '10px' }}>
         <label>Tomador do Serviço: </label>
-        <input type="text" name="servicetaker" value={formData.servicetaker} onChange={handleChange} required />
+        <input type="text" name="serviceTaker" value={formData.serviceTaker} onChange={handleChange} required />
       </div>
+      
+      {/* ✅ Campo responsável - nomenclatura consistente */}
+      <div style={{ marginBottom: '10px' }}>
+        <label>Responsável: </label>
+        <input type="text" name="responsible" value={formData.responsible} onChange={handleChange} required />
+      </div>
+      
+      {/* ✅ Localização */}
       <div style={{ marginBottom: '10px' }}>
         <label>Cidade: </label>
         <input type="text" name="city" value={formData.city} onChange={handleChange} required />
       </div>
+      
       <div style={{ marginBottom: '10px' }}>
         <label>Estado: </label>
         <input type="text" name="state" value={formData.state} onChange={handleChange} maxLength="2" required />
       </div>
+      
+      <div style={{ marginBottom: '10px' }}>
+        <label>Endereço (Opcional): </label>
+        <input type="text" name="address" value={formData.address} onChange={handleChange} />
+      </div>
+      
+      {/* ✅ Datas */}
       <div style={{ marginBottom: '10px' }}>
         <label>Data Início: </label>
         <input type="date" name="startDate" value={formData.startDate} onChange={handleChange} required />
       </div>
+      
       <div style={{ marginBottom: '10px' }}>
         <label>Data Fim (Opcional): </label> 
         <input type="date" name="endDate" value={formData.endDate} onChange={handleChange} />
       </div>
+      
+      {/* ✅ Descrição */}
+      <div style={{ marginBottom: '10px' }}>
+        <label>Descrição (Opcional): </label>
+        <textarea 
+          name="description" 
+          value={formData.description} 
+          onChange={handleChange}
+          rows="3"
+          style={{ width: '100%' }}
+        />
+      </div>
+      
       <button type="submit" disabled={submitting}>
         {submitting ? 'Salvando...' : 'Salvar Obra'}
       </button>
+      
       {error && <p style={{ color: 'red' }}>{error}</p>}
     </form>
   );

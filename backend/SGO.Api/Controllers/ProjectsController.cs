@@ -42,42 +42,60 @@ namespace SGO.Api.Controllers
             {
                 query = query.Where(p => p.EndDate <= filters.EndDate.Value.ToUniversalTime());
             }
-            var projectsData = await query
-                    .Select(p => new
-                    {
-                        Project = p,
-                        Contracts = p.Contracts,
-                        Expenses = p.Expenses,
-                        Allocations = p.ProjectEmployees.Select(pe => new
-                        {
-                            pe.StartDate,
-                            pe.EndDate,
-                            pe.Employee.Salary
-                        })
-                    })
-                    .ToListAsync();
-            var projectSummaries = projectsData.Select(data =>
-    {        
-        var laborCost = data.Allocations
-            .Where(a => a.StartDate > DateTime.MinValue)
-            .Sum(a => (a.Salary / 30) * (decimal)((a.EndDate ?? DateTime.UtcNow) - a.StartDate).TotalDays);
 
-        return new ProjectSummaryDto
-        {
-            Id = data.Project.Id,
-            Name = data.Project.Name,
-            Contractor = data.Project.Contractor,
-            City = data.Project.City,
-            State = data.Project.State,
-            CNO = data.Project.CNO,
-            TeamSize = data.Allocations.Count(a => a.EndDate == null),
-            TotalContractsValue = data.Contracts.Sum(c => c.TotalValue),
-                       TotalExpensesValue = (data.Expenses.Sum(e => (decimal?)e.Amount) ?? 0) + Math.Round(laborCost, 2)
-        };
-    });
+            var projectsData = await query
+                .Select(p => new
+                {
+                    Project = p,
+                    Contracts = p.Contracts,
+                    Expenses = p.Expenses,
+                    Allocations = p.ProjectEmployees.Select(pe => new
+                    {
+                        pe.StartDate,
+                        pe.EndDate,
+                        pe.Employee.Salary
+                    })
+                })
+                .ToListAsync();
+
+            var projectSummaries = projectsData.Select(data =>
+            {
+                var laborCost = data.Allocations
+                    .Where(a => a.StartDate > DateTime.MinValue)
+                    .Sum(a => (a.Salary / 30) * (decimal)((a.EndDate ?? DateTime.UtcNow) - a.StartDate).TotalDays);
+
+                return new ProjectSummaryDto
+                {
+                    Id = data.Project.Id,
+                    Name = data.Project.Name,
+                    Contractor = data.Project.Contractor,
+                    City = data.Project.City,
+                    State = data.Project.State,
+                    CNO = data.Project.CNO,                    
+                    Responsible = data.Project.Responsible,
+                    Status = (int)data.Project.Status,
+                    StatusText = GetStatusText(data.Project.Status),
+
+                    TeamSize = data.Allocations.Count(a => a.EndDate == null),
+                    TotalContractsValue = data.Contracts.Sum(c => c.TotalValue),
+                    TotalExpensesValue = (data.Expenses.Sum(e => (decimal?)e.Amount) ?? 0) + Math.Round(laborCost, 2)
+                };
+            });
 
             return Ok(projectSummaries);
-
+        }      
+        private static string GetStatusText(ProjectStatus status)
+        {
+            return status switch
+            {
+                ProjectStatus.Planning => "🟡 Planejamento",
+                ProjectStatus.Active => "🟢 Ativa",
+                ProjectStatus.OnHold => "🟠 Pausada",
+                ProjectStatus.Completed => "✅ Concluída",
+                ProjectStatus.Additive => "🔄 Aditivo",
+                ProjectStatus.Cancelled => "❌ Cancelada",
+                _ => "❓ Indefinido"
+            };
         }
 
         // GET: api/projects/{id}
@@ -211,4 +229,6 @@ namespace SGO.Api.Controllers
             return NoContent();
         }
     }
+
+
 }
