@@ -1,7 +1,7 @@
-// Local: frontend/src/pages/WorkDetails.jsx
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
+import AddContractModal from '../components/AddContractModal';
 
 const WorkDetails = () => {
     const { id } = useParams();
@@ -10,6 +10,7 @@ const WorkDetails = () => {
     const [error, setError] = useState(null);
     const [isExpenseFormVisible, setIsExpenseFormVisible] = useState(false);
     const [activeTab, setActiveTab] = useState('overview');
+    const [showAddContractModal, setShowAddContractModal] = useState(false);
 
     // Estados para gerenciamento de contratos
     const [contracts, setContracts] = useState([]);
@@ -79,29 +80,18 @@ const WorkDetails = () => {
 
     // Função para adicionar contrato
     const handleAddContract = () => {
-        const contractNumber = prompt("Digite o número do novo contrato:");
-        if (!contractNumber) return;
-
-        const newContract = {
-            projectId: id,
-            contractNumber: contractNumber,
-            title: "Novo Contrato",
-            totalValue: 0
-        };
-
-        axios.post('http://localhost:5145/api/contracts', newContract)
-            .then(() => {
-                alert("Contrato adicionado com sucesso!");
-                fetchContracts();
-                fetchProjectDetails();
-            })
-            .catch(error => {
-                const errorMessage = error.response && error.response.data
-                    ? error.response.data
-                    : "Erro ao adicionar contrato.";
-                alert(errorMessage);
-            });
+        setShowAddContractModal(true);
     };
+
+    const handleContractAdded = () => {
+        fetchContracts();
+        fetchProjectDetails();
+    };
+
+    const handleCloseContractModal = () => {
+        setShowAddContractModal(false);
+    };
+
 
     // Função para deletar contrato
     const handleDeleteContract = (contractId) => {
@@ -1886,6 +1876,13 @@ const WorkDetails = () => {
                     </div>
                 </div>
             )}
+            <AddContractModal
+                isOpen={showAddContractModal}
+                onClose={handleCloseContractModal}
+                projectId={id}
+                projectName={`${project.contractor} - ${project.name}`}
+                onContractAdded={handleContractAdded}
+            />
         </div>
     );
 };
