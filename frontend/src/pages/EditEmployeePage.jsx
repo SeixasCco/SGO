@@ -1,3 +1,4 @@
+// Local: frontend/src/pages/EditEmployeePage.jsx
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
@@ -13,7 +14,10 @@ const EditEmployeePage = () => {
     axios.get(`http://localhost:5145/api/employees/${id}`)
       .then(response => {
         const employee = response.data;
-        employee.hireDate = new Date(employee.hireDate).toISOString().split('T')[0];
+        employee.startDate = new Date(employee.startDate).toISOString().split('T')[0];
+        if (employee.endDate) {
+            employee.endDate = new Date(employee.endDate).toISOString().split('T')[0];
+        }
         setFormData(employee);
         setLoading(false);
       })
@@ -24,26 +28,26 @@ const EditEmployeePage = () => {
   }, [id]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prevState => ({ ...prevState, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setFormData(prevState => ({ ...prevState, [name]: type === 'checkbox' ? checked : value }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
     const employeeDto = {
-      name: formData.name,
-      position: formData.position,
-      hireDate: formData.hireDate,
+        name: formData.name,
+        position: formData.position,
+        salary: parseFloat(formData.salary),
+        startDate: formData.startDate,
+        endDate: formData.endDate || null,
+        isActive: formData.isActive
     };
-
     axios.put(`http://localhost:5145/api/employees/${id}`, employeeDto)
       .then(() => {
         alert('Funcionário atualizado com sucesso!');
         navigate('/employees');
       })
       .catch(err => {
-        console.error("Erro ao atualizar funcionário:", err.response.data);
         setError('Falha ao atualizar o funcionário. Tente novamente.');
       });
   };
@@ -66,8 +70,22 @@ const EditEmployeePage = () => {
           <input type="text" name="position" value={formData.position} onChange={handleChange} required />
         </div>
         <div style={{ marginBottom: '10px' }}>
-          <label>Data de Contratação: </label>
-          <input type="date" name="hireDate" value={formData.hireDate} onChange={handleChange} required />
+          <label>Salário (R$): </label>
+          <input type="number" step="0.01" min="0" name="salary" value={formData.salary} onChange={handleChange} required />
+        </div>
+        <div style={{ marginBottom: '10px' }}>
+          <label>Data Início: </label>
+          <input type="date" name="startDate" value={formData.startDate} onChange={handleChange} required />
+        </div>
+        <div style={{ marginBottom: '10px' }}>
+          <label>Data Fim (Opcional): </label>
+          <input type="date" name="endDate" value={formData.endDate  || ''} onChange={handleChange} />
+        </div>
+         <div style={{ marginBottom: '10px' }}>
+          <label>
+            <input type="checkbox" name="isActive" checked={formData.isActive} onChange={handleChange} />
+            Funcionário Ativo
+          </label>
         </div>
         <button type="submit">Salvar Alterações</button>
       </form>

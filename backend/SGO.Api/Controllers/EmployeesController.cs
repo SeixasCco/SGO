@@ -1,11 +1,13 @@
+// Em SGO.Api/Controllers/EmployeesController.cs
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using SGO.Api.Dtos;
 using SGO.Core;
 using SGO.Infrastructure;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
-using SGO.Api.Dtos;
 
 namespace SGO.Api.Controllers
 {
@@ -14,49 +16,82 @@ namespace SGO.Api.Controllers
     public class EmployeesController : ControllerBase
     {
         private readonly SgoDbContext _context;
-
-        public EmployeesController(SgoDbContext context)
-        {
-            _context = context;
-        }
+        public EmployeesController(SgoDbContext context) { _context = context; }
 
         // GET: api/employees
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Employee>>> GetEmployees()
+        public async Task<ActionResult<IEnumerable<EmployeeDto>>> GetEmployees()
         {
-            return await _context.Employees.ToListAsync();
+            return await _context.Employees
+                .Select(e => new EmployeeDto 
+                {
+                    Id = e.Id,
+                    Name = e.Name,
+                    Position = e.Position,
+                    Salary = e.Salary,
+                    StartDate = e.StartDate,
+                    EndDate = e.EndDate,
+                    IsActive = e.IsActive
+                })
+                .ToListAsync();
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateEmployee(Guid id, [FromBody] UpdateEmployeeDto employeeDto)
+        // GET: api/employees/{id}
+        [HttpGet("{id}")]
+        public async Task<ActionResult<EmployeeDto>> GetEmployeeById(Guid id)
         {
             var employee = await _context.Employees.FindAsync(id);
-            if (employee == null)
-            {
-                return NotFound();
-            }
+            if (employee == null) return NotFound();
 
-            // Atualiza a entidade com os dados do DTO
+            var employeeDto = new EmployeeDto
+            {
+                Id = employee.Id,
+                Name = employee.Name,
+                Position = employee.Position,
+                Salary = employee.Salary,
+                StartDate = employee.StartDate,
+                EndDate = employee.EndDate,
+                IsActive = employee.IsActive
+            };
+            return Ok(employeeDto);
+        }
+
+        // POST: api/employees
+        [HttpPost]
+        public async Task<ActionResult<EmployeeDto>> CreateEmployee(CreateEmployeeDto employeeDto)
+        {
+            var employee = new Employee
+            {
+                Id = Guid.NewGuid(),
+                Name = employeeDto.Name,
+                Position = employeeDto.Position,
+                Salary = employeeDto.Salary,
+                StartDate = employeeDto.StartDate.ToUniversalTime(),
+                EndDate = employeeDto.EndDate?.ToUniversalTime(),
+                IsActive = true 
+            };
+            _context.Employees.Add(employee);
+await _context.SaveChangesAsync();
+            
+            var resultDto = new EmployeeDto { Id = employee.Id, Name = employee.Name, /*...*/ };
+            return CreatedAtAction(nameof(GetEmployeeById), new { id = employee.Id }, resultDto);
+        }
+
+        // PUT: api/employees/{id}
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateEmployee(Guid id, UpdateEmployeeDto employeeDto)
+        {
+            var employee = await _context.Employees.FindAsync(id);
+            if (employee == null) return NotFound();
+
             employee.Name = employeeDto.Name;
             employee.Position = employeeDto.Position;
-            employee.HireDate = employeeDto.HireDate.ToUniversalTime();
+            employee.Salary = employeeDto.Salary;
+            employee.StartDate = employeeDto.StartDate.ToUniversalTime();
+            employee.EndDate = employeeDto.EndDate?.ToUniversalTime();
+            employee.IsActive = employeeDto.IsActive;
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!_context.Employees.Any(e => e.Id == id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
+            await _context.SaveChangesAsync();
             return NoContent();
         }
 
@@ -65,56 +100,10 @@ namespace SGO.Api.Controllers
         public async Task<IActionResult> DeleteEmployee(Guid id)
         {
             var employee = await _context.Employees.FindAsync(id);
-            if (employee == null)
-            {
-                return NotFound();
-            }
-
+            if (employee == null) return NotFound();
             _context.Employees.Remove(employee);
             await _context.SaveChangesAsync();
-
             return NoContent();
         }
-
-        //GET :api/employee/{id}
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Employee>> GetEmployeeById(Guid id)
-        {
-            var employee = await _context.Employees.FindAsync(id);
-
-            if (employee == null)
-            {
-                return NotFound();
-            }
-            return Ok(employee);
-        }
-
-        // POST: api/employees
-        [HttpPost]
-        public async Task<ActionResult<Employee>> CreateEmployee(Employee employee)
-        {
-            employee.Id = Guid.NewGuid();
-            employee.HireDate = employee.HireDate.ToUniversalTime();
-            _context.Employees.Add(employee);
-            await _context.SaveChangesAsync();
-
-            return Ok(employee);
-        }
-
-        [HttpGet("available")]
-        public async Task<ActionResult<IEnumerable<Employee>>> GetAvailableEmployees()
-        {            
-            var assignedEmployeeIds = await _context.Set<ProjectEmployee>()
-                                                    .Select(pe => pe.EmployeeId)
-                                                    .Distinct()
-                                                    .ToListAsync();
-           
-            var availableEmployees = await _context.Employees
-                                                   .Where(e => !assignedEmployeeIds.Contains(e.Id))
-                                                   .ToListAsync();
-
-            return Ok(availableEmployees);
-        }
-
     }
 }

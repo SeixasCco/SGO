@@ -25,18 +25,17 @@ namespace SGO.Api.Controllers
         [HttpGet("byproject/{projectId}")]
         public async Task<ActionResult<IEnumerable<ContractSummaryDto>>> GetContractsByProject(Guid projectId)
         {
-            var contracts = await _context.Contracts
+            return await _context.Contracts
                 .Where(c => c.ProjectId == projectId)
                 .Select(c => new ContractSummaryDto
                 {
                     Id = c.Id,
-                    ContractNumber = c.ContractNumber,                    
+                    ContractNumber = c.ContractNumber,                   
                     TotalValue = c.TotalValue,
                     StartDate = c.StartDate,
                     EndDate = c.EndDate
                 })
                 .ToListAsync();
-            return Ok(contracts);
         }
 
         // GET: api/contracts/{id}
@@ -71,16 +70,18 @@ namespace SGO.Api.Controllers
             return Ok(newContract);
         }
 
-        // PUT: api/contracts/{id}
+        // PUT: api/contracts/{id} - VERSÃO CORRIGIDA COM "FETCH-THEN-UPDATE"
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateContract(Guid id, [FromBody] UpdateContractDto contractDto)
         {
+            // 1. BUSCAR a entidade existente do banco de dados
             var contract = await _context.Contracts.FindAsync(id);
             if (contract == null)
             {
                 return NotFound();
             }
 
+            // 2. ATUALIZAR as propriedades da entidade com os valores do DTO
             contract.ContractNumber = contractDto.ContractNumber;
             contract.Title = contractDto.Title;
             contract.TotalValue = contractDto.TotalValue;
@@ -88,7 +89,9 @@ namespace SGO.Api.Controllers
             contract.EndDate = contractDto.EndDate?.ToUniversalTime();
             contract.Observations = contractDto.Observations;
 
+            // 3. SALVAR as alterações. O EF Core saberá exatamente o que mudou.
             await _context.SaveChangesAsync();
+            
             return NoContent();
         }
 
