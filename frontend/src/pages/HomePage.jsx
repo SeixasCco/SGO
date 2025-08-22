@@ -14,12 +14,10 @@ const HomePage = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        // ✅ VERSÃO DEBUG - TESTA ENDPOINTS UM POR VEZ
         const fetchDashboardData = async () => {
             try {
                 console.log('Iniciando carregamento do dashboard...');
                 
-                // Teste endpoint por endpoint
                 try {
                     console.log('Carregando summary...');
                     const summaryRes = await axios.get('http://localhost:5145/api/dashboard/summary');
@@ -37,7 +35,6 @@ const HomePage = () => {
                     console.log('Projects by status carregado:', statusRes.data);
                 } catch (err) {
                     console.error('Erro no projects-by-status:', err);
-                    // Não para o carregamento
                 }
 
                 try {
@@ -47,7 +44,6 @@ const HomePage = () => {
                     console.log('Monthly expenses carregado:', expensesRes.data);
                 } catch (err) {
                     console.error('Erro no monthly-expenses:', err);
-                    // Não para o carregamento
                 }
 
                 try {
@@ -57,7 +53,6 @@ const HomePage = () => {
                     console.log('Top projects carregado:', topRes.data);
                 } catch (err) {
                     console.error('Erro no top-projects:', err);
-                    // Não para o carregamento
                 }
 
                 try {
@@ -67,7 +62,6 @@ const HomePage = () => {
                     console.log('Recent activity carregado:', activityRes.data);
                 } catch (err) {
                     console.error('Erro no recent-activity:', err);
-                    // Não para o carregamento
                 }
 
                 try {
@@ -77,7 +71,6 @@ const HomePage = () => {
                     console.log('Alerts carregado:', alertsRes.data);
                 } catch (err) {
                     console.error('Erro no alerts:', err);
-                    // Não para o carregamento
                 }
 
                 console.log('Dashboard carregado com sucesso!');
@@ -150,17 +143,16 @@ const HomePage = () => {
             padding: '0'
         }}>
             
-            {/* ✅ HEADER SIMPLIFICADO */}
+            {/* ✅ HEADER LARGURA COMPLETA */}
             <div style={{
                 backgroundColor: 'white',
                 borderBottom: '1px solid #e2e8f0',
-                padding: '32px 48px',
-                marginBottom: '32px',
+                padding: '32px 24px', // ✅ Padding menor nas laterais
+                marginBottom: '24px',
                 boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
             }}>
                 <div style={{
-                    maxWidth: '1400px',
-                    margin: '0 auto',
+                    // ✅ REMOVIDO maxWidth - agora usa largura completa
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center'
@@ -219,36 +211,41 @@ const HomePage = () => {
                 </div>
             </div>
 
-            {/* ✅ CONTAINER PRINCIPAL */}
+            {/* ✅ CONTAINER LARGURA COMPLETA */}
             <div style={{
-                maxWidth: '1400px',
-                margin: '0 auto',
-                padding: '0 48px'
+                // ✅ REMOVIDO maxWidth e margin auto
+                padding: '0 24px' // ✅ Apenas padding nas laterais
             }}>
 
-                {/* ✅ ALERTAS SIMPLES */}
+                {/* ✅ ALERTAS LARGURA COMPLETA */}
                 {alerts.length > 0 && (
-                    <div style={{ marginBottom: '32px' }}>
-                        <h3>🔔 Alertas</h3>
-                        {alerts.map((alert, index) => (
-                            <div key={index} style={{
-                                backgroundColor: 'white',
-                                padding: '16px',
-                                marginBottom: '8px',
-                                borderRadius: '8px',
-                                border: '1px solid #e2e8f0'
-                            }}>
-                                {alert.icon} <strong>{alert.title}:</strong> {alert.message}
-                            </div>
-                        ))}
+                    <div style={{ marginBottom: '24px' }}>
+                        <h3 style={{ marginLeft: '8px', marginBottom: '16px' }}>🔔 Alertas</h3>
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', // ✅ Grid responsivo
+                            gap: '16px'
+                        }}>
+                            {alerts.map((alert, index) => (
+                                <div key={index} style={{
+                                    backgroundColor: 'white',
+                                    padding: '16px',
+                                    borderRadius: '8px',
+                                    border: '1px solid #e2e8f0',
+                                    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
+                                }}>
+                                    {alert.icon} <strong>{alert.title}:</strong> {alert.message}
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 )}
 
-                {/* ✅ MÉTRICAS PRINCIPAIS SIMPLIFICADAS */}
+                {/* ✅ MÉTRICAS PRINCIPAIS - GRID ADAPTATIVO */}
                 {dashboardData && (
                     <div style={{
                         display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', // ✅ Se adapta à largura
                         gap: '20px',
                         marginBottom: '32px'
                     }}>
@@ -258,7 +255,8 @@ const HomePage = () => {
                             borderRadius: '12px',
                             padding: '20px',
                             border: '1px solid #e2e8f0',
-                            textAlign: 'center'
+                            textAlign: 'center',
+                            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
                         }}>
                             <div style={{ fontSize: '2rem', marginBottom: '8px' }}>🏗️</div>
                             <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#3b82f6' }}>
@@ -272,7 +270,8 @@ const HomePage = () => {
                             borderRadius: '12px',
                             padding: '20px',
                             border: '1px solid #e2e8f0',
-                            textAlign: 'center'
+                            textAlign: 'center',
+                            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
                         }}>
                             <div style={{ fontSize: '2rem', marginBottom: '8px' }}>🟢</div>
                             <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#10b981' }}>
@@ -286,7 +285,8 @@ const HomePage = () => {
                             borderRadius: '12px',
                             padding: '20px',
                             border: '1px solid #e2e8f0',
-                            textAlign: 'center'
+                            textAlign: 'center',
+                            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
                         }}>
                             <div style={{ fontSize: '2rem', marginBottom: '8px' }}>📄</div>
                             <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#3b82f6' }}>
@@ -300,7 +300,8 @@ const HomePage = () => {
                             borderRadius: '12px',
                             padding: '20px',
                             border: '1px solid #e2e8f0',
-                            textAlign: 'center'
+                            textAlign: 'center',
+                            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
                         }}>
                             <div style={{ fontSize: '2rem', marginBottom: '8px' }}>💰</div>
                             <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#f59e0b' }}>
@@ -314,7 +315,8 @@ const HomePage = () => {
                             borderRadius: '12px',
                             padding: '20px',
                             border: '1px solid #e2e8f0',
-                            textAlign: 'center'
+                            textAlign: 'center',
+                            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
                         }}>
                             <div style={{ fontSize: '2rem', marginBottom: '8px' }}>
                                 {dashboardData.profitMargin >= 0 ? '📈' : '📉'}
@@ -334,7 +336,8 @@ const HomePage = () => {
                             borderRadius: '12px',
                             padding: '20px',
                             border: '1px solid #e2e8f0',
-                            textAlign: 'center'
+                            textAlign: 'center',
+                            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
                         }}>
                             <div style={{ fontSize: '2rem', marginBottom: '8px' }}>👥</div>
                             <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#8b5cf6' }}>
@@ -345,74 +348,121 @@ const HomePage = () => {
                     </div>
                 )}
 
-                {/* ✅ TOP PROJETOS SIMPLES */}
-                {topProjects.length > 0 && (
-                    <div style={{
-                        backgroundColor: 'white',
-                        borderRadius: '12px',
-                        padding: '24px',
-                        marginBottom: '32px',
-                        border: '1px solid #e2e8f0'
-                    }}>
-                        <h3>🏆 Top Projetos</h3>
-                        {topProjects.map((project, index) => (
-                            <div key={project.id} style={{
-                                padding: '12px 0',
-                                borderBottom: index < topProjects.length - 1 ? '1px solid #f1f5f9' : 'none',
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center'
-                            }}>
-                                <div>
-                                    <Link to={`/project/${project.id}`} style={{
-                                        textDecoration: 'none',
-                                        color: '#3b82f6',
-                                        fontWeight: '500'
+                {/* ✅ SEÇÃO INFERIOR - LAYOUT FLEXÍVEL */}
+                <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr)', // ✅ Grid flexível
+                    gap: '24px',
+                    marginBottom: '32px'
+                }}>
+                    
+                    {/* ✅ TOP PROJETOS - LARGURA FLEXÍVEL */}
+                    {topProjects.length > 0 && (
+                        <div style={{
+                            backgroundColor: 'white',
+                            borderRadius: '12px',
+                            padding: '24px',
+                            border: '1px solid #e2e8f0',
+                            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
+                        }}>
+                            <h3 style={{ marginBottom: '20px' }}>🏆 Top Projetos</h3>
+                            <div style={{ overflowX: 'auto' }}> {/* ✅ Scroll horizontal se necessário */}
+                                {topProjects.map((project, index) => (
+                                    <div key={project.id} style={{
+                                        padding: '12px 0',
+                                        borderBottom: index < topProjects.length - 1 ? '1px solid #f1f5f9' : 'none',
+                                        display: 'grid',
+                                        gridTemplateColumns: '1fr auto auto auto', // ✅ Grid para organizar colunas
+                                        gap: '16px',
+                                        alignItems: 'center',
+                                        minWidth: '600px' // ✅ Largura mínima para evitar quebra
                                     }}>
-                                        {project.contractor} - {project.name}
-                                    </Link>
-                                    <div style={{ fontSize: '0.8rem', color: '#64748b' }}>
-                                        {project.city}/{project.state}
+                                        <div>
+                                            <Link to={`/project/${project.id}`} style={{
+                                                textDecoration: 'none',
+                                                color: '#3b82f6',
+                                                fontWeight: '500'
+                                            }}>
+                                                {project.contractor} - {project.name}
+                                            </Link>
+                                            <div style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                                                {project.city}/{project.state}
+                                            </div>
+                                        </div>
+                                        <div style={{ textAlign: 'right' }}>
+                                            <div style={{ fontWeight: 'bold', color: '#3b82f6', fontSize: '0.9rem' }}>
+                                                {formatCurrency(project.totalContractsValue)}
+                                            </div>
+                                            <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Contratos</div>
+                                        </div>
+                                        <div style={{ textAlign: 'right' }}>
+                                            <div style={{ fontWeight: 'bold', color: '#f59e0b', fontSize: '0.9rem' }}>
+                                                {formatCurrency(project.totalExpensesValue)}
+                                            </div>
+                                            <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Despesas</div>
+                                        </div>
+                                        <div style={{ textAlign: 'right' }}>
+                                            <div style={{
+                                                fontWeight: 'bold',
+                                                fontSize: '0.9rem',
+                                                color: project.profitMargin >= 0 ? '#10b981' : '#ef4444'
+                                            }}>
+                                                {formatCurrency(project.profitMargin)}
+                                            </div>
+                                            <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Margem</div>
+                                        </div>
                                     </div>
-                                </div>
-                                <div style={{ textAlign: 'right' }}>
-                                    <div style={{ fontWeight: 'bold', color: '#3b82f6' }}>
-                                        {formatCurrency(project.totalContractsValue)}
-                                    </div>
-                                    <div style={{ fontSize: '0.8rem', color: '#64748b' }}>
-                                        Margem: {formatCurrency(project.profitMargin)}
-                                    </div>
-                                </div>
+                                ))}
                             </div>
-                        ))}
-                    </div>
-                )}
+                        </div>
+                    )}
 
-                {/* ✅ ATIVIDADES RECENTES SIMPLES */}
-                {recentActivity.length > 0 && (
-                    <div style={{
-                        backgroundColor: 'white',
-                        borderRadius: '12px',
-                        padding: '24px',
-                        border: '1px solid #e2e8f0'
-                    }}>
-                        <h3>⚡ Atividades Recentes</h3>
-                        {recentActivity.slice(0, 5).map((activity, index) => (
-                            <div key={index} style={{
-                                padding: '12px 0',
-                                borderBottom: index < 4 ? '1px solid #f1f5f9' : 'none'
+                    {/* ✅ ATIVIDADES RECENTES - ALTURA FLEXÍVEL */}
+                    {recentActivity.length > 0 && (
+                        <div style={{
+                            backgroundColor: 'white',
+                            borderRadius: '12px',
+                            padding: '24px',
+                            border: '1px solid #e2e8f0',
+                            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
+                            maxHeight: '500px', // ✅ Altura máxima com scroll
+                            display: 'flex',
+                            flexDirection: 'column'
+                        }}>
+                            <h3 style={{ marginBottom: '20px', flexShrink: 0 }}>⚡ Atividades Recentes</h3>
+                            <div style={{ 
+                                overflowY: 'auto',
+                                flex: 1
                             }}>
-                                <div style={{ fontWeight: '500' }}>{activity.description}</div>
-                                <div style={{ fontSize: '0.8rem', color: '#64748b' }}>
-                                    {activity.projectContractor} - {activity.projectName}
-                                </div>
-                                <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
-                                    {new Date(activity.activityDate).toLocaleDateString('pt-BR')} - {formatCurrency(activity.amount)}
-                                </div>
+                                {recentActivity.slice(0, 8).map((activity, index) => (
+                                    <div key={index} style={{
+                                        padding: '12px 0',
+                                        borderBottom: index < 7 ? '1px solid #f1f5f9' : 'none'
+                                    }}>
+                                        <div style={{ fontWeight: '500', fontSize: '0.9rem' }}>
+                                            {activity.description}
+                                        </div>
+                                        <div style={{ fontSize: '0.8rem', color: '#64748b', marginBottom: '4px' }}>
+                                            {activity.projectContractor} - {activity.projectName}
+                                        </div>
+                                        <div style={{ 
+                                            display: 'flex', 
+                                            justifyContent: 'space-between',
+                                            alignItems: 'center'
+                                        }}>
+                                            <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+                                                {new Date(activity.activityDate).toLocaleDateString('pt-BR')}
+                                            </div>
+                                            <div style={{ fontSize: '0.8rem', fontWeight: '600', color: '#f59e0b' }}>
+                                                {formatCurrency(activity.amount)}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
-                        ))}
-                    </div>
-                )}
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );

@@ -1,10 +1,11 @@
-/* ✅ RESET E BASE */
+/* ✅ RESET E BASE PARA LARGURA COMPLETA */
 * {
   box-sizing: border-box;
 }
 
 body {
   margin: 0;
+  padding: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
@@ -13,6 +14,71 @@ body {
   background-color: #f1f5f9;
   color: #0f172a;
   line-height: 1.6;
+  /* ✅ LARGURA COMPLETA */
+  width: 100%;
+  overflow-x: auto;
+}
+
+#root {
+  /* ✅ LARGURA COMPLETA */
+  width: 100%;
+  min-height: 100vh;
+}
+
+.App {
+  /* ✅ LARGURA COMPLETA */
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* ✅ CONTAINERS LARGURA COMPLETA */
+.container-full {
+  width: 100%;
+  padding: 0 24px;
+}
+
+.container-fluid {
+  width: 100%;
+  padding: 0 16px;
+}
+
+/* ✅ GRIDS RESPONSIVOS OTIMIZADOS */
+.grid-auto-fit {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.grid-auto-fill {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.grid-responsive {
+  display: grid;
+  gap: 1.5rem;
+}
+
+/* ✅ BREAKPOINTS PARA GRIDS */
+@media (min-width: 640px) {
+  .grid-responsive { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (min-width: 768px) {
+  .grid-responsive { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (min-width: 1024px) {
+  .grid-responsive { grid-template-columns: repeat(4, 1fr); }
+}
+
+@media (min-width: 1280px) {
+  .grid-responsive { grid-template-columns: repeat(5, 1fr); }
+}
+
+@media (min-width: 1536px) {
+  .grid-responsive { grid-template-columns: repeat(6, 1fr); }
 }
 
 /* ✅ SCROLLBAR CUSTOMIZADA */
@@ -34,7 +100,7 @@ body {
   background: #94a3b8;
 }
 
-/* ✅ ANIMAÇÕES GLOBAIS */
+/* ✅ ANIMAÇÕES OTIMIZADAS */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -69,24 +135,46 @@ body {
   }
 }
 
-/* ✅ CLASSES UTILITÁRIAS */
-.fade-in {
-  animation: fadeIn 0.5s ease-out;
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
 }
 
-.slide-in {
-  animation: slideIn 0.3s ease-out;
-}
+/* ✅ CLASSES UTILITÁRIAS PARA LARGURA COMPLETA */
+.w-full { width: 100%; }
+.w-screen { width: 100vw; }
+.min-w-full { min-width: 100%; }
+.max-w-none { max-width: none; }
 
-.hover-lift {
-  transition: all 0.2s ease;
-}
+.h-full { height: 100%; }
+.h-screen { height: 100vh; }
+.min-h-full { min-height: 100%; }
+.min-h-screen { min-height: 100vh; }
 
-.hover-lift:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15);
-}
+/* ✅ FLEX UTILITIES */
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.flex-wrap { flex-wrap: wrap; }
+.flex-1 { flex: 1; }
+.flex-auto { flex: auto; }
+.flex-none { flex: none; }
 
+.justify-start { justify-content: flex-start; }
+.justify-center { justify-content: center; }
+.justify-end { justify-content: flex-end; }
+.justify-between { justify-content: space-between; }
+.justify-around { justify-content: space-around; }
+
+.items-start { align-items: flex-start; }
+.items-center { align-items: center; }
+.items-end { align-items: flex-end; }
+.items-stretch { align-items: stretch; }
+
+/* ✅ CARDS OTIMIZADOS */
 .card {
   background: white;
   border-radius: 16px;
@@ -94,13 +182,23 @@ body {
   border: 1px solid #e2e8f0;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
   transition: all 0.2s ease;
+  width: 100%;
 }
 
 .card:hover {
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
 }
 
-/* ✅ TIPOGRAFIA */
+.card-compact {
+  padding: 16px;
+}
+
+.card-large {
+  padding: 32px;
+}
+
+/* ✅ TIPOGRAFIA RESPONSIVA */
 .text-xs { font-size: 0.75rem; }
 .text-sm { font-size: 0.875rem; }
 .text-base { font-size: 1rem; }
@@ -109,14 +207,26 @@ body {
 .text-2xl { font-size: 1.5rem; }
 .text-3xl { font-size: 1.875rem; }
 .text-4xl { font-size: 2.25rem; }
+.text-5xl { font-size: 3rem; }
 
-.font-normal { font-weight: 400; }
-.font-medium { font-weight: 500; }
-.font-semibold { font-weight: 600; }
-.font-bold { font-weight: 700; }
-.font-extrabold { font-weight: 800; }
+/* ✅ TIPOGRAFIA RESPONSIVA AUTOMÁTICA */
+@media (min-width: 1024px) {
+  .text-responsive { font-size: 1.125rem; }
+  .text-2xl { font-size: 1.75rem; }
+  .text-3xl { font-size: 2.25rem; }
+  .text-4xl { font-size: 3rem; }
+  .text-5xl { font-size: 4rem; }
+}
 
-/* ✅ CORES */
+@media (min-width: 1280px) {
+  .text-responsive { font-size: 1.25rem; }
+  .text-2xl { font-size: 2rem; }
+  .text-3xl { font-size: 2.5rem; }
+  .text-4xl { font-size: 3.5rem; }
+  .text-5xl { font-size: 4.5rem; }
+}
+
+/* ✅ CORES SEMÂNTICAS */
 .text-gray-400 { color: #9ca3af; }
 .text-gray-500 { color: #6b7280; }
 .text-gray-600 { color: #4b5563; }
@@ -138,22 +248,37 @@ body {
 .bg-yellow-50 { background-color: #fffbeb; }
 .bg-red-50 { background-color: #fef2f2; }
 .bg-purple-50 { background-color: #faf5ff; }
+.bg-gray-50 { background-color: #f9fafb; }
 
-/* ✅ ESPAÇAMENTOS */
+/* ✅ ESPAÇAMENTOS RESPONSIVOS */
 .p-4 { padding: 1rem; }
 .p-6 { padding: 1.5rem; }
 .p-8 { padding: 2rem; }
 
-.m-4 { margin: 1rem; }
-.m-6 { margin: 1.5rem; }
-.m-8 { margin: 2rem; }
+.px-4 { padding-left: 1rem; padding-right: 1rem; }
+.px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+.px-8 { padding-left: 2rem; padding-right: 2rem; }
 
-.mb-2 { margin-bottom: 0.5rem; }
-.mb-4 { margin-bottom: 1rem; }
-.mb-6 { margin-bottom: 1.5rem; }
-.mb-8 { margin-bottom: 2rem; }
+.py-4 { padding-top: 1rem; padding-bottom: 1rem; }
+.py-6 { padding-top: 1.5rem; padding-bottom: 1.5rem; }
+.py-8 { padding-top: 2rem; padding-bottom: 2rem; }
 
-/* ✅ BOTÕES BASE */
+/* ✅ ESPAÇAMENTOS PARA TELAS GRANDES */
+@media (min-width: 1024px) {
+  .lg\:p-8 { padding: 2rem; }
+  .lg\:p-12 { padding: 3rem; }
+  .lg\:px-8 { padding-left: 2rem; padding-right: 2rem; }
+  .lg\:px-12 { padding-left: 3rem; padding-right: 3rem; }
+}
+
+@media (min-width: 1280px) {
+  .xl\:p-12 { padding: 3rem; }
+  .xl\:p-16 { padding: 4rem; }
+  .xl\:px-16 { padding-left: 4rem; padding-right: 4rem; }
+  .xl\:px-24 { padding-left: 6rem; padding-right: 6rem; }
+}
+
+/* ✅ BOTÕES RESPONSIVOS */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -167,59 +292,24 @@ body {
   cursor: pointer;
   transition: all 0.2s ease;
   text-decoration: none;
+  white-space: nowrap;
 }
 
 .btn:hover {
   transform: translateY(-1px);
 }
 
-.btn-primary {
-  background-color: #3b82f6;
-  color: white;
+.btn-sm {
+  padding: 8px 16px;
+  font-size: 0.8rem;
 }
 
-.btn-primary:hover {
-  background-color: #2563eb;
+.btn-lg {
+  padding: 16px 32px;
+  font-size: 1rem;
 }
 
-.btn-success {
-  background-color: #10b981;
-  color: white;
-}
-
-.btn-success:hover {
-  background-color: #059669;
-}
-
-.btn-warning {
-  background-color: #f59e0b;
-  color: white;
-}
-
-.btn-warning:hover {
-  background-color: #d97706;
-}
-
-.btn-danger {
-  background-color: #ef4444;
-  color: white;
-}
-
-.btn-danger:hover {
-  background-color: #dc2626;
-}
-
-.btn-secondary {
-  background-color: #f8fafc;
-  color: #475569;
-  border: 1px solid #cbd5e1;
-}
-
-.btn-secondary:hover {
-  background-color: #e2e8f0;
-}
-
-/* ✅ FORMULÁRIOS */
+/* ✅ FORMULÁRIOS LARGURA COMPLETA */
 .form-input {
   width: 100%;
   padding: 12px 16px;
@@ -228,6 +318,7 @@ body {
   font-size: 0.95rem;
   background-color: white;
   transition: all 0.2s ease;
+  box-sizing: border-box;
 }
 
 .form-input:focus {
@@ -244,19 +335,32 @@ body {
   margin-bottom: 6px;
 }
 
-/* ✅ TABELAS */
+/* ✅ TABELAS RESPONSIVAS */
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
 .table {
   width: 100%;
+  min-width: 600px; /* Largura mínima para evitar quebra */
   border-collapse: collapse;
+  background: white;
 }
 
 .table th {
-  padding: 12px 16px;
+  padding: 16px;
   text-align: left;
   font-size: 0.875rem;
   font-weight: 600;
   color: #64748b;
   border-bottom: 2px solid #f1f5f9;
+  background-color: #f8fafc;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .table td {
@@ -269,67 +373,29 @@ body {
   background-color: #f8fafc;
 }
 
-/* ✅ BADGES/STATUS */
-.badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 6px 12px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  border-radius: 20px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.badge-success {
-  background-color: #d1fae5;
-  color: #065f46;
-  border: 1px solid #bbf7d0;
-}
-
-.badge-warning {
-  background-color: #fef3c7;
-  color: #92400e;
-  border: 1px solid #fde68a;
-}
-
-.badge-danger {
-  background-color: #fecaca;
-  color: #991b1b;
-  border: 1px solid #fca5a5;
-}
-
-.badge-info {
-  background-color: #dbeafe;
-  color: #1e40af;
-  border: 1px solid #bfdbfe;
-}
-
-.badge-secondary {
-  background-color: #e5e7eb;
-  color: #374151;
-  border: 1px solid #d1d5db;
-}
-
-/* ✅ LAYOUT RESPONSIVO */
+/* ✅ LAYOUT RESPONSIVO AVANÇADO */
 @media (max-width: 768px) {
-  .desktop-only {
-    display: none;
+  .desktop-only { display: none; }
+  .mobile-stack { flex-direction: column !important; }
+  .mobile-full { width: 100% !important; }
+  .mobile-text-center { text-align: center !important; }
+  
+  .container-full {
+    padding: 0 16px;
   }
   
-  .mobile-stack {
-    flex-direction: column !important;
+  .card {
+    padding: 16px;
   }
   
-  .mobile-full {
-    width: 100% !important;
+  .btn {
+    width: 100%;
+    justify-content: center;
   }
 }
 
 @media (min-width: 769px) {
-  .mobile-only {
-    display: none;
-  }
+  .mobile-only { display: none; }
 }
 
 /* ✅ ESTADOS DE CARREGAMENTO */
@@ -351,6 +417,7 @@ body {
   background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
   background-size: 200% 100%;
   animation: skeleton-loading 1.5s infinite;
+  border-radius: 4px;
 }
 
 @keyframes skeleton-loading {
@@ -358,35 +425,64 @@ body {
   100% { background-position: -200% 0; }
 }
 
-/* ✅ FOCO E ACESSIBILIDADE */
-button:focus,
-input:focus,
-select:focus,
-textarea:focus,
-a:focus {
-  outline: 2px solid #3b82f6;
-  outline-offset: 2px;
+/* ✅ BADGES/STATUS */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border-width: 0;
+/* ✅ UTILIDADES PARA TELAS ULTRA-WIDE */
+@media (min-width: 1920px) {
+  .container-full {
+    padding: 0 48px;
+  }
+  
+  .grid-ultra-wide {
+    grid-template-columns: repeat(8, 1fr);
+  }
+  
+  .text-ultra { font-size: 5rem; }
+}
+
+@media (min-width: 2560px) {
+  .container-full {
+    padding: 0 64px;
+  }
+  
+  .grid-ultra-wide {
+    grid-template-columns: repeat(10, 1fr);
+  }
+}
+
+/* ✅ OTIMIZAÇÕES DE PERFORMANCE */
+.gpu-accelerated {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000;
+}
+
+.smooth-scroll {
+  scroll-behavior: smooth;
 }
 
 /* ✅ PRINT STYLES */
 @media print {
-  .no-print {
-    display: none !important;
+  .no-print { display: none !important; }
+  .print-only { display: block !important; }
+  
+  body {
+    background: white;
+    color: black;
   }
   
-  .print-only {
-    display: block !important;
+  .card {
+    border: 1px solid #ccc;
+    box-shadow: none;
   }
 }
