@@ -6,8 +6,11 @@ const AddWorkForm = ({ onWorkAdded }) => {
     cno: '',
     name: '',
     contractor: '',
+    servicetaker: '',
     city: '',
     state: '',
+    startDate: new Date().toISOString().split('T')[0], 
+    endDate: '', 
   });
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -61,6 +64,10 @@ const AddWorkForm = ({ onWorkAdded }) => {
         <input type="text" name="contractor" value={formData.contractor} onChange={handleChange} required />
       </div>
       <div style={{ marginBottom: '10px' }}>
+        <label>Tomador do Serviço: </label>
+        <input type="text" name="servicetaker" value={formData.servicetaker} onChange={handleChange} required />
+      </div>
+      <div style={{ marginBottom: '10px' }}>
         <label>Cidade: </label>
         <input type="text" name="city" value={formData.city} onChange={handleChange} required />
       </div>
@@ -68,7 +75,14 @@ const AddWorkForm = ({ onWorkAdded }) => {
         <label>Estado: </label>
         <input type="text" name="state" value={formData.state} onChange={handleChange} maxLength="2" required />
       </div>
-
+      <div style={{ marginBottom: '10px' }}>
+        <label>Data Início: </label>
+        <input type="date" name="startDate" value={formData.startDate} onChange={handleChange} required />
+      </div>
+      <div style={{ marginBottom: '10px' }}>
+        <label>Data Fim (Opcional): </label> 
+        <input type="date" name="endDate" value={formData.endDate} onChange={handleChange} />
+      </div>
       <button type="submit" disabled={submitting}>
         {submitting ? 'Salvando...' : 'Salvar Obra'}
       </button>

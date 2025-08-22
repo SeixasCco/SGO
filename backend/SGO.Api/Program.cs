@@ -20,7 +20,13 @@ builder.Services.AddCors(options =>
 var connectionString = builder.Configuration.GetConnectionString("SgoDbConnection");
 
 builder.Services.AddDbContext<SgoDbContext>(options =>
-    options.UseNpgsql(connectionString));
+    options.UseNpgsql(connectionString, 
+        // Adiciona a configuração para usar Split Queries
+        o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery))
+);
+
+
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -43,7 +49,7 @@ app.UseStaticFiles(new StaticFileOptions
     RequestPath = "/uploads"
 });
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
 app.UseCors("AllowReactApp");
 app.MapControllers();
 app.Run();

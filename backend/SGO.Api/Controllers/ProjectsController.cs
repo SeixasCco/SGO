@@ -23,7 +23,7 @@ namespace SGO.Api.Controllers
             var projects = await _context.Projects
                 .Include(p => p.Contracts)
                 .Include(p => p.Expenses)
-                .Include(p => p.ProjectEmployees) 
+                .Include(p => p.ProjectEmployees)
                 .Select(p => new ProjectSummaryDto
                 {
                     Id = p.Id,
@@ -106,6 +106,9 @@ namespace SGO.Api.Controllers
             project.Name = projectDto.Name;
             project.Contractor = projectDto.Contractor;
             project.CNO = projectDto.CNO;
+            project.Responsible = projectDto.Responsible;
+            project.StartDate = projectDto.StartDate.ToUniversalTime();
+            project.EndDate = projectDto.EndDate?.ToUniversalTime();
             project.City = projectDto.City;
             project.State = projectDto.State;
             project.Address = projectDto.Address;

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 
-const ContractsManager = ({ projectId }) => {
+const ContractsManager = ({ projectId, onContractAdded }) => {
     const [contracts, setContracts] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -44,10 +44,16 @@ const ContractsManager = ({ projectId }) => {
         axios.post('http://localhost:5145/api/contracts', newContract)
             .then(() => {
                 alert("Contrato adicionado com sucesso!");
-                fetchContracts();
-                onContractAdded();
+                onContractAdded();                
             })
-            .catch(error => alert("Erro ao adicionar contrato."));
+            .catch(error => {            
+            const errorMessage = error.response && error.response.data 
+                ? error.response.data 
+                : "Erro ao adicionar contrato. Verifique os dados e a conexão.";
+            
+            alert(errorMessage);
+            console.error("Erro ao adicionar contrato:", error.response || error);
+        });
     };
 
 

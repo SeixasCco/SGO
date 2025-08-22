@@ -16,6 +16,8 @@ public class Project
     public string CNO { get; set; } = default!;
     public string Name { get; set; } = default!;
     public string Contractor { get; set; } = default!;
+    public string ServiceTaker { get; set; } = default!;
+    public string Responsible { get; set; } = string.Empty; 
     public string City { get; set; } = default!;
     public string State { get; set; } = default!;
     public ProjectStatus Status { get; set; }

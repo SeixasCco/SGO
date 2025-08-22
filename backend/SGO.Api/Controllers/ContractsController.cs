@@ -31,14 +31,25 @@ namespace SGO.Api.Controllers
         }
 
         // POST: api/contracts
+        // POST: api/contracts
         [HttpPost]
         public async Task<ActionResult<Contract>> CreateContract([FromBody] CreateContractDto contractDto)
-        {
+        {            
+            var contractNumberTrimmed = contractDto.ContractNumber.Trim();
+
+            var existingContract = await _context.Contracts
+                .FirstOrDefaultAsync(c => c.ProjectId == contractDto.ProjectId && c.ContractNumber.Equals(contractNumberTrimmed));
+
+            if (existingContract != null)
+            {
+                return BadRequest("Já existe um contrato com este número para esta obra.");
+            }
+
             var newContract = new Contract
             {
                 Id = Guid.NewGuid(),
                 ProjectId = contractDto.ProjectId,
-                ContractNumber = contractDto.ContractNumber,
+                ContractNumber = contractNumberTrimmed, 
                 Title = contractDto.Title,
                 TotalValue = contractDto.TotalValue,
                 Status = ContractStatus.Active,
@@ -50,6 +61,7 @@ namespace SGO.Api.Controllers
 
             return Ok(newContract);
         }
+
         // PUT: api/contracts/{id}
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateContract(Guid id, [FromBody] UpdateContractDto contractDto)
