@@ -8,6 +8,7 @@ public class Project
     {
         Contracts = new HashSet<Contract>();
         Expenses = new HashSet<ProjectExpense>();
+        ProjectEmployees = new HashSet<ProjectEmployee>();
     }
 
     public Guid Id { get; set; }
@@ -20,19 +21,21 @@ public class Project
     public ProjectStatus Status { get; set; }
 
     public DateTime StartDate { get; set; }
-   
+
     public DateTime? EndDate { get; set; }
     public string? Address { get; set; }
-   
+
     public string? Description { get; set; }
-   
+
     public bool IsAdditive { get; set; }
-   
+
     public Guid? OriginalProjectId { get; set; }
-   
+
     public ICollection<Contract> Contracts { get; set; }
-    
+
     public ICollection<ProjectExpense> Expenses { get; set; }
+    
+    public ICollection<ProjectEmployee> ProjectEmployees { get; set; }
     
 }
 

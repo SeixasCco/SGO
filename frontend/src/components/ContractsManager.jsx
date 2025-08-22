@@ -45,6 +45,7 @@ const ContractsManager = ({ projectId }) => {
             .then(() => {
                 alert("Contrato adicionado com sucesso!");
                 fetchContracts();
+                onContractAdded();
             })
             .catch(error => alert("Erro ao adicionar contrato."));
     };

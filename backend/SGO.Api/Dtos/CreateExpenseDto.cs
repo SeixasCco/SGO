@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace SGO.Api.Dtos
 {
@@ -7,6 +8,7 @@ namespace SGO.Api.Dtos
         public Guid ProjectId { get; set; }
         public Guid ContractId { get; set; }
         public string Description { get; set; } = default!;
+        [Range(0, double.MaxValue, ErrorMessage = "O valor da despesa não pode ser negativo.")]
         public decimal Amount { get; set; }
         public DateTime Date { get; set; }
         public string CostCenterName { get; set; } = default!;
@@ -14,5 +16,8 @@ namespace SGO.Api.Dtos
         public string? SupplierName { get; set; }
         public string? InvoiceNumber { get; set; }
         public string? AttachmentPath { get; set; }
+
+        [Range(0, int.MaxValue, ErrorMessage = "O número de pessoas não pode ser negativo.")]
+        public int? NumberOfPeople { get; set; }
     }
 }

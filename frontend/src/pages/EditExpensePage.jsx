@@ -48,9 +48,14 @@ const EditExpensePage = () => {
                 alert('Despesa atualizada com sucesso!');
                 navigate(`/project/${formData.projectId}`);
             })
-            .catch(err => {
+            .catch(err => {              
+                if (err.response && err.response.data && err.response.data.errors) {                   
+                    const errorMessages = Object.values(err.response.data.errors).flat();
+                    setError(errorMessages.join('\n'));
+                } else {                    
+                    setError('Falha ao atualizar a despesa. Verifique a conexão e os dados.');
+                }
                 console.error("Erro ao atualizar despesa:", err);
-                setError('Falha ao atualizar a despesa.');
             });
     };
 
@@ -69,7 +74,7 @@ const EditExpensePage = () => {
                 </div>
                 <div style={{ marginBottom: '10px' }}>
                     <label>Valor (R$): </label>
-                    <input type="number" step="0.01" name="amount" value={formData.amount} onChange={handleChange} required />
+                    <input type="number" step="0.01" name="amount" value={formData.amount} min="0" onChange={handleChange} required />
                 </div>
                 <div style={{ marginBottom: '10px' }}>
                     <label>Data: </label>

@@ -24,7 +24,9 @@ public class ProjectExpense
     public ExpenseStatus Status { get; set; }
     public DateTime? PaymentDate { get; set; }
     public string? AttachmentPath { get; set; }
+    public int? NumberOfPeople { get; set; }  
     public Project Project { get; set; } = default!;
     public Contract Contract { get; set; } = default!;
     public ICollection<ExpenseAttachment> Attachments { get; set; }
+    
 }

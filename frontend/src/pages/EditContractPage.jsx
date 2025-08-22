@@ -55,7 +55,7 @@ const EditContractPage = () => {
         </div>
         <div style={{ marginBottom: '10px' }}>
           <label>Valor Total (R$): </label>
-          <input type="number" step="0.01" name="totalValue" value={formData.totalValue} onChange={handleChange} />
+          <input type="number" step="0.01" name="totalValue"  min="0" value={formData.totalValue} onChange={handleChange} />
         </div>
         <button type="submit">Salvar Alterações</button>
       </form>

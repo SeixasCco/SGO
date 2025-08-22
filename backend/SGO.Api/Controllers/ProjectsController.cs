@@ -18,9 +18,27 @@ namespace SGO.Api.Controllers
         public ProjectsController(SgoDbContext context) { _context = context; }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Project>>> GetAllProjects()
+        public async Task<ActionResult<IEnumerable<ProjectSummaryDto>>> GetAllProjects()
         {
-            return await _context.Projects.ToListAsync();
+            var projects = await _context.Projects
+                .Include(p => p.Contracts)
+                .Include(p => p.Expenses)
+                .Include(p => p.ProjectEmployees) 
+                .Select(p => new ProjectSummaryDto
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Contractor = p.Contractor,
+                    City = p.City,
+                    State = p.State,
+                    CNO = p.CNO,
+                    TeamSize = p.ProjectEmployees.Count(),
+                    TotalContractsValue = p.Contracts.Sum(c => c.TotalValue),
+                    TotalExpensesValue = p.Expenses.Sum(e => e.Amount)
+                })
+                .ToListAsync();
+
+            return Ok(projects);
         }
 
 

@@ -14,10 +14,11 @@ public class SgoDbContext : DbContext
     public DbSet<ProjectExpense> ProjectExpenses { get; set; }
     public DbSet<CostCenter> CostCenters { get; set; }
     
-    public DbSet<Employee> Employees { get; set; }
+    public DbSet<Employee> Employees { get; set; }    
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity<ProjectEmployee>()
+            .HasKey(pe => new { pe.ProjectId, pe.EmployeeId });
     }
 }

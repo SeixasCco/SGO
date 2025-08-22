@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import AddExpenseForm from '../components/AddExpenseForm';
 import ContractsManager from '../components/ContractsManager';
+import TeamManager from '../components/TeamManager';
 
 const WorkDetails = () => {
     const { id } = useParams();
@@ -55,8 +56,11 @@ const WorkDetails = () => {
             <Link to="/">&larr; Voltar para a lista de obras</Link>
             <h1>Detalhes: {project.contractor} - {project.name}</h1>
             <p><strong>CNO:</strong> {project.cno}</p>
-
-            <ContractsManager projectId={project.id} />
+            <ContractsManager
+                projectId={project.id}
+                onContractAdded={fetchProjectDetails} 
+            />
+            <TeamManager projectId={project.id} />
             <hr />
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -85,6 +89,7 @@ const WorkDetails = () => {
                             <th>Data</th>
                             <th>Descrição</th>
                             <th>Centro de Custo</th>
+                            <th>Nº Pessoas</th>
                             <th>Valor</th>
                             <th>Anexo</th>
                             <th>Ações</th>
@@ -95,6 +100,7 @@ const WorkDetails = () => {
                             <tr key={expense.id}>
                                 <td>{new Date(expense.date).toLocaleDateString()}</td>
                                 <td>{expense.description}</td>
+                                <td>{expense.numberOfPeople}</td>
                                 <td>{expense.costCenterName}</td>
                                 <td>R$ {expense.amount.toFixed(2)}</td>
                                 <td>

@@ -101,5 +101,20 @@ namespace SGO.Api.Controllers
             return Ok(employee);
         }
 
+        [HttpGet("available")]
+        public async Task<ActionResult<IEnumerable<Employee>>> GetAvailableEmployees()
+        {            
+            var assignedEmployeeIds = await _context.Set<ProjectEmployee>()
+                                                    .Select(pe => pe.EmployeeId)
+                                                    .Distinct()
+                                                    .ToListAsync();
+           
+            var availableEmployees = await _context.Employees
+                                                   .Where(e => !assignedEmployeeIds.Contains(e.Id))
+                                                   .ToListAsync();
+
+            return Ok(availableEmployees);
+        }
+
     }
 }
