@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SGO.Infrastructure;
@@ -11,9 +12,11 @@ using SGO.Infrastructure;
 namespace SGO.Infrastructure.Migrations
 {
     [DbContext(typeof(SgoDbContext))]
-    partial class SgoDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250822133040_AddDatesToProjectEmployee")]
+    partial class AddDatesToProjectEmployee
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -227,8 +230,7 @@ namespace SGO.Infrastructure.Migrations
 
             modelBuilder.Entity("SGO.Core.ProjectEmployee", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<Guid>("ProjectId")
                         .HasColumnType("uuid");
 
                     b.Property<Guid>("EmployeeId")
@@ -237,19 +239,14 @@ namespace SGO.Infrastructure.Migrations
                     b.Property<DateTime?>("EndDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid>("ProjectId")
-                        .HasColumnType("uuid");
-
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.HasKey("Id");
+                    b.HasKey("ProjectId", "EmployeeId");
 
                     b.HasIndex("EmployeeId");
 
-                    b.HasIndex("ProjectId");
-
-                    b.ToTable("ProjectEmployees");
+                    b.ToTable("ProjectEmployee");
                 });
 
             modelBuilder.Entity("SGO.Core.ProjectExpense", b =>

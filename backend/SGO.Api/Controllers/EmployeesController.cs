@@ -60,23 +60,24 @@ namespace SGO.Api.Controllers
         public async Task<ActionResult<IEnumerable<EmployeeDto>>> GetAvailableEmployees()
         {
             var assignedEmployeeIds = await _context.Set<ProjectEmployee>()
+                                                    .Where(pe => pe.EndDate == null)
                                                     .Select(pe => pe.EmployeeId)
                                                     .Distinct()
                                                     .ToListAsync();
 
             return await _context.Employees
-                                .Where(e => !assignedEmployeeIds.Contains(e.Id))
-                                .Select(e => new EmployeeDto
-                                {
-                                    Id = e.Id,
-                                    Name = e.Name,
-                                    Position = e.Position,
-                                    Salary = e.Salary,
-                                    StartDate = e.StartDate,
-                                    EndDate = e.EndDate,
-                                    IsActive = e.IsActive
-                                })
-                                .ToListAsync();
+                               .Where(e => !assignedEmployeeIds.Contains(e.Id))
+                               .Select(e => new EmployeeDto 
+                               {
+                                   Id = e.Id,
+                                   Name = e.Name,
+                                   Position = e.Position,
+                                   Salary = e.Salary,
+                                   StartDate = e.StartDate,
+                                   EndDate = e.EndDate,
+                                   IsActive = e.IsActive
+                               })
+                               .ToListAsync();
         }
 
         // POST: api/employees

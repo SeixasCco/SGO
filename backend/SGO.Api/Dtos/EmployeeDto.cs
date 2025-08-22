@@ -3,8 +3,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace SGO.Api.Dtos
-{
-    // DTO para exibir um funcionário
+{   
     public class EmployeeDto
     {
         public Guid Id { get; set; }
@@ -15,8 +14,7 @@ namespace SGO.Api.Dtos
         public DateTime? EndDate { get; set; }
         public bool IsActive { get; set; }
     }
-
-    // DTO para criar um novo funcionário
+   
     public class CreateEmployeeDto
     {
         [Required]
@@ -28,8 +26,7 @@ namespace SGO.Api.Dtos
         public DateTime StartDate { get; set; }
         public DateTime? EndDate { get; set; }
     }
-
-    // DTO para atualizar um funcionário existente
+   
     public class UpdateEmployeeDto
     {
         [Required]
@@ -47,5 +44,10 @@ namespace SGO.Api.Dtos
     {
         public Guid EmployeeId { get; set; }
         public string EmployeeName { get; set; } = string.Empty;
+    }
+
+    public class AddTeamMemberDto
+    {
+        public DateTime StartDate { get; set; }
     }
 }

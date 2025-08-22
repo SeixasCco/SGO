@@ -22,7 +22,7 @@ namespace SGO.Api.Controllers
         public async Task<ActionResult<IEnumerable<ProjectSummaryDto>>> GetAllProjects([FromQuery] ProjectFilterDto filters)
         {
             var query = _context.Projects.AsQueryable();
-            
+
             if (!string.IsNullOrEmpty(filters.City))
             {
                 query = query.Where(p => p.City.Contains(filters.City));
@@ -42,29 +42,45 @@ namespace SGO.Api.Controllers
             {
                 query = query.Where(p => p.EndDate <= filters.EndDate.Value.ToUniversalTime());
             }
+            var projectsData = await query
+                    .Select(p => new
+                    {
+                        Project = p,
+                        Contracts = p.Contracts,
+                        Expenses = p.Expenses,
+                        Allocations = p.ProjectEmployees.Select(pe => new
+                        {
+                            pe.StartDate,
+                            pe.EndDate,
+                            pe.Employee.Salary
+                        })
+                    })
+                    .ToListAsync();
+            var projectSummaries = projectsData.Select(data =>
+    {        
+        var laborCost = data.Allocations
+            .Where(a => a.StartDate > DateTime.MinValue)
+            .Sum(a => (a.Salary / 30) * (decimal)((a.EndDate ?? DateTime.UtcNow) - a.StartDate).TotalDays);
 
-            var projects = await query
-                .Include(p => p.Contracts)
-                .Include(p => p.Expenses)
-                .Include(p => p.ProjectEmployees)
-                .Select(p => new ProjectSummaryDto
-                {
-                    Id = p.Id,
-                    Name = p.Name,
-                    Contractor = p.Contractor,
-                    City = p.City,
-                    State = p.State,
-                    CNO = p.CNO,
-                    TeamSize = p.ProjectEmployees.Count(),
-                    TotalContractsValue = p.Contracts.Sum(c => c.TotalValue),
-                    TotalExpensesValue = p.Expenses.Sum(e => e.Amount)
-                })
-                .ToListAsync();
+        return new ProjectSummaryDto
+        {
+            Id = data.Project.Id,
+            Name = data.Project.Name,
+            Contractor = data.Project.Contractor,
+            City = data.Project.City,
+            State = data.Project.State,
+            CNO = data.Project.CNO,
+            TeamSize = data.Allocations.Count(a => a.EndDate == null),
+            TotalContractsValue = data.Contracts.Sum(c => c.TotalValue),
+                       TotalExpensesValue = (data.Expenses.Sum(e => (decimal?)e.Amount) ?? 0) + Math.Round(laborCost, 2)
+        };
+    });
 
-            return Ok(projects);
+            return Ok(projectSummaries);
+
         }
 
-
+        // GET: api/projects/{id}
         [HttpGet("{id}")]
         public async Task<ActionResult<ProjectDetailsDto>> GetProjectById(Guid id)
         {
@@ -112,11 +128,25 @@ namespace SGO.Api.Controllers
             return Ok(projectDto);
         }
 
+        // Em SGO.Api/Controllers/ProjectsController.cs
+
         [HttpPost]
-        public async Task<ActionResult<Project>> CreateProject(Project project)
+        public async Task<ActionResult<Project>> CreateProject([FromBody] CreateProjectDto projectDto)
         {
-            project.Id = Guid.NewGuid();
-            project.StartDate = DateTime.UtcNow;
+            var project = new Project
+            {
+                Id = Guid.NewGuid(),
+                CNO = projectDto.CNO,
+                Name = projectDto.Name,
+                Contractor = projectDto.Contractor,
+                ServiceTaker = projectDto.ServiceTaker,
+                Responsible = projectDto.Responsible,
+                City = projectDto.City,
+                State = projectDto.State,
+                StartDate = projectDto.StartDate.ToUniversalTime(),
+                EndDate = projectDto.EndDate?.ToUniversalTime(),
+                Status = ProjectStatus.Active
+            };
 
             _context.Projects.Add(project);
             await _context.SaveChangesAsync();

@@ -91,5 +91,18 @@ public class ProjectSummaryDto
     public string CNO { get; set; } = string.Empty;
     public int TeamSize { get; set; }
     public decimal TotalContractsValue { get; set; }
-    public decimal TotalExpensesValue { get; set; }
+    public decimal TotalExpensesValue { get; set; }   
+}
+
+public class CreateProjectDto
+{
+    public string CNO { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public string Contractor { get; set; } = string.Empty;
+    public string ServiceTaker { get; set; } = string.Empty;
+    public string Responsible { get; set; } = string.Empty;
+    public string City { get; set; } = string.Empty;
+    public string State { get; set; } = string.Empty;
+    public DateTime StartDate { get; set; }
+    public DateTime? EndDate { get; set; }
 }

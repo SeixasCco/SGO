@@ -28,15 +28,32 @@ const AddWorkForm = ({ onWorkAdded }) => {
     setError('');
     setSubmitting(true);
 
+    const projectDto = {
+      cno: formData.cno,
+      name: formData.name,
+      contractor: formData.contractor,
+      serviceTaker: formData.serviceTaker,
+      responsible: formData.responsible,
+      city: formData.city,
+      state: formData.state,
+      startDate: formData.startDate,     
+      endDate: formData.endDate || null, 
+    };
+
     const newWork = {
       ...formData,
       status: 2,
     };
 
-    axios.post('http://localhost:5145/api/projects', newWork)
+    axios.post('http://localhost:5145/api/projects', projectDto)
       .then(response => {
         alert('Obra cadastrada com sucesso!');
-        setFormData({ cno: '', name: '', contractor: '', city: '', state: '' }); 
+        setFormData({ 
+          cno: '', name: '', contractor: '', city: '', state: '',
+          responsible: '', serviceTaker: '',
+          startDate: new Date().toISOString().split('T')[0],
+          endDate: '',
+        });
         onWorkAdded(); 
       })
       .catch(err => {

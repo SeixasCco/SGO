@@ -1,3 +1,4 @@
+// Em SGO.Api/Controllers/ProjectTeamsController.cs
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SGO.Api.Dtos;
@@ -24,56 +25,63 @@ namespace SGO.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> GetTeam(Guid projectId)
         {
-            var teamMembers = await _context.Set<ProjectEmployee>()
+            var teamAllocations = await _context.ProjectEmployees // Agora buscamos na tabela correta
                 .Where(pe => pe.ProjectId == projectId)
                 .Include(pe => pe.Employee)
-                .Select(pe => new TeamMemberDto
+                .Select(pe => new
                 {
+                    AllocationId = pe.Id, // <-- Retornamos o ID da Alocação
                     EmployeeId = pe.EmployeeId,
-                    EmployeeName = pe.Employee.Name
+                    EmployeeName = pe.Employee.Name,
+                    StartDate = pe.StartDate,
+                    EndDate = pe.EndDate // <-- E a data de fim
                 })
+                .OrderBy(t => t.StartDate)
                 .ToListAsync();
 
-            return Ok(teamMembers);
+            return Ok(teamAllocations);
         }
 
         // POST: api/projects/{projectId}/team/{employeeId}
         [HttpPost("{employeeId}")]
-        public async Task<IActionResult> AddTeamMember(Guid projectId, Guid employeeId)
+        public async Task<IActionResult> AddTeamMember(Guid projectId, Guid employeeId, [FromBody] AddTeamMemberDto dto)
         {
-            var existingLink = await _context.Set<ProjectEmployee>()
-                .FindAsync(projectId, employeeId);
+            var existingAllocation = await _context.ProjectEmployees
+                .FirstOrDefaultAsync(pe => pe.ProjectId == projectId && pe.EmployeeId == employeeId && pe.EndDate == null);
 
-            if (existingLink != null)
+            if (existingAllocation != null)
             {
-                return Ok(); 
+                return BadRequest("Este funcionário já está ativo nesta obra.");
             }
 
-            var projectEmployee = new ProjectEmployee
+            var newAllocation = new ProjectEmployee
             {
+                Id = Guid.NewGuid(),
                 ProjectId = projectId,
-                EmployeeId = employeeId
+                EmployeeId = employeeId,
+                StartDate = dto.StartDate.ToUniversalTime() // <-- Usa a data do DTO
             };
 
-            _context.Set<ProjectEmployee>().Add(projectEmployee);
+            _context.ProjectEmployees.Add(newAllocation);
             await _context.SaveChangesAsync();
 
             return Ok();
         }
 
-        // DELETE: api/projects/{projectId}/team/{employeeId}
-        [HttpDelete("{employeeId}")]
-        public async Task<IActionResult> RemoveTeamMember(Guid projectId, Guid employeeId)
+        // PUT: api/projects/{projectId}/team/{allocationId}/end
+        // Usamos PUT para a ação de "dar baixa", que é uma atualização
+        [HttpPut("{allocationId}/end")]
+        public async Task<IActionResult> EndTeamMemberAllocation(Guid projectId, Guid allocationId)
         {
-            var projectEmployee = await _context.Set<ProjectEmployee>()
-                .FindAsync(projectId, employeeId);
+            var allocation = await _context.ProjectEmployees
+                .FirstOrDefaultAsync(pe => pe.Id == allocationId && pe.ProjectId == projectId);
 
-            if (projectEmployee == null)
+            if (allocation == null)
             {
                 return NotFound();
             }
 
-            _context.Set<ProjectEmployee>().Remove(projectEmployee);
+            allocation.EndDate = DateTime.UtcNow;
             await _context.SaveChangesAsync();
 
             return NoContent();
