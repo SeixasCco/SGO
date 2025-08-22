@@ -59,21 +59,29 @@ namespace SGO.Api.Controllers
                 CNO = project.CNO,
                 Name = project.Name,
                 Contractor = project.Contractor,
+                ServiceTaker = project.ServiceTaker,
+                Responsible = project.Responsible,
                 City = project.City,
                 State = project.State,
+                StartDate = project.StartDate,
+                Address = project.Address,
+                Description = project.Description,
+                Status = (int)project.Status,
+                EndDate = project.EndDate,
                 Contracts = project.Contracts.Select(c => new ContractDto
                 {
                     Id = c.Id,
                     ContractNumber = c.ContractNumber,
                     TotalValue = c.TotalValue
                 }).ToList(),
+
                 Expenses = project.Expenses.Select(e => new ExpenseDto
                 {
                     Id = e.Id,
                     Date = e.Date,
                     Description = e.Description,
                     Amount = e.Amount,
-                    CostCenterName = e.CostCenter?.Name ?? "N/A",
+                    CostCenterName = e.CostCenter != null ? e.CostCenter.Name : "N/A",
                     AttachmentPath = e.AttachmentPath
                 }).ToList()
             };

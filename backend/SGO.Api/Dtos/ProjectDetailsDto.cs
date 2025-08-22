@@ -30,14 +30,27 @@ public class ContractDto
     public decimal TotalValue { get; set; }
 }
 
-public class ExpenseDto
+public class UpdateContractDto
+{
+    public string ContractNumber { get; set; } = string.Empty;
+    public string Title { get; set; } = string.Empty;
+
+    [Range(0, double.MaxValue, ErrorMessage = "O valor total do contrato não pode ser negativo.")]
+    public decimal TotalValue { get; set; }
+   
+    public DateTime StartDate { get; set; }
+    public DateTime? EndDate { get; set; }
+    public string? Observations { get; set; }
+}
+
+public class ContractSummaryDto
 {
     public Guid Id { get; set; }
-    public DateTime Date { get; set; }
-    public string Description { get; set; } = string.Empty;
-    public decimal Amount { get; set; }
-    public string CostCenterName { get; set; } = string.Empty;
-    public string? AttachmentPath { get; set; }
+    public string ContractNumber { get; set; } = string.Empty;
+    public decimal TotalValue { get; set; }
+    public DateTime StartDate { get; set; }
+    public DateTime? EndDate { get; set; }
+    
 }
 
 public class UpdateProjectDto
@@ -53,16 +66,20 @@ public class UpdateProjectDto
     public string? Address { get; set; }
     public string? Description { get; set; }
     public int Status { get; set; }
-     public DateTime StartDate { get; set; } // NOVO CAMPO
-    public DateTime? EndDate { get; set; }  
+    public DateTime StartDate { get; set; }
+    public DateTime? EndDate { get; set; }
 }
 
-public class UpdateContractDto
+public class ExpenseDto
 {
-    public string ContractNumber { get; set; } = string.Empty;
-    public string Title { get; set; } = string.Empty;
-    public decimal TotalValue { get; set; }
+    public Guid Id { get; set; }
+    public DateTime Date { get; set; }
+    public string Description { get; set; } = string.Empty;
+    public decimal Amount { get; set; }
+    public string CostCenterName { get; set; } = string.Empty;
+    public string? AttachmentPath { get; set; }
 }
+
 
 public class ProjectSummaryDto
 {

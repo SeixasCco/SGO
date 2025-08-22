@@ -20,6 +20,7 @@ public class Contract
     public DateTime StartDate { get; set; }
     public DateTime? EndDate { get; set; }
     public DateTime? SignedDate { get; set; }
+    public string? Observations { get; set; } 
     public Project Project { get; set; } = default!;
     public ICollection<ProjectExpense> Expenses { get; set; }
     public ICollection<ContractInvoice> Invoices { get; set; }

@@ -23,42 +23,51 @@ namespace SGO.Api.Controllers
 
         // GET: api/contracts/byproject/{projectId}
         [HttpGet("byproject/{projectId}")]
-        public async Task<ActionResult<IEnumerable<Contract>>> GetContractsByProject(Guid projectId)
+        public async Task<ActionResult<IEnumerable<ContractSummaryDto>>> GetContractsByProject(Guid projectId)
         {
-            return await _context.Contracts
-                                 .Where(c => c.ProjectId == projectId)
-                                 .ToListAsync();
+            var contracts = await _context.Contracts
+                .Where(c => c.ProjectId == projectId)
+                .Select(c => new ContractSummaryDto
+                {
+                    Id = c.Id,
+                    ContractNumber = c.ContractNumber,                    
+                    TotalValue = c.TotalValue,
+                    StartDate = c.StartDate,
+                    EndDate = c.EndDate
+                })
+                .ToListAsync();
+            return Ok(contracts);
+        }
+
+        // GET: api/contracts/{id}
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Contract>> GetContractById(Guid id)
+        {
+            var contract = await _context.Contracts.FindAsync(id);
+            if (contract == null)
+            {
+                return NotFound();
+            }
+            return Ok(contract);
         }
 
         // POST: api/contracts
-        // POST: api/contracts
         [HttpPost]
         public async Task<ActionResult<Contract>> CreateContract([FromBody] CreateContractDto contractDto)
-        {            
-            var contractNumberTrimmed = contractDto.ContractNumber.Trim();
-
-            var existingContract = await _context.Contracts
-                .FirstOrDefaultAsync(c => c.ProjectId == contractDto.ProjectId && c.ContractNumber.Equals(contractNumberTrimmed));
-
-            if (existingContract != null)
-            {
-                return BadRequest("Já existe um contrato com este número para esta obra.");
-            }
-
+        {
             var newContract = new Contract
             {
                 Id = Guid.NewGuid(),
                 ProjectId = contractDto.ProjectId,
-                ContractNumber = contractNumberTrimmed, 
+                ContractNumber = contractDto.ContractNumber.Trim(),
                 Title = contractDto.Title,
                 TotalValue = contractDto.TotalValue,
-                Status = ContractStatus.Active,
-                StartDate = DateTime.UtcNow
+                StartDate = contractDto.StartDate.ToUniversalTime(),
+                EndDate = contractDto.EndDate?.ToUniversalTime(),
+                Status = ContractStatus.Active
             };
-
             _context.Contracts.Add(newContract);
             await _context.SaveChangesAsync();
-
             return Ok(newContract);
         }
 
@@ -75,29 +84,12 @@ namespace SGO.Api.Controllers
             contract.ContractNumber = contractDto.ContractNumber;
             contract.Title = contractDto.Title;
             contract.TotalValue = contractDto.TotalValue;
+            contract.StartDate = contractDto.StartDate.ToUniversalTime();
+            contract.EndDate = contractDto.EndDate?.ToUniversalTime();
+            contract.Observations = contractDto.Observations;
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!_context.Contracts.Any(e => e.Id == id)) { return NotFound(); } else { throw; }
-            }
-
+            await _context.SaveChangesAsync();
             return NoContent();
-        }
-
-        // GET: api/contracts/{id}
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Contract>> GetContractById(Guid id)
-        {
-            var contract = await _context.Contracts.FindAsync(id);
-            if (contract == null)
-            {
-                return NotFound();
-            }
-            return Ok(contract);
         }
 
         // DELETE: api/contracts/{id}
@@ -109,10 +101,8 @@ namespace SGO.Api.Controllers
             {
                 return NotFound();
             }
-
             _context.Contracts.Remove(contract);
             await _context.SaveChangesAsync();
-
             return NoContent();
         }
     }

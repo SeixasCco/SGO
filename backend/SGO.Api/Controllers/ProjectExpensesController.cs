@@ -62,8 +62,7 @@ namespace SGO.Api.Controllers
                 Observations = expenseDto.Observations,
                 SupplierName = expenseDto.SupplierName,
                 InvoiceNumber = expenseDto.InvoiceNumber,
-                AttachmentPath = expenseDto.AttachmentPath,
-                NumberOfPeople = expenseDto.NumberOfPeople, 
+                AttachmentPath = expenseDto.AttachmentPath,               
                 CostCenter = costCenter
             };
 
@@ -90,8 +89,7 @@ namespace SGO.Api.Controllers
            
             expense.Description = expenseDto.Description;
             expense.Amount = expenseDto.Amount;
-            expense.Date = expenseDto.Date.ToUniversalTime();  
-            expense.NumberOfPeople = expenseDto.NumberOfPeople;         
+            expense.Date = expenseDto.Date.ToUniversalTime();                   
 
             try
             {

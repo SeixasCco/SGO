@@ -20,8 +20,7 @@ builder.Services.AddCors(options =>
 var connectionString = builder.Configuration.GetConnectionString("SgoDbConnection");
 
 builder.Services.AddDbContext<SgoDbContext>(options =>
-    options.UseNpgsql(connectionString, 
-        // Adiciona a configuração para usar Split Queries
+    options.UseNpgsql(connectionString,        
         o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery))
 );
 
