@@ -17,10 +17,33 @@ namespace SGO.Api.Controllers
         private readonly SgoDbContext _context;
         public ProjectsController(SgoDbContext context) { _context = context; }
 
+        // GET: api/projects
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ProjectSummaryDto>>> GetAllProjects()
+        public async Task<ActionResult<IEnumerable<ProjectSummaryDto>>> GetAllProjects([FromQuery] ProjectFilterDto filters)
         {
-            var projects = await _context.Projects
+            var query = _context.Projects.AsQueryable();
+            
+            if (!string.IsNullOrEmpty(filters.City))
+            {
+                query = query.Where(p => p.City.Contains(filters.City));
+            }
+
+            if (!string.IsNullOrEmpty(filters.ServiceTaker))
+            {
+                query = query.Where(p => p.ServiceTaker.Contains(filters.ServiceTaker));
+            }
+
+            if (filters.StartDate.HasValue)
+            {
+                query = query.Where(p => p.StartDate >= filters.StartDate.Value.ToUniversalTime());
+            }
+
+            if (filters.EndDate.HasValue)
+            {
+                query = query.Where(p => p.EndDate <= filters.EndDate.Value.ToUniversalTime());
+            }
+
+            var projects = await query
                 .Include(p => p.Contracts)
                 .Include(p => p.Expenses)
                 .Include(p => p.ProjectEmployees)
