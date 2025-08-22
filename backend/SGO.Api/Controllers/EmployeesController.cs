@@ -23,7 +23,7 @@ namespace SGO.Api.Controllers
         public async Task<ActionResult<IEnumerable<EmployeeDto>>> GetEmployees()
         {
             return await _context.Employees
-                .Select(e => new EmployeeDto 
+                .Select(e => new EmployeeDto
                 {
                     Id = e.Id,
                     Name = e.Name,
@@ -37,7 +37,7 @@ namespace SGO.Api.Controllers
         }
 
         // GET: api/employees/{id}
-        [HttpGet("{id}")]
+        [HttpGet("{id:guid}")]
         public async Task<ActionResult<EmployeeDto>> GetEmployeeById(Guid id)
         {
             var employee = await _context.Employees.FindAsync(id);
@@ -56,6 +56,29 @@ namespace SGO.Api.Controllers
             return Ok(employeeDto);
         }
 
+        [HttpGet("available")]
+        public async Task<ActionResult<IEnumerable<EmployeeDto>>> GetAvailableEmployees()
+        {
+            var assignedEmployeeIds = await _context.Set<ProjectEmployee>()
+                                                    .Select(pe => pe.EmployeeId)
+                                                    .Distinct()
+                                                    .ToListAsync();
+
+            return await _context.Employees
+                                .Where(e => !assignedEmployeeIds.Contains(e.Id))
+                                .Select(e => new EmployeeDto
+                                {
+                                    Id = e.Id,
+                                    Name = e.Name,
+                                    Position = e.Position,
+                                    Salary = e.Salary,
+                                    StartDate = e.StartDate,
+                                    EndDate = e.EndDate,
+                                    IsActive = e.IsActive
+                                })
+                                .ToListAsync();
+        }
+
         // POST: api/employees
         [HttpPost]
         public async Task<ActionResult<EmployeeDto>> CreateEmployee(CreateEmployeeDto employeeDto)
@@ -68,11 +91,11 @@ namespace SGO.Api.Controllers
                 Salary = employeeDto.Salary,
                 StartDate = employeeDto.StartDate.ToUniversalTime(),
                 EndDate = employeeDto.EndDate?.ToUniversalTime(),
-                IsActive = true 
+                IsActive = true
             };
             _context.Employees.Add(employee);
-await _context.SaveChangesAsync();
-            
+            await _context.SaveChangesAsync();
+
             var resultDto = new EmployeeDto { Id = employee.Id, Name = employee.Name, /*...*/ };
             return CreatedAtAction(nameof(GetEmployeeById), new { id = employee.Id }, resultDto);
         }
@@ -96,7 +119,7 @@ await _context.SaveChangesAsync();
         }
 
         // DELETE: api/employees/{id}
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:guid}")]
         public async Task<IActionResult> DeleteEmployee(Guid id)
         {
             var employee = await _context.Employees.FindAsync(id);
