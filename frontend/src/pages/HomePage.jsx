@@ -159,7 +159,7 @@ const HomePage = () => {
                             color: '#0f172a',
                             margin: '0 0 8px 0'
                         }}>
-                            📊 Dashboard Executivo
+                            📊 Dashboard 
                         </h1>
                         <p style={{
                             fontSize: '1.25rem',

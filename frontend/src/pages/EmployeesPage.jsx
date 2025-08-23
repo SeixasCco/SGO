@@ -203,7 +203,8 @@ const EmployeesPage = () => {
                   borderRadius: '8px',
                   fontSize: '1rem',
                   transition: 'border-color 0.2s ease',
-                  boxSizing: 'border-box'
+                  boxSizing: 'border-box',
+                  color: '#000000',
                 }}
                 onFocus={(e) => e.target.style.borderColor = '#3b82f6'}
                 onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
@@ -236,7 +237,8 @@ const EmployeesPage = () => {
                   fontSize: '1rem',
                   transition: 'border-color 0.2s ease',
                   backgroundColor: '#dcdedfff',
-                  boxSizing: 'border-box'
+                  boxSizing: 'border-box',
+                  color: '#000000',
                 }}
                 onFocus={(e) => e.target.style.borderColor = '#3b82f6'}
                 onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
@@ -271,7 +273,8 @@ const EmployeesPage = () => {
                   backgroundColor: '#dcdedfff',
                   fontSize: '1rem',
                   transition: 'border-color 0.2s ease',
-                  boxSizing: 'border-box'
+                  boxSizing: 'border-box',
+                  color: '#000000',
                 }}
                 onFocus={(e) => e.target.style.borderColor = '#3b82f6'}
                 onBlur={(e) => e.target.style.borderColor = '#d1d5db'}

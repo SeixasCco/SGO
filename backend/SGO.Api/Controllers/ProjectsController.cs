@@ -43,6 +43,11 @@ namespace SGO.Api.Controllers
                 query = query.Where(p => p.EndDate <= filters.EndDate.Value.ToUniversalTime());
             }
 
+            if (filters.Status.HasValue)
+            {
+                query = query.Where(p => (int)p.Status == filters.Status.Value);
+            }
+
             var projectsData = await query
                 .Select(p => new
                 {
@@ -71,7 +76,7 @@ namespace SGO.Api.Controllers
                     Contractor = data.Project.Contractor,
                     City = data.Project.City,
                     State = data.Project.State,
-                    CNO = data.Project.CNO,                    
+                    CNO = data.Project.CNO,
                     Responsible = data.Project.Responsible,
                     Status = (int)data.Project.Status,
                     StatusText = GetStatusText(data.Project.Status),
@@ -83,7 +88,7 @@ namespace SGO.Api.Controllers
             });
 
             return Ok(projectSummaries);
-        }      
+        }
         private static string GetStatusText(ProjectStatus status)
         {
             return status switch
