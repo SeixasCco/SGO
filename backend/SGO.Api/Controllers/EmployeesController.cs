@@ -1,4 +1,5 @@
-// Em SGO.Api/Controllers/EmployeesController.cs
+// ✅ ARQUIVO: backend/SGO.Api/Controllers/EmployeesController.cs (CORRIGIDO)
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SGO.Api.Dtos;
@@ -29,8 +30,7 @@ namespace SGO.Api.Controllers
                     Name = e.Name,
                     Position = e.Position,
                     Salary = e.Salary,
-                    StartDate = e.StartDate,
-                    EndDate = e.EndDate,
+                    // ✅ REMOVIDO: StartDate e EndDate não existem em Employee
                     IsActive = e.IsActive
                 })
                 .ToListAsync();
@@ -49,32 +49,32 @@ namespace SGO.Api.Controllers
                 Name = employee.Name,
                 Position = employee.Position,
                 Salary = employee.Salary,
-                StartDate = employee.StartDate,
-                EndDate = employee.EndDate,
+                // ✅ REMOVIDO: StartDate e EndDate não existem em Employee
                 IsActive = employee.IsActive
             };
             return Ok(employeeDto);
         }
 
+        // GET: api/employees/available
         [HttpGet("available")]
         public async Task<ActionResult<IEnumerable<EmployeeDto>>> GetAvailableEmployees()
         {
-            var assignedEmployeeIds = await _context.Set<ProjectEmployee>()
-                                                    .Where(pe => pe.EndDate == null)
+            // ✅ CORRIGIDO: Buscar funcionários que não estão alocados atualmente
+            var assignedEmployeeIds = await _context.ProjectEmployees
+                                                    .Where(pe => pe.EndDate == null) // Ainda alocados
                                                     .Select(pe => pe.EmployeeId)
                                                     .Distinct()
                                                     .ToListAsync();
 
             return await _context.Employees
-                               .Where(e => !assignedEmployeeIds.Contains(e.Id))
+                               .Where(e => e.IsActive && !assignedEmployeeIds.Contains(e.Id))
                                .Select(e => new EmployeeDto 
                                {
                                    Id = e.Id,
                                    Name = e.Name,
                                    Position = e.Position,
                                    Salary = e.Salary,
-                                   StartDate = e.StartDate,
-                                   EndDate = e.EndDate,
+                                   // ✅ REMOVIDO: StartDate e EndDate não existem em Employee
                                    IsActive = e.IsActive
                                })
                                .ToListAsync();
@@ -90,14 +90,20 @@ namespace SGO.Api.Controllers
                 Name = employeeDto.Name,
                 Position = employeeDto.Position,
                 Salary = employeeDto.Salary,
-                StartDate = employeeDto.StartDate.ToUniversalTime(),
-                EndDate = employeeDto.EndDate?.ToUniversalTime(),
+                // ✅ REMOVIDO: StartDate e EndDate não existem em Employee
                 IsActive = true
             };
             _context.Employees.Add(employee);
             await _context.SaveChangesAsync();
 
-            var resultDto = new EmployeeDto { Id = employee.Id, Name = employee.Name, /*...*/ };
+            var resultDto = new EmployeeDto 
+            { 
+                Id = employee.Id, 
+                Name = employee.Name,
+                Position = employee.Position,
+                Salary = employee.Salary,
+                IsActive = employee.IsActive
+            };
             return CreatedAtAction(nameof(GetEmployeeById), new { id = employee.Id }, resultDto);
         }
 
@@ -111,8 +117,7 @@ namespace SGO.Api.Controllers
             employee.Name = employeeDto.Name;
             employee.Position = employeeDto.Position;
             employee.Salary = employeeDto.Salary;
-            employee.StartDate = employeeDto.StartDate.ToUniversalTime();
-            employee.EndDate = employeeDto.EndDate?.ToUniversalTime();
+            // ✅ REMOVIDO: StartDate e EndDate não existem em Employee
             employee.IsActive = employeeDto.IsActive;
 
             await _context.SaveChangesAsync();
@@ -125,6 +130,16 @@ namespace SGO.Api.Controllers
         {
             var employee = await _context.Employees.FindAsync(id);
             if (employee == null) return NotFound();
+            
+            // ✅ VERIFICAR SE TEM ALOCAÇÕES ATIVAS ANTES DE DELETAR
+            var hasActiveAllocations = await _context.ProjectEmployees
+                .AnyAsync(pe => pe.EmployeeId == id && pe.EndDate == null);
+            
+            if (hasActiveAllocations)
+            {
+                return BadRequest("Não é possível deletar funcionário com alocações ativas.");
+            }
+            
             _context.Employees.Remove(employee);
             await _context.SaveChangesAsync();
             return NoContent();
