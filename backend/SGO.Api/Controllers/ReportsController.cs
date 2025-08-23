@@ -26,13 +26,13 @@ namespace SGO.Api.Controllers
 
             if (filters.StartDate.HasValue)
                 query = query.Where(e => e.Date >= filters.StartDate.Value.ToUniversalTime());
-            
+
             if (filters.EndDate.HasValue)
                 query = query.Where(e => e.Date <= filters.EndDate.Value.ToUniversalTime());
 
             if (filters.ProjectIds != null && filters.ProjectIds.Any())
                 query = query.Where(e => filters.ProjectIds.Contains(e.ProjectId));
-            
+
             return query;
         }
 
@@ -47,7 +47,7 @@ namespace SGO.Api.Controllers
                 .Include(e => e.CostCenter)
                 .OrderBy(e => e.Date)
                 .ToListAsync();
-            
+
             var detailedList = filteredExpenses.Select(e => new ExpenseReportItemDto
             {
                 Date = e.Date,
@@ -79,17 +79,18 @@ namespace SGO.Api.Controllers
         }
 
         // GET: api/reports/expenses/export (Endpoint para o Excel)
-        [HttpGet("expenses/export")]
-        [Obsolete]
+        [HttpGet("expenses/excel")]
         public async Task<IActionResult> ExportExpensesReport([FromQuery] ExpenseReportFilterDto filters)
         {
+            ExcelPackage.License.SetNonCommercialPersonal("Raul Zamban");
+
             var query = GetFilteredExpensesQuery(filters);
-            
+
             var expensesForExport = await query
                 .Include(e => e.Project)
                 .Include(e => e.CostCenter)
                 .OrderBy(e => e.Date)
-                .Select(e => new // Usamos um tipo anônimo para a exportação
+                .Select(e => new
                 {
                     Data = e.Date.ToString("dd/MM/yyyy"),
                     Obra = e.Project.Name,
@@ -100,20 +101,17 @@ namespace SGO.Api.Controllers
                 })
                 .ToListAsync();
 
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-
             using (var package = new ExcelPackage())
             {
                 var worksheet = package.Workbook.Worksheets.Add("Relatorio de Despesas");
                 worksheet.Cells.LoadFromCollection(expensesForExport, true);
 
                 worksheet.Cells[worksheet.Dimension.Address].AutoFitColumns();
-                worksheet.Column(5).Style.Numberformat.Format = "R$ #,##0.00"; // Formata a coluna de Valor
+                worksheet.Column(5).Style.Numberformat.Format = "R$ #,##0.00";
 
-                // Cria o hiperlink na coluna "Anexo"
-                for(int i = 2; i <= expensesForExport.Count + 1; i++)
+                for (int i = 2; i <= expensesForExport.Count + 1; i++)
                 {
-                    var linkCell = worksheet.Cells[i, 6]; // Coluna 6 é "Anexo"
+                    var linkCell = worksheet.Cells[i, 6];
                     if (!string.IsNullOrEmpty(linkCell.Text))
                     {
                         linkCell.Hyperlink = new Uri(linkCell.Text);
@@ -122,7 +120,7 @@ namespace SGO.Api.Controllers
                         linkCell.Style.Font.UnderLine = true;
                     }
                 }
-                
+
                 var stream = new MemoryStream();
                 await package.SaveAsAsync(stream);
                 stream.Position = 0;
@@ -131,5 +129,6 @@ namespace SGO.Api.Controllers
                 return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", excelName);
             }
         }
+
     }
 }
