@@ -134,7 +134,7 @@ const AddExpenseForm = ({ projectId, contractId, onExpenseAdded }) => {
                 borderRadius: '8px',
                 fontSize: '1rem',
                 backgroundColor: '#dcdedfff',
-              color: '#1f2937',
+                color: '#1f2937',
                 fontWeight: '600',
                 boxSizing: 'border-box',
                 transition: 'border-color 0.2s ease'
@@ -252,9 +252,9 @@ const AddExpenseForm = ({ projectId, contractId, onExpenseAdded }) => {
                 padding: '12px 16px',
                 border: '2px solid #d1d5db',
                 borderRadius: '8px',
-                fontSize: '1rem',
+                fontSize: '1rem',     
                 backgroundColor: '#dcdedfff',
-                color: '#1f2937',
+                color: '#1f2937',           
                 fontWeight: '600',
                 boxSizing: 'border-box',
                 transition: 'border-color 0.2s ease'
@@ -296,7 +296,7 @@ const AddExpenseForm = ({ projectId, contractId, onExpenseAdded }) => {
                 borderRadius: '8px',
                 fontSize: '1rem',
                 backgroundColor: '#dcdedfff',
-                    color: '#1f2937',
+                color: '#1f2937',
                 fontWeight: '600',
                 boxSizing: 'border-box',
                 transition: 'border-color 0.2s ease'

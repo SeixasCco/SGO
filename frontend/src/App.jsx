@@ -1,3 +1,5 @@
+// ✅ ARQUIVO: /frontend/src/App.jsx
+
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import HomePage from './pages/HomePage'; 
@@ -8,16 +10,18 @@ import EmployeesPage from './pages/EmployeesPage';
 import EditEmployeePage from './pages/EditEmployeePage';
 import EditContractPage from './pages/EditContractPage';
 import EditExpensePage from './pages/EditExpensePage';
+import ReportsPage from './pages/ReportsPage'; // ✅ NOVA IMPORTAÇÃO
 import './App.css';
 
-// ✅ COMPONENTE DE NAVEGAÇÃO MODERNA
+// ✅ COMPONENTE DE NAVEGAÇÃO MODERNA ATUALIZADA
 const ModernNavigation = () => {
   const location = useLocation();
   
   const navItems = [
     { path: '/', label: 'Dashboard', icon: '📊' },
     { path: '/projects', label: 'Obras', icon: '🏗️' },
-    { path: '/employees', label: 'Funcionários', icon: '👥' }
+    { path: '/employees', label: 'Funcionários', icon: '👥' },
+    { path: '/reports', label: 'Relatórios', icon: '📋' } // ✅ NOVA OPÇÃO
   ];
 
   const isActive = (path) => {
@@ -162,7 +166,7 @@ const ModernNavigation = () => {
   );
 };
 
-// ✅ COMPONENTE PRINCIPAL COM LAYOUT
+// ✅ COMPONENTE PRINCIPAL COM LAYOUT ATUALIZADO
 function App() {
   return (
     <Router>
@@ -182,6 +186,7 @@ function App() {
             <Route path="/employee/edit/:id" element={<EditEmployeePage />} />
             <Route path="/contract/edit/:id" element={<EditContractPage />} />
             <Route path="/expense/edit/:id" element={<EditExpensePage />} />
+            <Route path="/reports" element={<ReportsPage />} /> {/* ✅ NOVA ROTA */}
           </Routes>
         </main>
       </div>

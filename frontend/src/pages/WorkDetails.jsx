@@ -1434,8 +1434,11 @@ const WorkDetails = () => {
                                                         width: '100%',
                                                         padding: '12px 16px',
                                                         border: '1px solid #d1d5db',
+                                                        backgroundColor: '#dcdedfff',
+                                                        color: '#1f2937',
                                                         borderRadius: '8px',
                                                         fontSize: '1rem',
+                                                        transition: 'border-color 0.2s ease',
                                                         boxSizing: 'border-box'
                                                     }}
                                                     placeholder="Ex: Cimento Portland"
@@ -1464,8 +1467,11 @@ const WorkDetails = () => {
                                                         width: '100%',
                                                         padding: '12px 16px',
                                                         border: '1px solid #d1d5db',
+                                                        backgroundColor: '#dcdedfff',
+                                                        color: '#1f2937',
                                                         borderRadius: '8px',
                                                         fontSize: '1rem',
+                                                        transition: 'border-color 0.2s ease',
                                                         boxSizing: 'border-box'
                                                     }}
                                                     placeholder="0.00"
@@ -1491,12 +1497,12 @@ const WorkDetails = () => {
                                                     style={{
                                                         width: '100%',
                                                         padding: '12px 16px',
-                                                        border: '2px solid #d1d5db',
+                                                        border: '1px solid #d1d5db',
+                                                        backgroundColor: '#dcdedfff',
+                                                        color: '#1f2937',
                                                         borderRadius: '8px',
                                                         fontSize: '1rem',
-                                                        backgroundColor: 'white',
-                                                        color: '#1f2937',
-                                                        fontWeight: '600',
+                                                        transition: 'border-color 0.2s ease',
                                                         boxSizing: 'border-box'
                                                     }}
                                                 />
@@ -1522,8 +1528,11 @@ const WorkDetails = () => {
                                                         width: '100%',
                                                         padding: '12px 16px',
                                                         border: '1px solid #d1d5db',
+                                                        backgroundColor: '#dcdedfff',
+                                                        color: '#1f2937',
                                                         borderRadius: '8px',
                                                         fontSize: '1rem',
+                                                        transition: 'border-color 0.2s ease',
                                                         boxSizing: 'border-box'
                                                     }}
                                                     placeholder="Ex: Material"
@@ -1550,8 +1559,11 @@ const WorkDetails = () => {
                                                         width: '100%',
                                                         padding: '12px 16px',
                                                         border: '1px solid #d1d5db',
+                                                        backgroundColor: '#dcdedfff',
+                                                        color: '#1f2937',
                                                         borderRadius: '8px',
                                                         fontSize: '1rem',
+                                                        transition: 'border-color 0.2s ease',
                                                         boxSizing: 'border-box'
                                                     }}
                                                     placeholder="0"
@@ -1575,9 +1587,11 @@ const WorkDetails = () => {
                                                         width: '100%',
                                                         padding: '12px 16px',
                                                         border: '1px solid #d1d5db',
+                                                        backgroundColor: '#dcdedfff',
+                                                        color: '#1f2937',
                                                         borderRadius: '8px',
                                                         fontSize: '1rem',
-                                                        backgroundColor: 'white',
+                                                        transition: 'border-color 0.2s ease',
                                                         boxSizing: 'border-box'
                                                     }}
                                                 />
@@ -1790,54 +1804,61 @@ const WorkDetails = () => {
                                                 {/* Ações */}
                                                 <div style={{
                                                     display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center', // Centraliza os botões na célula
                                                     gap: '8px'
                                                 }}>
-                                                    <Link
-                                                        to={`/expense/edit/${expense.id}`}
-                                                        style={{ textDecoration: 'none' }}
-                                                    >
-                                                        <button style={{
-                                                            backgroundColor: '#3b82f6',
-                                                            color: 'white',
-                                                            border: 'none',
-                                                            borderRadius: '6px',
-                                                            padding: '6px 12px',
-                                                            fontSize: '0.75rem',
-                                                            fontWeight: '600',
-                                                            cursor: 'pointer',
-                                                            transition: 'background-color 0.2s ease',
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            gap: '4px'
-                                                        }}
-                                                            onMouseEnter={(e) => e.target.style.backgroundColor = '#2563eb'}
-                                                            onMouseLeave={(e) => e.target.style.backgroundColor = '#3b82f6'}
-                                                        >
-                                                            ✏️ Editar
-                                                        </button>
-                                                    </Link>
+                                                    {/* A verificação condicional envolve os dois botões */}
+                                                    {!expense.isVirtual && (
+                                                        <>
+                                                            <Link
+                                                                to={`/expense/edit/${expense.id}`}
+                                                                style={{ textDecoration: 'none' }}
+                                                            >
+                                                                <button style={{
+                                                                    backgroundColor: '#3b82f6',
+                                                                    color: 'white',
+                                                                    border: 'none',
+                                                                    borderRadius: '6px',
+                                                                    padding: '6px 12px',
+                                                                    fontSize: '0.75rem',
+                                                                    fontWeight: '600',
+                                                                    cursor: 'pointer',
+                                                                    transition: 'background-color 0.2s ease',
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    gap: '4px'
+                                                                }}
+                                                                    onMouseEnter={(e) => e.target.style.backgroundColor = '#2563eb'}
+                                                                    onMouseLeave={(e) => e.target.style.backgroundColor = '#3b82f6'}
+                                                                >
+                                                                    ✏️ Editar
+                                                                </button>
+                                                            </Link>
 
-                                                    <button
-                                                        onClick={() => handleDeleteExpense(expense.id)}
-                                                        style={{
-                                                            backgroundColor: '#ef4444',
-                                                            color: 'white',
-                                                            border: 'none',
-                                                            borderRadius: '6px',
-                                                            padding: '6px 12px',
-                                                            fontSize: '0.75rem',
-                                                            fontWeight: '600',
-                                                            cursor: 'pointer',
-                                                            transition: 'background-color 0.2s ease',
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            gap: '4px'
-                                                        }}
-                                                        onMouseEnter={(e) => e.target.style.backgroundColor = '#dc2626'}
-                                                        onMouseLeave={(e) => e.target.style.backgroundColor = '#ef4444'}
-                                                    >
-                                                        🗑️ Deletar
-                                                    </button>
+                                                            <button
+                                                                onClick={() => handleDeleteExpense(expense.id)}
+                                                                style={{
+                                                                    backgroundColor: '#ef4444',
+                                                                    color: 'white',
+                                                                    border: 'none',
+                                                                    borderRadius: '6px',
+                                                                    padding: '6px 12px',
+                                                                    fontSize: '0.75rem',
+                                                                    fontWeight: '600',
+                                                                    cursor: 'pointer',
+                                                                    transition: 'background-color 0.2s ease',
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    gap: '4px'
+                                                                }}
+                                                                onMouseEnter={(e) => e.target.style.backgroundColor = '#dc2626'}
+                                                                onMouseLeave={(e) => e.target.style.backgroundColor = '#ef4444'}
+                                                            >
+                                                                🗑️ Deletar
+                                                            </button>
+                                                        </>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>

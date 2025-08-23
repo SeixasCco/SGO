@@ -8,17 +8,18 @@ public class ProjectDetailsDto
     public string CNO { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public string Contractor { get; set; } = string.Empty;
-    public string ServiceTaker { get; set; } = string.Empty; 
-    public string Responsible { get; set; } = string.Empty; 
+    public string ServiceTaker { get; set; } = string.Empty;
+    public string Responsible { get; set; } = string.Empty;
     public string City { get; set; } = string.Empty;
     public string State { get; set; } = string.Empty;
-    public string? Address { get; set; }    
-    public string? Description { get; set; } 
-    public int Status { get; set; }          
-    public DateTime StartDate { get; set; } 
-    public DateTime? EndDate { get; set; }   
+    public string? Address { get; set; }
+    public string? Description { get; set; }
+    public int Status { get; set; }
+    public DateTime StartDate { get; set; }
+    public DateTime? EndDate { get; set; }
     public List<ContractDto> Contracts { get; set; } = new();
     public List<ExpenseDto> Expenses { get; set; } = new();
+    public bool IsVirtual { get; set; } 
 }
 
 public class ContractDto
@@ -78,6 +79,8 @@ public class ExpenseDto
     public decimal Amount { get; set; }
     public string CostCenterName { get; set; } = string.Empty;
     public string? AttachmentPath { get; set; }
+
+    public bool IsVirtual { get; set; }
 }
 
 

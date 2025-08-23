@@ -111,9 +111,42 @@ namespace SGO.Api.Controllers
                 .Include(p => p.Contracts)
                 .Include(p => p.Expenses)
                     .ThenInclude(e => e.CostCenter)
+                .Include(p => p.ProjectEmployees)
+                    .ThenInclude(pe => pe.Employee)
                 .FirstOrDefaultAsync(p => p.Id == id);
 
             if (project == null) return NotFound();
+
+            var laborCost = project.ProjectEmployees
+                .Where(pe => pe.StartDate > DateTime.MinValue)
+                .Sum(pe => (pe.Employee.Salary / 30) * (decimal)((pe.EndDate ?? DateTime.UtcNow) - pe.StartDate).TotalDays);
+
+
+            var realExpenses = project.Expenses.Select(e => new ExpenseDto
+            {
+                Id = e.Id,
+                Date = e.Date,
+                Description = e.Description,
+                Amount = e.Amount,
+                CostCenterName = e.CostCenter?.Name ?? "N/A",
+                AttachmentPath = e.AttachmentPath,
+                IsVirtual = false
+            }).ToList();
+
+            if (laborCost > 0)
+            {
+                var virtualExpense = new ExpenseDto
+                {
+                    Id = Guid.NewGuid(),
+                    Date = DateTime.UtcNow,
+                    Description = "Custo de Mão de Obra (Calculado)",
+                    Amount = Math.Round(laborCost, 2),
+                    CostCenterName = "Mão de Obra",
+                    IsVirtual = true
+                };
+                realExpenses.Insert(0, virtualExpense);
+            }
+
 
             var projectDto = new ProjectDetailsDto
             {
@@ -130,22 +163,13 @@ namespace SGO.Api.Controllers
                 Description = project.Description,
                 Status = (int)project.Status,
                 EndDate = project.EndDate,
+                Expenses = realExpenses ,
                 Contracts = project.Contracts.Select(c => new ContractDto
                 {
                     Id = c.Id,
                     ContractNumber = c.ContractNumber,
                     TotalValue = c.TotalValue
-                }).ToList(),
-
-                Expenses = project.Expenses.Select(e => new ExpenseDto
-                {
-                    Id = e.Id,
-                    Date = e.Date,
-                    Description = e.Description,
-                    Amount = e.Amount,
-                    CostCenterName = e.CostCenter != null ? e.CostCenter.Name : "N/A",
-                    AttachmentPath = e.AttachmentPath
-                }).ToList()
+                }).ToList(),                
             };
 
             return Ok(projectDto);

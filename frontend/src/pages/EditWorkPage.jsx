@@ -267,7 +267,7 @@ const EditWorkPage = () => {
               color: '#1e293b',
               margin: '0 0 8px 0'
             }}>
-              {formData.contractor} - {formData.name}
+              {formData.serviceTaker} - {formData.contractor} - {formData.name}
             </h2>
             <p style={{
               fontSize: '1rem',
