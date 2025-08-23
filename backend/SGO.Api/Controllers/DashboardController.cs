@@ -175,9 +175,7 @@ namespace SGO.Api.Controllers
                     ProjectName = e.Project.Name,
                     ProjectContractor = e.Project.Contractor
                 })
-                .ToListAsync();
-
-            // TODO: Adicionar outras atividades (contratos criados, projetos iniciados, etc.)
+                .ToListAsync();          
             
             return Ok(recentExpenses);
         }
@@ -186,9 +184,8 @@ namespace SGO.Api.Controllers
         [HttpGet("alerts")]
         public async Task<IActionResult> GetDashboardAlerts()
         {
-            var alerts = new List<DashboardAlertDto>();
-            
-            // ✅ CORREÇÃO CRÍTICA: Usar apenas DateTime.UtcNow sem .Date
+            var alerts = new List<DashboardAlertDto>();            
+           
             var now = DateTime.UtcNow;
             var thirtyDaysAgo = now.AddDays(-30);
             var nextWeek = now.AddDays(7);
@@ -214,8 +211,7 @@ namespace SGO.Api.Controllers
                 }
             }
             catch (Exception ex)
-            {
-                // Log do erro mas não quebra o endpoint
+            {              
                 Console.WriteLine($"Erro ao verificar projetos inativos: {ex.Message}");
             }
 

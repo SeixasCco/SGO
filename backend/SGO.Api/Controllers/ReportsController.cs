@@ -4,11 +4,11 @@ using SGO.Api.Dtos;
 using SGO.Core;
 using SGO.Infrastructure;
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using OfficeOpenXml;
-using System.IO;
-using System.Collections.Generic;
 
 namespace SGO.Api.Controllers
 {
@@ -19,63 +19,77 @@ namespace SGO.Api.Controllers
         private readonly SgoDbContext _context;
         public ReportsController(SgoDbContext context) { _context = context; }
 
+        // Método privado para reutilizar a lógica de filtro
         private IQueryable<ProjectExpense> GetFilteredExpensesQuery(ExpenseReportFilterDto filters)
         {
             var query = _context.ProjectExpenses.AsQueryable();
 
             if (filters.StartDate.HasValue)
                 query = query.Where(e => e.Date >= filters.StartDate.Value.ToUniversalTime());
-
+            
             if (filters.EndDate.HasValue)
                 query = query.Where(e => e.Date <= filters.EndDate.Value.ToUniversalTime());
 
-            // Corrected and robust check for ProjectIds
             if (filters.ProjectIds != null && filters.ProjectIds.Any())
-            {
                 query = query.Where(e => filters.ProjectIds.Contains(e.ProjectId));
-            }
-
+            
             return query;
         }
 
-        // GET: api/reports/expenses
+        // GET: api/reports/expenses (Endpoint para a tela)
         [HttpGet("expenses")]
-        public async Task<ActionResult> GetExpensesReport([FromQuery] ExpenseReportFilterDto filters)
+        public async Task<ActionResult<ReportResultDto>> GetExpensesReport([FromQuery] ExpenseReportFilterDto filters)
         {
             var query = GetFilteredExpensesQuery(filters);
 
-            var result = await query
+            var filteredExpenses = await query
                 .Include(e => e.Project)
                 .Include(e => e.CostCenter)
-                .Select(e => new 
-                {
-                    e.Date,
-                    ProjectName = e.Project.Name,
-                    CostCenterName = e.CostCenter.Name,
-                    e.Description,
-                    e.Amount,
-                    AttachmentPath = !string.IsNullOrEmpty(e.AttachmentPath)
-                        ? $"http://localhost:5145{e.AttachmentPath}"
-                        : null
-                })
                 .OrderBy(e => e.Date)
                 .ToListAsync();
+            
+            var detailedList = filteredExpenses.Select(e => new ExpenseReportItemDto
+            {
+                Date = e.Date,
+                ProjectName = e.Project.Name,
+                CostCenterName = e.CostCenter.Name,
+                Description = e.Description,
+                Amount = e.Amount,
+                AttachmentPath = !string.IsNullOrEmpty(e.AttachmentPath) ? $"http://localhost:5145{e.AttachmentPath}" : null
+            }).ToList();
+
+            var total = detailedList.Sum(item => item.Amount);
+            var byProjectSummary = detailedList
+                .GroupBy(item => item.ProjectName)
+                .ToDictionary(g => g.Key, g => g.Sum(i => i.Amount));
+
+            var result = new ReportResultDto
+            {
+                DetailedExpenses = detailedList,
+                Summary = new ReportSummaryDto
+                {
+                    TotalExpenses = total,
+                    TotalRecords = detailedList.Count,
+                    AverageExpense = detailedList.Count > 0 ? total / detailedList.Count : 0,
+                    ByProject = byProjectSummary
+                }
+            };
 
             return Ok(result);
         }
 
-        // GET: api/reports/expenses/export
+        // GET: api/reports/expenses/export (Endpoint para o Excel)
         [HttpGet("expenses/export")]
         [Obsolete]
         public async Task<IActionResult> ExportExpensesReport([FromQuery] ExpenseReportFilterDto filters)
         {
             var query = GetFilteredExpensesQuery(filters);
-
-            var expenses = await query
+            
+            var expensesForExport = await query
                 .Include(e => e.Project)
                 .Include(e => e.CostCenter)
                 .OrderBy(e => e.Date)
-                .Select(e => new ExpenseReportItemDto 
+                .Select(e => new // Usamos um tipo anônimo para a exportação
                 {
                     Data = e.Date.ToString("dd/MM/yyyy"),
                     Obra = e.Project.Name,
@@ -91,13 +105,15 @@ namespace SGO.Api.Controllers
             using (var package = new ExcelPackage())
             {
                 var worksheet = package.Workbook.Worksheets.Add("Relatorio de Despesas");
-                worksheet.Cells.LoadFromCollection(expenses, true);
-                worksheet.Cells[worksheet.Dimension.Address].AutoFitColumns();
+                worksheet.Cells.LoadFromCollection(expensesForExport, true);
 
-                // Create hyperlink
-                for(int i = 2; i <= expenses.Count + 1; i++)
+                worksheet.Cells[worksheet.Dimension.Address].AutoFitColumns();
+                worksheet.Column(5).Style.Numberformat.Format = "R$ #,##0.00"; // Formata a coluna de Valor
+
+                // Cria o hiperlink na coluna "Anexo"
+                for(int i = 2; i <= expensesForExport.Count + 1; i++)
                 {
-                    var linkCell = worksheet.Cells[i, 6]; 
+                    var linkCell = worksheet.Cells[i, 6]; // Coluna 6 é "Anexo"
                     if (!string.IsNullOrEmpty(linkCell.Text))
                     {
                         linkCell.Hyperlink = new Uri(linkCell.Text);
@@ -106,7 +122,7 @@ namespace SGO.Api.Controllers
                         linkCell.Style.Font.UnderLine = true;
                     }
                 }
-
+                
                 var stream = new MemoryStream();
                 await package.SaveAsAsync(stream);
                 stream.Position = 0;
