@@ -25,16 +25,16 @@ namespace SGO.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> GetTeam(Guid projectId)
         {
-            var teamAllocations = await _context.ProjectEmployees // Agora buscamos na tabela correta
+            var teamAllocations = await _context.ProjectEmployees
                 .Where(pe => pe.ProjectId == projectId)
                 .Include(pe => pe.Employee)
                 .Select(pe => new
                 {
-                    AllocationId = pe.Id, // <-- Retornamos o ID da Alocação
+                    AllocationId = pe.Id,
                     EmployeeId = pe.EmployeeId,
                     EmployeeName = pe.Employee.Name,
                     StartDate = pe.StartDate,
-                    EndDate = pe.EndDate // <-- E a data de fim
+                    EndDate = pe.EndDate
                 })
                 .OrderBy(t => t.StartDate)
                 .ToListAsync();
@@ -59,7 +59,7 @@ namespace SGO.Api.Controllers
                 Id = Guid.NewGuid(),
                 ProjectId = projectId,
                 EmployeeId = employeeId,
-                StartDate = dto.StartDate.ToUniversalTime() // <-- Usa a data do DTO
+                StartDate = dto.StartDate.ToUniversalTime()
             };
 
             _context.ProjectEmployees.Add(newAllocation);
@@ -68,8 +68,7 @@ namespace SGO.Api.Controllers
             return Ok();
         }
 
-        // PUT: api/projects/{projectId}/team/{allocationId}/end
-        // Usamos PUT para a ação de "dar baixa", que é uma atualização
+        // PUT: api/projects/{projectId}/team/{allocationId}/end       
         [HttpPut("{allocationId}/end")]
         public async Task<IActionResult> EndTeamMemberAllocation(Guid projectId, Guid allocationId)
         {
@@ -82,6 +81,23 @@ namespace SGO.Api.Controllers
             }
 
             allocation.EndDate = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+        
+        [HttpDelete("{allocationId}")]
+        public async Task<IActionResult> DeleteAllocation(Guid projectId, Guid allocationId)
+        {
+            var allocation = await _context.ProjectEmployees
+                .FirstOrDefaultAsync(pe => pe.Id == allocationId && pe.ProjectId == projectId);
+
+            if (allocation == null)
+            {
+                return NotFound();
+            }
+
+            _context.ProjectEmployees.Remove(allocation);
             await _context.SaveChangesAsync();
 
             return NoContent();

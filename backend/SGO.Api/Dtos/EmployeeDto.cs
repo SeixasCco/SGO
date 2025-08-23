@@ -7,6 +7,8 @@ namespace SGO.Api.Dtos
         public string Name { get; set; } = string.Empty;
         public string Position { get; set; } = string.Empty;
         public decimal Salary { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
         public bool IsActive { get; set; }
     }
 
@@ -16,6 +18,8 @@ namespace SGO.Api.Dtos
         public string Name { get; set; } = string.Empty;
         public string Position { get; set; } = string.Empty;
         public decimal Salary { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
     }
 
     // ✅ DTO PARA ATUALIZAÇÃO DE FUNCIONÁRIO
@@ -24,6 +28,9 @@ namespace SGO.Api.Dtos
         public string Name { get; set; } = string.Empty;
         public string Position { get; set; } = string.Empty;
         public decimal Salary { get; set; }
+
+        public DateTime StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
         public bool IsActive { get; set; }
     }
     
