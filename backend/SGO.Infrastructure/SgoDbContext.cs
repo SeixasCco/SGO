@@ -18,14 +18,10 @@ public class SgoDbContext : DbContext
    
     public DbSet<ProjectEmployee> ProjectEmployees { get; set; }
 
+    public DbSet<ContractInvoice> ContractInvoices { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // REMOVA OU COMENTE ESTE BLOCO
-        /*
-        modelBuilder.Entity<ProjectEmployee>()
-            .HasKey(pe => new { pe.ProjectId, pe.EmployeeId });
-        */
-
         base.OnModelCreating(modelBuilder);
     }
 }

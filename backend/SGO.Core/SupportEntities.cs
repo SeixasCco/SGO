@@ -1,4 +1,7 @@
-﻿namespace SGO.Core;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace SGO.Core;
 
 // --- Enums de Suporte ---
 
@@ -20,10 +23,34 @@ public enum ExpenseStatus
 
 public class ContractInvoice
 {
+    [Key]
     public Guid Id { get; set; }
-   
-}
 
+    [Required]
+    [MaxLength(200)]
+    public string Title { get; set; } = default!;
+
+    [Required]
+    [Column(TypeName = "decimal(18,2)")]
+    public decimal GrossValue { get; set; }
+
+    [Column(TypeName = "decimal(18,2)")]
+    public decimal DeductionsValue { get; set; }
+
+    [Required]
+    [Column(TypeName = "decimal(18,2)")]
+    public decimal NetValue { get; set; }
+
+    [Required]
+    public DateTime DepositDate { get; set; }
+
+   public string? AttachmentPath { get; set; }
+   
+    public Guid ContractId { get; set; }  
+
+    [ForeignKey("ContractId")]
+    public virtual Contract Contract { get; set; } = default!;
+}
 
 public class ExpenseAttachment
 {
