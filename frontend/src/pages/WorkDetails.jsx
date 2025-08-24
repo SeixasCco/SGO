@@ -13,7 +13,6 @@ const WorkDetails = () => {
     const [activeTab, setActiveTab] = useState('overview');
     const [showAddContractModal, setShowAddContractModal] = useState(false);
 
-    // Estados para gerenciamento de contratos
     const [contracts, setContracts] = useState([]);
     const [loadingContracts, setLoadingContracts] = useState(false);
 
@@ -23,12 +22,15 @@ const WorkDetails = () => {
     const [selectedEmployee, setSelectedEmployee] = useState('');
     const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
 
+    const [costCenters, setCostCenters] = useState([]);
+    const [loadingCostCenters, setLoadingCostCenters] = useState(true);
+
     // Estados para formulário de despesas
     const [expenseFormData, setExpenseFormData] = useState({
         description: '',
         amount: '',
         date: new Date().toISOString().split('T')[0],
-        costCenterName: '',
+        costCenterId: '',
         numberOfPeople: ''
     });
     const [selectedFile, setSelectedFile] = useState(null);
@@ -43,7 +45,11 @@ const WorkDetails = () => {
             })
             .catch(error => {
                 console.error("Erro ao buscar detalhes da obra!", error);
-                setError("Não foi possível carregar os dados da obra.");
+                if (error.response && error.response.status === 404) {
+                    setError("Obra não encontrada. Verifique o endereço ou crie uma nova obra.");
+                } else {
+                    setError("Ocorreu um erro ao carregar os dados da obra.");
+                }
                 setLoading(false);
             });
     }, [id]);
@@ -73,10 +79,23 @@ const WorkDetails = () => {
         });
     }, [id]);
 
+    const fetchCostCenters = useCallback(() => {
+        axios.get('http://localhost:5145/api/costcenters')
+            .then(response => {
+                setCostCenters(response.data);
+                setLoadingCostCenters(false);
+            })
+            .catch(err => {
+                console.error("Erro ao buscar centros de custo:", err);
+                setLoadingCostCenters(false);
+            });
+    }, []);
+
     useEffect(() => {
         fetchProjectDetails();
         fetchContracts();
         fetchTeamData();
+        fetchCostCenters();
     }, [fetchProjectDetails, fetchContracts, fetchTeamData]);
 
     // Função para adicionar contrato
@@ -166,8 +185,10 @@ const WorkDetails = () => {
         }
 
         const newExpense = {
-            ...expenseFormData,
+            description: expenseFormData.description,
             amount: parseFloat(expenseFormData.amount),
+            date: expenseFormData.date,
+            costCenterId: expenseFormData.costCenterId,
             numberOfPeople: expenseFormData.numberOfPeople ? parseInt(expenseFormData.numberOfPeople, 10) : null,
             projectId: id,
             contractId: defaultContractId,
@@ -181,7 +202,7 @@ const WorkDetails = () => {
                 description: '',
                 amount: '',
                 date: new Date().toISOString().split('T')[0],
-                costCenterName: '',
+                costCenterId: '',
                 numberOfPeople: ''
             });
             setSelectedFile(null);
@@ -997,8 +1018,298 @@ const WorkDetails = () => {
                 </div>
             )}
 
-            {activeTab === 'team' && (                
-                <TeamManager projectId={id} />
+            {/* TAB: EQUIPE */}
+            {activeTab === 'team' && (
+                <div style={{
+                    backgroundColor: 'white',
+                    borderRadius: '12px',
+                    border: '1px solid #e2e8f0',
+                    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
+                    overflow: 'hidden'
+                }}>
+
+                    {/* Header da Seção */}
+                    <div style={{
+                        padding: '24px 32px',
+                        borderBottom: '1px solid #f1f5f9',
+                        backgroundColor: '#f8fafc'
+                    }}>
+                        <h2 style={{
+                            fontSize: '1.5rem',
+                            fontWeight: '600',
+                            color: '#1e293b',
+                            margin: '0 0 16px 0',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '12px'
+                        }}>
+                            👥 Equipe da Obra
+                            <span style={{
+                                backgroundColor: '#e0e7ff',
+                                color: '#3730a3',
+                                padding: '4px 12px',
+                                borderRadius: '20px',
+                                fontSize: '0.875rem',
+                                fontWeight: '700'
+                            }}>
+                                {allocations.filter(alloc => !alloc.endDate).length} ativos
+                            </span>
+                        </h2>
+
+                        {/* Formulário para Adicionar Funcionário */}
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: '1fr auto auto auto',
+                            gap: '12px',
+                            alignItems: 'end'
+                        }}>
+                            <div>
+                                <label style={{
+                                    display: 'block',
+                                    fontSize: '0.875rem',
+                                    fontWeight: '600',
+                                    color: '#374151',
+                                    marginBottom: '6px'
+                                }}>
+                                    Funcionário Disponível
+                                </label>
+                                <select
+                                    onChange={(e) => setSelectedEmployee(e.target.value)}
+                                    value={selectedEmployee}
+                                    style={{
+                                        width: '100%',
+                                        padding: '12px 16px',
+                                        border: '2px solid #d1d5db',
+                                        borderRadius: '8px',
+                                        fontSize: '1rem',
+                                        backgroundColor: 'white',
+                                        color: '#1f2937',
+                                        fontWeight: '600',
+                                        boxSizing: 'border-box'
+                                    }}
+                                >
+                                    <option value="">Selecione um funcionário...</option>
+                                    {availableEmployees.map(emp => (
+                                        <option key={emp.id} value={emp.id}>{emp.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div>
+                                <label style={{
+                                    display: 'block',
+                                    fontSize: '0.875rem',
+                                    fontWeight: '600',
+                                    color: '#374151',
+                                    marginBottom: '6px'
+                                }}>
+                                    Data de Início
+                                </label>
+                                <input
+                                    type="date"
+                                    value={startDate}
+                                    onChange={(e) => setStartDate(e.target.value)}
+                                    style={{
+                                        padding: '12px 16px',
+                                        border: '2px solid #d1d5db',
+                                        borderRadius: '8px',
+                                        fontSize: '1rem',
+                                        backgroundColor: 'white',
+                                        color: '#1f2937',
+                                        fontWeight: '600'
+                                    }}
+                                />
+                            </div>
+
+                            <button
+                                onClick={handleAddTeamMember}
+                                style={{
+                                    backgroundColor: '#10b981',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '8px',
+                                    padding: '12px 20px',
+                                    fontSize: '0.875rem',
+                                    fontWeight: '600',
+                                    cursor: 'pointer',
+                                    transition: 'background-color 0.2s ease',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px'
+                                }}
+                                onMouseEnter={(e) => e.target.style.backgroundColor = '#059669'}
+                                onMouseLeave={(e) => e.target.style.backgroundColor = '#10b981'}
+                            >
+                                ➕ Adicionar
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Lista de Alocações */}
+                    <div style={{ padding: '32px' }}>
+                        <h4 style={{
+                            fontSize: '1.1rem',
+                            fontWeight: '600',
+                            color: '#1e293b',
+                            marginBottom: '20px'
+                        }}>
+                            Histórico de Alocações
+                        </h4>
+
+                        {allocations.length === 0 ? (
+                            <div style={{
+                                textAlign: 'center',
+                                padding: '48px',
+                                color: '#64748b'
+                            }}>
+                                <div style={{ fontSize: '3rem', marginBottom: '16px' }}>👥</div>
+                                <h3 style={{ fontSize: '1.2rem', marginBottom: '8px' }}>Nenhum funcionário alocado</h3>
+                                <p style={{ margin: '0' }}>Adicione funcionários à equipe desta obra.</p>
+                            </div>
+                        ) : (
+                            <div style={{
+                                display: 'grid',
+                                gap: '12px'
+                            }}>
+                                {allocations.map(alloc => (
+                                    <div key={alloc.allocationId} style={{
+                                        border: '1px solid #e2e8f0',
+                                        borderRadius: '12px',
+                                        padding: '20px',
+                                        transition: 'all 0.2s ease',
+                                        backgroundColor: alloc.endDate ? '#f8fafc' : '#f0fdf4'
+                                    }}
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.borderColor = '#c7d2fe';
+                                            e.currentTarget.style.transform = 'translateY(-1px)';
+                                            e.currentTarget.style.boxShadow = '0 2px 8px 0 rgba(0, 0, 0, 0.1)';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.borderColor = '#e2e8f0';
+                                            e.currentTarget.style.transform = 'translateY(0)';
+                                            e.currentTarget.style.boxShadow = 'none';
+                                        }}
+                                    >
+
+                                        <div style={{
+                                            display: 'grid',
+                                            gridTemplateColumns: 'auto 1fr auto auto',
+                                            gap: '16px',
+                                            alignItems: 'center'
+                                        }}>
+
+                                            {/* Avatar e Nome */}
+                                            <div style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '12px'
+                                            }}>
+                                                <div style={{
+                                                    width: '40px',
+                                                    height: '40px',
+                                                    backgroundColor: alloc.endDate ? '#e5e7eb' : '#dcfce7',
+                                                    borderRadius: '50%',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    fontSize: '1.2rem',
+                                                    border: `2px solid ${alloc.endDate ? '#d1d5db' : '#bbf7d0'}`
+                                                }}>
+                                                    👤
+                                                </div>
+
+                                                <div>
+                                                    <h4 style={{
+                                                        fontSize: '1rem',
+                                                        fontWeight: '600',
+                                                        color: '#1e293b',
+                                                        margin: '0'
+                                                    }}>
+                                                        {alloc.employeeName}
+                                                    </h4>
+                                                </div>
+                                            </div>
+
+                                            {/* Data Início */}
+                                            <div style={{
+                                                textAlign: 'center',
+                                                padding: '8px 12px',
+                                                backgroundColor: '#eff6ff',
+                                                borderRadius: '6px',
+                                                border: '1px solid #bfdbfe'
+                                            }}>
+                                                <div style={{
+                                                    fontSize: '0.75rem',
+                                                    fontWeight: '600',
+                                                    color: '#1d4ed8',
+                                                    marginBottom: '2px'
+                                                }}>
+                                                    INÍCIO
+                                                </div>
+                                                <div style={{
+                                                    fontSize: '0.875rem',
+                                                    fontWeight: '600',
+                                                    color: '#1e40af'
+                                                }}>
+                                                    {new Date(alloc.startDate).toLocaleDateString('pt-BR')}
+                                                </div>
+                                            </div>
+
+                                            {/* Status/Data Fim */}
+                                            <div style={{
+                                                textAlign: 'center',
+                                                padding: '8px 12px',
+                                                backgroundColor: alloc.endDate ? '#fef3c7' : '#dcfce7',
+                                                borderRadius: '6px',
+                                                border: `1px solid ${alloc.endDate ? '#fbbf24' : '#bbf7d0'}`
+                                            }}>
+                                                <div style={{
+                                                    fontSize: '0.75rem',
+                                                    fontWeight: '600',
+                                                    color: alloc.endDate ? '#92400e' : '#15803d',
+                                                    marginBottom: '2px'
+                                                }}>
+                                                    {alloc.endDate ? 'SAÍDA' : 'STATUS'}
+                                                </div>
+                                                <div style={{
+                                                    fontSize: '0.875rem',
+                                                    fontWeight: '600',
+                                                    color: alloc.endDate ? '#b45309' : '#166534'
+                                                }}>
+                                                    {alloc.endDate ? new Date(alloc.endDate).toLocaleDateString('pt-BR') : 'ATIVO'}
+                                                </div>
+                                            </div>
+
+                                            {/* Ação */}
+                                            <div>
+                                                {!alloc.endDate && (
+                                                    <button
+                                                        onClick={() => handleEndAllocation(alloc.allocationId)}
+                                                        style={{
+                                                            backgroundColor: '#f59e0b',
+                                                            color: 'white',
+                                                            border: 'none',
+                                                            borderRadius: '6px',
+                                                            padding: '6px 12px',
+                                                            fontSize: '0.75rem',
+                                                            fontWeight: '600',
+                                                            cursor: 'pointer',
+                                                            transition: 'background-color 0.2s ease'
+                                                        }}
+                                                        onMouseEnter={(e) => e.target.style.backgroundColor = '#d97706'}
+                                                        onMouseLeave={(e) => e.target.style.backgroundColor = '#f59e0b'}
+                                                    >
+                                                        Dar Baixa
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
             )}
 
             {/* TAB: DESPESAS */}
@@ -1229,12 +1540,12 @@ const WorkDetails = () => {
                                                 }}>
                                                     Centro de Custo
                                                 </label>
-                                                <input
-                                                    type="text"
-                                                    name="costCenterName"
-                                                    value={expenseFormData.costCenterName}
-                                                    onChange={(e) => setExpenseFormData({ ...expenseFormData, costCenterName: e.target.value })}
+                                                <select
+                                                    name="costCenterId"
+                                                    value={expenseFormData.costCenterId}
+                                                    onChange={(e) => setExpenseFormData({ ...expenseFormData, costCenterId: e.target.value })}
                                                     required
+                                                    disabled={loadingCostCenters}
                                                     style={{
                                                         width: '100%',
                                                         padding: '12px 16px',
@@ -1244,12 +1555,18 @@ const WorkDetails = () => {
                                                         borderRadius: '8px',
                                                         fontSize: '1rem',
                                                         transition: 'border-color 0.2s ease',
-                                                        boxSizing: 'border-box'
+                                                        boxSizing: 'border-box',
+                                                        cursor: loadingCostCenters ? 'not-allowed' : 'pointer'
                                                     }}
-                                                    placeholder="Ex: Material"
-                                                />
+                                                >
+                                                    <option value="">{loadingCostCenters ? 'Carregando...' : 'Selecione...'}</option>
+                                                    {costCenters.map(cc => (
+                                                        <option key={cc.id} value={cc.id}>
+                                                            {cc.name}
+                                                        </option>
+                                                    ))}
+                                                </select>
                                             </div>
-
                                             <div>
                                                 <label style={{
                                                     display: 'block',

@@ -1,7 +1,7 @@
-// Local: frontend/src/pages/EditContractPage.jsx
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
+import InvoicesManager from '../components/InvoicesManager';
 
 const EditContractPage = () => {
   const { id } = useParams();
@@ -16,14 +16,12 @@ const EditContractPage = () => {
     axios.get(`http://localhost:5145/api/contracts/${id}`)
       .then(response => {
         const contract = response.data;
-        // Formatear fechas para el input
         setFormData({
           ...contract,
           startDate: contract.startDate ? contract.startDate.split('T')[0] : '',
           endDate: contract.endDate ? contract.endDate.split('T')[0] : ''
         });
 
-        // Buscar informações do projeto
         return axios.get(`http://localhost:5145/api/projects/${contract.projectId}`);
       })
       .then(projectResponse => {
@@ -654,6 +652,7 @@ const EditContractPage = () => {
           </div>
         </form>
       </div>
+       <InvoicesManager contractId={id} />
     </div>
   );
 };

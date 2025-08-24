@@ -1,4 +1,3 @@
-// Local: frontend/src/components/AddExpenseForm.jsx
 import React, { useState } from 'react';
 import axios from 'axios';
 
@@ -7,12 +6,14 @@ const AddExpenseForm = ({ projectId, contractId, onExpenseAdded }) => {
     description: '',
     amount: '',
     date: new Date().toISOString().split('T')[0],
-    costCenterName: '',
+    costCenterId: '',
     numberOfPeople: ''
   });
   const [selectedFile, setSelectedFile] = useState(null);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -48,20 +49,23 @@ const AddExpenseForm = ({ projectId, contractId, onExpenseAdded }) => {
     const newExpense = {
       ...formData,
       amount: parseFloat(formData.amount),
+      costCenterId: formData.costCenterId,
       numberOfPeople: formData.numberOfPeople ? parseInt(formData.numberOfPeople, 10) : null,
       projectId: projectId,
       contractId: contractId,
       attachmentPath: attachmentPath,
     };
 
+    delete newExpense.costCenterName;
+
     try {
       await axios.post('http://localhost:5145/api/projectexpenses', newExpense);
       alert('Despesa lançada com sucesso!');
-      setFormData({ 
-        description: '', 
-        amount: '', 
-        date: new Date().toISOString().split('T')[0], 
-        costCenterName: '',
+      setFormData({
+        description: '',
+        amount: '',
+        date: new Date().toISOString().split('T')[0],
+        costCenterId: '',
         numberOfPeople: ''
       });
       setSelectedFile(null);
@@ -86,7 +90,7 @@ const AddExpenseForm = ({ projectId, contractId, onExpenseAdded }) => {
       boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
       marginTop: '20px'
     }}>
-      
+
       {/* Header do Formulário */}
       <h3 style={{
         fontSize: '1.5rem',
@@ -101,7 +105,7 @@ const AddExpenseForm = ({ projectId, contractId, onExpenseAdded }) => {
       </h3>
 
       <form onSubmit={handleSubmit}>
-        
+
         {/* Grid de Campos */}
         <div style={{
           display: 'grid',
@@ -109,7 +113,7 @@ const AddExpenseForm = ({ projectId, contractId, onExpenseAdded }) => {
           gap: '20px',
           marginBottom: '24px'
         }}>
-          
+
           {/* Descrição */}
           <div style={{ gridColumn: '1 / -1' }}>
             <label style={{
@@ -121,11 +125,11 @@ const AddExpenseForm = ({ projectId, contractId, onExpenseAdded }) => {
             }}>
               Descrição da Despesa
             </label>
-            <input 
-              type="text" 
-              name="description" 
-              value={formData.description} 
-              onChange={handleChange} 
+            <input
+              type="text"
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
               required
               style={{
                 width: '100%',
@@ -156,13 +160,13 @@ const AddExpenseForm = ({ projectId, contractId, onExpenseAdded }) => {
             }}>
               Valor (R$)
             </label>
-            <input 
-              type="number" 
-              step="0.01" 
-              name="amount" 
-              min="0" 
-              value={formData.amount} 
-              onChange={handleChange} 
+            <input
+              type="number"
+              step="0.01"
+              name="amount"
+              min="0"
+              value={formData.amount}
+              onChange={handleChange}
               required
               style={{
                 width: '100%',
@@ -200,11 +204,11 @@ const AddExpenseForm = ({ projectId, contractId, onExpenseAdded }) => {
             }}>
               Data da Despesa
             </label>
-            <input 
-              type="date" 
-              name="date" 
-              value={formData.date} 
-              onChange={handleChange} 
+            <input
+              type="date"
+              name="date"
+              value={formData.date}
+              onChange={handleChange}
               required
               style={{
                 width: '100%',
@@ -241,28 +245,37 @@ const AddExpenseForm = ({ projectId, contractId, onExpenseAdded }) => {
             }}>
               Centro de Custo
             </label>
-            <input 
-              type="text" 
-              name="costCenterName" 
-              value={formData.costCenterName} 
-              onChange={handleChange} 
+            <select
+              name="costCenterId"
+              value={formData.costCenterId}
+              onChange={handleChange}
               required
+              disabled={loadingCostCenters}
               style={{
                 width: '100%',
                 padding: '12px 16px',
                 border: '2px solid #d1d5db',
                 borderRadius: '8px',
-                fontSize: '1rem',     
+                fontSize: '1rem',
                 backgroundColor: '#dcdedfff',
-                color: '#1f2937',           
+                color: '#1f2937',
                 fontWeight: '600',
                 boxSizing: 'border-box',
-                transition: 'border-color 0.2s ease'
+                transition: 'border-color 0.2s ease',                
+                cursor: loadingCostCenters ? 'not-allowed' : 'pointer'
               }}
               onFocus={(e) => e.target.style.borderColor = '#3b82f6'}
               onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
-              placeholder="Ex: Material, Mão de Obra, Transporte..."
-            />
+            >              
+              <option value="">
+                {loadingCostCenters ? 'Carregando...' : 'Selecione um centro de custo'}
+              </option>
+              {costCenters.map(cc => (
+                <option key={cc.id} value={cc.id}>
+                  {cc.name}
+                </option>
+              ))}              
+            </select>
             <div style={{
               fontSize: '0.875rem',
               color: '#64748b',
@@ -283,11 +296,11 @@ const AddExpenseForm = ({ projectId, contractId, onExpenseAdded }) => {
             }}>
               Nº de Pessoas (Opcional)
             </label>
-            <input 
-              type="number" 
-              name="numberOfPeople" 
-              value={formData.numberOfPeople} 
-              min="0" 
+            <input
+              type="number"
+              name="numberOfPeople"
+              value={formData.numberOfPeople}
+              min="0"
               onChange={handleChange}
               style={{
                 width: '100%',
@@ -325,8 +338,8 @@ const AddExpenseForm = ({ projectId, contractId, onExpenseAdded }) => {
             }}>
               Anexo (Nota Fiscal)
             </label>
-            <input 
-              type="file" 
+            <input
+              type="file"
               onChange={handleFileChange}
               style={{
                 width: '100%',
@@ -335,7 +348,7 @@ const AddExpenseForm = ({ projectId, contractId, onExpenseAdded }) => {
                 borderRadius: '8px',
                 fontSize: '1rem',
                 backgroundColor: '#dcdedfff',
-                    color: '#1f2937',
+                color: '#1f2937',
                 fontWeight: '600',
                 boxSizing: 'border-box',
                 transition: 'border-color 0.2s ease'
@@ -363,8 +376,8 @@ const AddExpenseForm = ({ projectId, contractId, onExpenseAdded }) => {
             padding: '12px 16px',
             marginBottom: '20px'
           }}>
-            <p style={{ 
-              color: '#b91c1c', 
+            <p style={{
+              color: '#b91c1c',
               margin: '0',
               fontSize: '0.875rem',
               fontWeight: '600'
@@ -383,8 +396,8 @@ const AddExpenseForm = ({ projectId, contractId, onExpenseAdded }) => {
             padding: '12px 16px',
             marginBottom: '20px'
           }}>
-            <p style={{ 
-              color: '#1e40af', 
+            <p style={{
+              color: '#1e40af',
               margin: '0',
               fontSize: '0.875rem',
               fontWeight: '600'
@@ -395,8 +408,8 @@ const AddExpenseForm = ({ projectId, contractId, onExpenseAdded }) => {
         )}
 
         {/* Botão de Envio */}
-        <button 
-          type="submit" 
+        <button
+          type="submit"
           disabled={submitting}
           style={{
             backgroundColor: submitting ? '#9ca3af' : '#10b981',

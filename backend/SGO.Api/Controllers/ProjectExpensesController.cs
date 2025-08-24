@@ -38,19 +38,6 @@ namespace SGO.Api.Controllers
         public async Task<ActionResult<ProjectExpense>> CreateExpense([FromBody] CreateExpenseDto expenseDto)
         {
 
-            var costCenter = await _context.CostCenters
-                .FirstOrDefaultAsync(c => c.Name.ToUpper() == expenseDto.CostCenterName.ToUpper());
-
-            if (costCenter == null)
-            {
-                costCenter = new CostCenter
-                {
-                    Id = Guid.NewGuid(),
-                    Name = expenseDto.CostCenterName
-                };
-                _context.CostCenters.Add(costCenter);
-            }
-
             var newExpense = new ProjectExpense
             {
                 Id = Guid.NewGuid(),
@@ -62,12 +49,13 @@ namespace SGO.Api.Controllers
                 Observations = expenseDto.Observations,
                 SupplierName = expenseDto.SupplierName,
                 InvoiceNumber = expenseDto.InvoiceNumber,
-                AttachmentPath = expenseDto.AttachmentPath,               
-                CostCenter = costCenter
+                AttachmentPath = expenseDto.AttachmentPath,
+                CostCenterId = expenseDto.CostCenterId
             };
 
             _context.ProjectExpenses.Add(newExpense);
             await _context.SaveChangesAsync();
+            await _context.Entry(newExpense).Reference(e => e.CostCenter).LoadAsync();
 
             return Ok(newExpense);
         }
@@ -86,10 +74,10 @@ namespace SGO.Api.Controllers
             {
                 return NotFound();
             }
-           
+
             expense.Description = expenseDto.Description;
             expense.Amount = expenseDto.Amount;
-            expense.Date = expenseDto.Date.ToUniversalTime();                   
+            expense.Date = expenseDto.Date.ToUniversalTime();
 
             try
             {

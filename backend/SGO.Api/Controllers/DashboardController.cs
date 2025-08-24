@@ -147,33 +147,29 @@ namespace SGO.Api.Controllers
                 })
                 .OrderBy(m => m.Year).ThenBy(m => m.Month)
                 .ToListAsync();
-
-            // ✅ POR ENQUANTO SÓ DESPESAS REAIS (SEM CUSTO DE MÃO DE OBRA MENSAL)
+           
             var monthlyExpenses = monthlyData.Select(data => new MonthlyExpenseDto
             {
                 Year = data.Year,
                 Month = data.Month,
                 MonthName = GetMonthName(data.Month),
-                TotalAmount = data.TotalAmount, // ✅ SEM LABOR COST POR ENQUANTO
+                TotalAmount = data.TotalAmount, 
                 ExpenseCount = data.ExpenseCount
             }).ToList();
 
             return Ok(monthlyExpenses);
         }
-
-        // ✅ TOP 5 OBRAS POR VALOR - CORRIGIDO COM CUSTO DE MÃO DE OBRA
+        
         [HttpGet("top-projects")]
         public async Task<IActionResult> GetTopProjects()
-        {
-            // ✅ BUSCAR PROJETOS COM DADOS RELACIONADOS
+        {            
             var projectsWithData = await _context.Projects
                 .Include(p => p.Contracts)
                 .Include(p => p.Expenses)
                 .Include(p => p.ProjectEmployees)
                     .ThenInclude(pe => pe.Employee)
                 .ToListAsync();
-
-            // ✅ CALCULAR CUSTOS DE MÃO DE OBRA POR PROJETO
+           
             var topProjects = projectsWithData.Select(p => 
             {
                 var laborCost = p.ProjectEmployees
@@ -192,8 +188,8 @@ namespace SGO.Api.Controllers
                     Status = (int)p.Status,
                     StatusName = p.Status.ToString(),
                     TotalContractsValue = p.Contracts.Sum(c => c.TotalValue),
-                    TotalExpensesValue = totalExpenses, // ✅ CORRIGIDO: Inclui mão de obra
-                    ProfitMargin = p.Contracts.Sum(c => c.TotalValue) - totalExpenses // ✅ CORRIGIDO: Margem real
+                    TotalExpensesValue = totalExpenses, 
+                    ProfitMargin = p.Contracts.Sum(c => c.TotalValue) - totalExpenses 
                 };
             })
             .OrderByDescending(p => p.TotalContractsValue)

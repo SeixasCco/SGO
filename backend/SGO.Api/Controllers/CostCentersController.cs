@@ -1,5 +1,4 @@
-﻿// Local: SGO.Api/Controllers/CostCentersController.cs
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SGO.Core;
 using SGO.Infrastructure;

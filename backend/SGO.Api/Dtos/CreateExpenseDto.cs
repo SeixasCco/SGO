@@ -11,7 +11,7 @@ namespace SGO.Api.Dtos
         [Range(0, double.MaxValue, ErrorMessage = "O valor da despesa não pode ser negativo.")]
         public decimal Amount { get; set; }
         public DateTime Date { get; set; }
-        public string CostCenterName { get; set; } = default!;
+        public Guid CostCenterId { get; set; } = default!;
         public string? Observations { get; set; }
         public string? SupplierName { get; set; }
         public string? InvoiceNumber { get; set; }
