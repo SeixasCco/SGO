@@ -38,6 +38,11 @@ namespace SGO.Api.Controllers
         public async Task<ActionResult<ProjectExpense>> CreateExpense([FromBody] CreateExpenseDto expenseDto)
         {
 
+            if (expenseDto.CostCenterId == Guid.Empty)
+            {                
+                return BadRequest(new { message = "O Centro de Custo é obrigatório." });
+            }
+
             var newExpense = new ProjectExpense
             {
                 Id = Guid.NewGuid(),

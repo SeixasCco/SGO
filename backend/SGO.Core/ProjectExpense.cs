@@ -12,7 +12,7 @@ public class ProjectExpense
     public Guid Id { get; set; }
     public Guid CompanyId { get; set; }
     public Guid ProjectId { get; set; }
-    public Guid ContractId { get; set; }
+    public Guid? ContractId { get; set; } 
     public string Description { get; set; } = default!;
     public decimal Amount { get; set; }
     public DateTime Date { get; set; }
@@ -23,7 +23,9 @@ public class ProjectExpense
     public string? InvoiceNumber { get; set; }
     public ExpenseStatus Status { get; set; }
     public DateTime? PaymentDate { get; set; }
-    public string? AttachmentPath { get; set; }    
+    public string? AttachmentPath { get; set; }     
+
+    public bool IsAutomaticallyCalculated { get; set; }
     public Project Project { get; set; } = default!;
     public Contract Contract { get; set; } = default!;
     public ICollection<ExpenseAttachment> Attachments { get; set; }

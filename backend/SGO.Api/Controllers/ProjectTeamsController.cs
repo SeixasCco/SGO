@@ -34,6 +34,7 @@ namespace SGO.Api.Controllers
                     EmployeeId = pe.EmployeeId,
                     EmployeeName = pe.Employee.Name,
                     StartDate = pe.StartDate,
+                    Salary = pe.Employee.Salary,
                     EndDate = pe.EndDate
                 })
                 .OrderBy(t => t.StartDate)

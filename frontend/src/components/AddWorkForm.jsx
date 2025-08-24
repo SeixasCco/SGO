@@ -55,18 +55,17 @@ const AddWorkForm = ({ onWorkAdded }) => {
     })
       .then(response => {
         if (response.ok) {
-          alert('Obra cadastrada com sucesso!');
-          // ✅ Reset com nomenclatura exatamente igual ao estado inicial
+          alert('Obra cadastrada com sucesso!');         
           setFormData({ 
             cno: '',
             name: '',
             contractor: '',
-            serviceTaker: '',  // ✅ consistente
-            responsible: '',   // ✅ consistente
+            serviceTaker: '', 
+            responsible: '',  
             city: '',
             state: '',
-            address: '',       // ✅ consistente
-            description: '',   // ✅ consistente
+            address: '',      
+            description: '',  
             startDate: new Date().toISOString().split('T')[0],
             endDate: '',
           });

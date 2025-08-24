@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SGO.Infrastructure;
@@ -11,9 +12,11 @@ using SGO.Infrastructure;
 namespace SGO.Infrastructure.Migrations
 {
     [DbContext(typeof(SgoDbContext))]
-    partial class SgoDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250824143457_AddIsCalculatedFlagToExpense")]
+    partial class AddIsCalculatedFlagToExpense
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -396,7 +399,7 @@ namespace SGO.Infrastructure.Migrations
                     b.Property<Guid>("CompanyId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("ContractId")
+                    b.Property<Guid>("ContractId")
                         .HasColumnType("uuid");
 
                     b.Property<Guid>("CostCenterId")
@@ -495,7 +498,9 @@ namespace SGO.Infrastructure.Migrations
                 {
                     b.HasOne("SGO.Core.Contract", "Contract")
                         .WithMany("Expenses")
-                        .HasForeignKey("ContractId");
+                        .HasForeignKey("ContractId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("SGO.Core.CostCenter", "CostCenter")
                         .WithMany()

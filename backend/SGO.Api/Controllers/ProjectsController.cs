@@ -67,7 +67,13 @@ namespace SGO.Api.Controllers
             {
                 var laborCost = data.Allocations
                     .Where(a => a.StartDate > DateTime.MinValue)
-                    .Sum(a => (a.Salary / 30) * (decimal)((a.EndDate ?? DateTime.UtcNow) - a.StartDate).TotalDays);
+                    .Sum(a => (a.Salary / 30m) * (decimal)(((a.EndDate?.Date ?? DateTime.UtcNow.Date) - a.StartDate.Date).TotalDays + 1));
+                
+                var manualExpensesValue = data.Expenses
+                    .Where(e => !e.IsAutomaticallyCalculated)
+                    .Sum(e => (decimal?)e.Amount) ?? 0;
+                
+                var totalExpenses = manualExpensesValue + Math.Round(laborCost, 2);
 
                 return new ProjectSummaryDto
                 {
@@ -83,7 +89,7 @@ namespace SGO.Api.Controllers
 
                     TeamSize = data.Allocations.Count(a => a.EndDate == null),
                     TotalContractsValue = data.Contracts.Sum(c => c.TotalValue),
-                    TotalExpensesValue = (data.Expenses.Sum(e => (decimal?)e.Amount) ?? 0) + Math.Round(laborCost, 2)
+                    TotalExpensesValue = totalExpenses
                 };
             });
 
@@ -103,7 +109,7 @@ namespace SGO.Api.Controllers
             };
         }
 
-        // GET: api/projects/{id}
+        // GET: api/projects/{id}   
         [HttpGet("{id}")]
         public async Task<ActionResult<ProjectDetailsDto>> GetProjectById(Guid id)
         {
@@ -117,12 +123,58 @@ namespace SGO.Api.Controllers
 
             if (project == null) return NotFound();
 
+            var payrollCostCenter = await _context.CostCenters
+                .FirstOrDefaultAsync(cc => cc.Name == "Folha de pagamento e rescisões");
+
+            if (payrollCostCenter == null)
+            {
+                return StatusCode(500, "Centro de Custo 'Folha de pagamento e rescisões' não encontrado no banco de dados.");
+            }
+
             var laborCost = project.ProjectEmployees
                 .Where(pe => pe.StartDate > DateTime.MinValue)
-                .Sum(pe => (pe.Employee.Salary / 30) * (decimal)((pe.EndDate ?? DateTime.UtcNow) - pe.StartDate).TotalDays);
+                .Sum(pe => (pe.Employee.Salary / 30m) * (decimal)(((pe.EndDate?.Date ?? DateTime.UtcNow.Date) - pe.StartDate.Date).TotalDays + 1));
 
+            var automatedExpense = project.Expenses
+                .FirstOrDefault(e => e.IsAutomaticallyCalculated);         
 
-            var realExpenses = project.Expenses.Select(e => new ExpenseDto
+            if (laborCost > 0)
+            {
+                if (automatedExpense != null)
+                {
+                    automatedExpense.Amount = Math.Round(laborCost, 2);
+                    automatedExpense.Date = DateTime.UtcNow;
+                    automatedExpense.CostCenterId = payrollCostCenter.Id;
+                }
+                else
+                {
+                    automatedExpense = new ProjectExpense
+                    {
+                        Id = Guid.NewGuid(),
+                        ProjectId = project.Id,
+                        ContractId = project.Contracts.FirstOrDefault()?.Id,
+                        Description = "Custo de Mão de Obra (Calculado)",
+                        Amount = Math.Round(laborCost, 2),
+                        Date = DateTime.UtcNow,
+                        CostCenterId = payrollCostCenter.Id,
+                        IsAutomaticallyCalculated = true
+                    };
+                    _context.ProjectExpenses.Add(automatedExpense);
+                }
+                await _context.SaveChangesAsync();
+            }
+            else if (automatedExpense != null)
+            {
+                _context.ProjectExpenses.Remove(automatedExpense);
+                await _context.SaveChangesAsync();
+            }
+
+            var updatedExpenses = await _context.ProjectExpenses
+                .Where(e => e.ProjectId == id)
+                .Include(e => e.CostCenter)
+                .ToListAsync();
+
+            var allExpensesDto = updatedExpenses.Select(e => new ExpenseDto
             {
                 Id = e.Id,
                 Date = e.Date,
@@ -130,23 +182,8 @@ namespace SGO.Api.Controllers
                 Amount = e.Amount,
                 CostCenterName = e.CostCenter?.Name ?? "N/A",
                 AttachmentPath = e.AttachmentPath,
-                IsVirtual = false
+                IsVirtual = e.IsAutomaticallyCalculated
             }).ToList();
-
-            if (laborCost > 0)
-            {
-                var virtualExpense = new ExpenseDto
-                {
-                    Id = Guid.NewGuid(),
-                    Date = DateTime.UtcNow,
-                    Description = "Custo de Mão de Obra (Calculado)",
-                    Amount = Math.Round(laborCost, 2),
-                    CostCenterName = "Mão de Obra",
-                    IsVirtual = true
-                };
-                realExpenses.Insert(0, virtualExpense);
-            }
-
 
             var projectDto = new ProjectDetailsDto
             {
@@ -163,20 +200,17 @@ namespace SGO.Api.Controllers
                 Description = project.Description,
                 Status = (int)project.Status,
                 EndDate = project.EndDate,
-                Expenses = realExpenses ,
+                Expenses = allExpensesDto.OrderByDescending(e => e.IsVirtual).ThenByDescending(e => e.Date).ToList(),
                 Contracts = project.Contracts.Select(c => new ContractDto
                 {
                     Id = c.Id,
                     ContractNumber = c.ContractNumber,
                     TotalValue = c.TotalValue
-                }).ToList(),                
+                }).ToList(),
             };
 
             return Ok(projectDto);
         }
-
-        // Em SGO.Api/Controllers/ProjectsController.cs
-
         [HttpPost]
         public async Task<ActionResult<Project>> CreateProject([FromBody] CreateProjectDto projectDto)
         {
