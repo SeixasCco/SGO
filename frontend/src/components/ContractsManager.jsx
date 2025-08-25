@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import toast from 'react-hot-toast';
 
 const ContractsManager = ({ projectId, onContractAdded }) => {
     const [contracts, setContracts] = useState([]);
@@ -22,11 +23,11 @@ const ContractsManager = ({ projectId, onContractAdded }) => {
     const handleDelete = (contractId) => {
         if (window.confirm("Tem certeza que deseja deletar este contrato?")) {
             axios.delete(`http://localhost:5145/api/contracts/${contractId}`)
-                .then(() => {
-                    alert("Contrato deletado com sucesso!");
+                .then(() => {                    
+                    toast.success("Contrato deletado com sucesso!");
                     fetchContracts();
                 })
-                .catch(error => alert("Erro ao deletar contrato."));
+                .catch(error => toast.error("Erro ao deletar contrato."));
         }
     };
 
@@ -42,8 +43,8 @@ const ContractsManager = ({ projectId, onContractAdded }) => {
         };
 
         axios.post('http://localhost:5145/api/contracts', newContract)
-            .then(() => {
-                alert("Contrato adicionado com sucesso!");
+            .then(() => {              
+                toast.success("Contrato adicionado com sucesso!");  
                 onContractAdded();                
             })
             .catch(error => {            
@@ -51,8 +52,7 @@ const ContractsManager = ({ projectId, onContractAdded }) => {
                 ? error.response.data 
                 : "Erro ao adicionar contrato. Verifique os dados e a conexão.";
             
-            alert(errorMessage);
-            console.error("Erro ao adicionar contrato:", error.response || error);
+            toast(errorMessage);           
         });
     };
 

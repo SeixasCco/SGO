@@ -1,17 +1,16 @@
 import React, { useState } from 'react'; 
 
 const AddWorkForm = ({ onWorkAdded }) => {
-  // ✅ TODOS os campos sempre definidos com nomenclatura consistente
   const [formData, setFormData] = useState({
     cno: '',
     name: '',
     contractor: '',
-    serviceTaker: '',  // ✅ camelCase consistente
-    responsible: '',   // ✅ sempre definido
+    serviceTaker: '', 
+    responsible: '',   
     city: '',
     state: '',
-    address: '',       // ✅ sempre definido
-    description: '',   // ✅ sempre definido
+    address: '',     
+    description: '',  
     startDate: new Date().toISOString().split('T')[0], 
     endDate: '', 
   });
@@ -45,7 +44,6 @@ const AddWorkForm = ({ onWorkAdded }) => {
       endDate: formData.endDate || null, 
     };
 
-    // Simular chamada axios
     fetch('http://localhost:5145/api/projects', {
       method: 'POST',
       headers: {
@@ -83,7 +81,6 @@ const AddWorkForm = ({ onWorkAdded }) => {
       });
   };
 
-  // ✅ ESTILOS MODERNOS
   const containerStyle = {
     background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
     padding: '30px',
@@ -199,7 +196,7 @@ const AddWorkForm = ({ onWorkAdded }) => {
           />
         </div>
         
-        {/* ✅ Nome da Obra */}
+        {/*  Nome da Obra */}
         <div style={fieldStyle}>
           <label style={labelStyle}>Nome da Obra *</label>
           <input 
@@ -215,7 +212,7 @@ const AddWorkForm = ({ onWorkAdded }) => {
           />
         </div>
         
-        {/* ✅ Contratante */}
+        {/*  Contratante */}
         <div style={fieldStyle}>
           <label style={labelStyle}>Contratante *</label>
           <input 
@@ -231,7 +228,7 @@ const AddWorkForm = ({ onWorkAdded }) => {
           />
         </div>
         
-        {/* ✅ Tomador do Serviço */}
+        {/*  Tomador do Serviço */}
         <div style={fieldStyle}>
           <label style={labelStyle}>Tomador do Serviço *</label>
           <input 
@@ -247,7 +244,7 @@ const AddWorkForm = ({ onWorkAdded }) => {
           />
         </div>
         
-        {/* ✅ Responsável */}
+        {/*  Responsável */}
         <div style={fieldStyle}>
           <label style={labelStyle}>Responsável *</label>
           <input 
@@ -263,7 +260,7 @@ const AddWorkForm = ({ onWorkAdded }) => {
           />
         </div>
         
-        {/* ✅ Cidade */}
+        {/* Cidade */}
         <div style={fieldStyle}>
           <label style={labelStyle}>Cidade *</label>
           <input 
@@ -279,7 +276,7 @@ const AddWorkForm = ({ onWorkAdded }) => {
           />
         </div>
         
-        {/* ✅ Estado */}
+        {/* Estado */}
         <div style={fieldStyle}>
           <label style={labelStyle}>Estado *</label>
           <input 
@@ -296,7 +293,7 @@ const AddWorkForm = ({ onWorkAdded }) => {
           />
         </div>
         
-        {/* ✅ Endereço */}
+        {/* Endereço */}
         <div style={fieldStyle}>
           <label style={labelStyle}>Endereço</label>
           <input 
@@ -311,7 +308,7 @@ const AddWorkForm = ({ onWorkAdded }) => {
           />
         </div>
         
-        {/* ✅ Data Início */}
+        {/* Data Início */}
         <div style={fieldStyle}>
           <label style={labelStyle}>Data Início *</label>
           <input 
@@ -326,7 +323,7 @@ const AddWorkForm = ({ onWorkAdded }) => {
           />
         </div>
         
-        {/* ✅ Data Fim */}
+        {/* Data Fim */}
         <div style={fieldStyle}>
           <label style={labelStyle}>Data Fim</label>
           <input 
@@ -341,7 +338,7 @@ const AddWorkForm = ({ onWorkAdded }) => {
         </div>
       </div>
       
-      {/* ✅ Descrição - Campo maior */}
+      {/*  Descrição  */}
       <div style={fieldStyle}>
         <label style={labelStyle}>Descrição</label>
         <textarea 

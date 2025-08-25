@@ -45,13 +45,14 @@ const EmployeesPage = () => {
       endDate: formData.endDate || null
     };
     axios.post('http://localhost:5145/api/employees', employeeDto)
-      .then(() => {
-        alert('Funcionário cadastrado com sucesso!');
+      .then(() => {       
+        toast.success('Funcionário cadastrado com sucesso!');
         setFormData({ name: '', position: '', salary: '', startDate: new Date().toISOString().split('T')[0], endDate: '' });
         fetchEmployees();
       })
       .catch(err => {
-        alert('Erro ao cadastrar funcionário.');
+         const errorMessage = error.response?.data?.message || error.response?.data || 'Falha ao cadastrar o funcionário.';
+         toast.error(errorMessage);   
       });
   };
 
@@ -231,10 +232,10 @@ const EmployeesPage = () => {
                   width: '100%',
                   padding: '12px 16px',
                   border: '1px solid #d1d5db',
+                  backgroundColor: '#dcdedfff',
                   borderRadius: '8px',
                   fontSize: '1rem',
                   transition: 'border-color 0.2s ease',
-                  backgroundColor: '#dcdedfff',
                   boxSizing: 'border-box',
                   color: '#000000',
                 }}

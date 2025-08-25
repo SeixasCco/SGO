@@ -1,8 +1,6 @@
-// Em SGO.Api/Dtos/DashboardDto.cs - Substituir o arquivo existente
-
 namespace SGO.Api.Dtos;
 
-// ✅ DTO PRINCIPAL - RESUMO GERAL
+//  DTO PRINCIPAL - RESUMO GERAL
 public class DashboardSummaryDto
 {
     // Métricas de Projetos
@@ -31,7 +29,7 @@ public class DashboardSummaryDto
     public DateTime LastUpdated { get; set; }
 }
 
-// ✅ PROJETOS POR STATUS
+//  PROJETOS POR STATUS
 public class ProjectStatusSummaryDto
 {
     public int Status { get; set; }
@@ -40,7 +38,7 @@ public class ProjectStatusSummaryDto
     public decimal TotalValue { get; set; }
 }
 
-// ✅ DESPESAS MENSAIS
+// DESPESAS MENSAIS
 public class MonthlyExpenseDto
 {
     public int Year { get; set; }
@@ -50,7 +48,7 @@ public class MonthlyExpenseDto
     public int ExpenseCount { get; set; }
 }
 
-// ✅ TOP PROJETOS
+// TOP PROJETOS
 public class TopProjectDto
 {
     public Guid Id { get; set; }
@@ -65,7 +63,7 @@ public class TopProjectDto
     public decimal ProfitMargin { get; set; }
 }
 
-// ✅ ATIVIDADES RECENTES EXPANDIDAS
+//  ATIVIDADES RECENTES EXPANDIDAS
 public class RecentActivityDto
 {
     public string ActivityType { get; set; } = string.Empty; 
@@ -77,10 +75,10 @@ public class RecentActivityDto
     public string ProjectContractor { get; set; } = string.Empty;
 }
 
-// ✅ ALERTAS DO DASHBOARD
+// ALERTAS DO DASHBOARD
 public class DashboardAlertDto
 {
-    public string Type { get; set; } = string.Empty; // "info", "warning", "error", "success"
+    public string Type { get; set; } = string.Empty; 
     public string Title { get; set; } = string.Empty;
     public string Message { get; set; } = string.Empty;
     public string Icon { get; set; } = string.Empty;

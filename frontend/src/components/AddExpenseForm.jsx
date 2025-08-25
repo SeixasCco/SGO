@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import toast from 'react-hot-toast';
 
 const AddExpenseForm = ({ projectId, contractId, onExpenseAdded }) => {
   const [formData, setFormData] = useState({
@@ -59,8 +60,8 @@ const AddExpenseForm = ({ projectId, contractId, onExpenseAdded }) => {
     delete newExpense.costCenterName;
 
     try {
-      await axios.post('http://localhost:5145/api/projectexpenses', newExpense);
-      alert('Despesa lançada com sucesso!');
+      await axios.post('http://localhost:5145/api/projectexpenses', newExpense);      
+      toast.success('Despesa lançada com sucesso!');
       setFormData({
         description: '',
         amount: '',
@@ -73,8 +74,7 @@ const AddExpenseForm = ({ projectId, contractId, onExpenseAdded }) => {
         document.querySelector('input[type="file"]').value = '';
       }
       onExpenseAdded();
-    } catch (err) {
-      console.error("Erro ao lançar despesa:", err);
+    } catch (err) {     
       setError('Falha ao lançar despesa. Verifique os dados.');
     } finally {
       setSubmitting(false);
