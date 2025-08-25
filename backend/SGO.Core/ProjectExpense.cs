@@ -16,8 +16,8 @@ public class ProjectExpense
     public Guid? ProjectId { get; set; }
 
     [Column(TypeName = "jsonb")]
-    public string? DetailsJson { get; set; }  
-    public Guid? ContractId { get; set; } 
+    public string? DetailsJson { get; set; }
+    public Guid? ContractId { get; set; }
     public string Description { get; set; } = default!;
     public decimal Amount { get; set; }
     public DateTime Date { get; set; }
@@ -26,13 +26,10 @@ public class ProjectExpense
     public string? Observations { get; set; }
     public string? SupplierName { get; set; }
     public string? InvoiceNumber { get; set; }
-    public ExpenseStatus Status { get; set; }
     public DateTime? PaymentDate { get; set; }
-    public string? AttachmentPath { get; set; }     
-
+    public string? AttachmentPath { get; set; }
     public bool IsAutomaticallyCalculated { get; set; }
     public Project? Project { get; set; } = default!;
     public Contract? Contract { get; set; } = default!;
     public ICollection<ExpenseAttachment> Attachments { get; set; }
-    
 }

@@ -2,8 +2,10 @@
 
 import React, { useState } from 'react';
 import axios from 'axios';
+import toast from 'react-hot-toast';
 
-const AddInvoiceModal = ({ contractId, onClose, onInvoiceAdded }) => {  
+const AddInvoiceModal = ({ contractId, onClose, onInvoiceAdded }) => {
+  
   const [issueDate, setIssueDate] = useState('');           // Data Emissão
   const [invoiceNumber, setInvoiceNumber] = useState('');   // Num NF
   const [grossValue, setGrossValue] = useState('');         // R$ Bruto
@@ -11,7 +13,6 @@ const AddInvoiceModal = ({ contractId, onClose, onInvoiceAdded }) => {
   const [inssValue, setInssValue] = useState('');           // R$ INSS
   const [paymentDate, setPaymentDate] = useState('');       // Data Pgto
   const [attachment, setAttachment] = useState(null);       // Anexo
-
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
@@ -31,13 +32,13 @@ const AddInvoiceModal = ({ contractId, onClose, onInvoiceAdded }) => {
     
     // Validações
     if (!issueDate || !invoiceNumber || !grossValue || !paymentDate) {
-      setError('Por favor, preencha todos os campos obrigatórios.');
+      toast.error('Por favor, preencha todos os campos obrigatórios.');
       return;
     }
 
     const netValue = calculateNetValue();
     if (netValue < 0) {
-      setError('O valor líquido não pode ser negativo. Verifique os valores de ISS e INSS.');
+      toast.error('O valor líquido não pode ser negativo. Verifique os valores de ISS e INSS.');
       return;
     }
 
@@ -52,6 +53,7 @@ const AddInvoiceModal = ({ contractId, onClose, onInvoiceAdded }) => {
     formData.append('inssValue', inssValue || 0);
     formData.append('paymentDate', paymentDate);
     formData.append('contractId', contractId);
+    formData.append('Status', 1);
     
     if (attachment) {
       formData.append('attachment', attachment);
@@ -67,9 +69,9 @@ const AddInvoiceModal = ({ contractId, onClose, onInvoiceAdded }) => {
       onClose();
     })
     .catch(err => {
-      setError('Falha ao adicionar a nota fiscal. Tente novamente.');
-      console.error("Erro ao criar nota fiscal:", err);
-      setSubmitting(false);
+      const errorMessage = err.response?.data?.message || 'Falha ao adicionar a nota fiscal. Tente novamente.';
+      toast.error(errorMessage);
+      setSubmitting(false);      
     });
   };
 

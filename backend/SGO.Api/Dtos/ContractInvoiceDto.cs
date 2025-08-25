@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using SGO.Core;
 
 namespace SGO.API.DTOs;
 
@@ -28,8 +29,7 @@ public class CreateContractInvoiceDto
     public Guid ContractId { get; set; }
 
     public bool IsNetValueValid => GrossValue - IssValue - InssValue >= 0;
-    
-    // Helper methods para converter datas para UTC
+   
     public DateTime GetIssueDateUtc() => DateTime.SpecifyKind(IssueDate, DateTimeKind.Utc);
     public DateTime GetPaymentDateUtc() => DateTime.SpecifyKind(PaymentDate, DateTimeKind.Utc);
 }
@@ -59,7 +59,7 @@ public class UpdateContractInvoiceDto
     [Required(ErrorMessage = "O ID do contrato é obrigatório")]
     public Guid ContractId { get; set; }
 
-    public bool IsNetValueValid => GrossValue - IssValue - InssValue >= 0;    
+    public bool IsNetValueValid => GrossValue - IssValue - InssValue >= 0;
     public DateTime GetIssueDateUtc() => DateTime.SpecifyKind(IssueDate, DateTimeKind.Utc);
     public DateTime GetPaymentDateUtc() => DateTime.SpecifyKind(PaymentDate, DateTimeKind.Utc);
 }
@@ -74,9 +74,11 @@ public class ContractInvoiceResponseDto
     public decimal InssValue { get; set; }
     public decimal NetValue { get; set; }
     public DateTime PaymentDate { get; set; }
-    public string? AttachmentPath { get; set; }
-    public Guid ContractId { get; set; }  
+    public InvoiceStatus Status { get; set; }
+    public string StatusText => Status.ToString();
     public string FormattedInvoiceNumber => $"#{InvoiceNumber}";
+    public string? AttachmentPath { get; set; }
+    public Guid ContractId { get; set; }
     public decimal TotalDeductions => IssValue + InssValue;
     public bool HasAttachment => !string.IsNullOrWhiteSpace(AttachmentPath);
     public string AttachmentFileName => HasAttachment ? Path.GetFileName(AttachmentPath!) : string.Empty;
@@ -84,6 +86,7 @@ public class ContractInvoiceResponseDto
 
 
 public class ContractInvoiceWithFileDto : CreateContractInvoiceDto
-{  
+{
     public IFormFile? Attachment { get; set; }
 }
+

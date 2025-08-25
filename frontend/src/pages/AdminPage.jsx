@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import EmployeesPage from './EmployeesPage'; 
 import AdminExpensesPage from './AdminExpensesPage'; 
+import CompanyProfilePage from './CompanyProfilePage';
 const AdminPage = () => {
     const [activeTab, setActiveTab] = useState('employees');
 
@@ -41,6 +42,10 @@ const AdminPage = () => {
                     onClick={() => setActiveTab('expenses')}
                 >
                     💰 Despesas da Matriz
+                </button>               
+                <button style={tabButtonStyle(activeTab === 'company')} 
+                    onClick={() => setActiveTab('company')}>
+                    🏢 Dados da Matriz
                 </button>
             </div>
 
@@ -48,6 +53,7 @@ const AdminPage = () => {
             <div>
                 {activeTab === 'employees' && <EmployeesPage />}
                 {activeTab === 'expenses' && <AdminExpensesPage />}
+                {activeTab === 'company' && <CompanyProfilePage />}
             </div>
         </div>
     );

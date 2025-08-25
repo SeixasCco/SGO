@@ -196,8 +196,8 @@ namespace SGO.Api.Controllers
                 City = project.City,
                 State = project.State,
                 StartDate = project.StartDate,
-                Address = project.Address,
-                Description = project.Description,
+                Address = project.Address ?? "N/A",
+                Description = project.Description ?? "N/A",
                 Status = (int)project.Status,
                 EndDate = project.EndDate,
                 Expenses = allExpensesDto.OrderByDescending(e => e.IsVirtual).ThenByDescending(e => e.Date).ToList(),
@@ -217,6 +217,9 @@ namespace SGO.Api.Controllers
             var project = new Project
             {
                 Id = Guid.NewGuid(),
+                Cnpj = projectDto.Cnpj,
+                Address = projectDto.Address,
+                Description = projectDto.Description,
                 CNO = projectDto.CNO,
                 Name = projectDto.Name,
                 Contractor = projectDto.Contractor,
@@ -247,6 +250,7 @@ namespace SGO.Api.Controllers
 
             project.Name = projectDto.Name;
             project.Contractor = projectDto.Contractor;
+            project.CNO = projectDto.Cnpj;
             project.CNO = projectDto.CNO;
             project.Responsible = projectDto.Responsible;
             project.StartDate = projectDto.StartDate.ToUniversalTime();

@@ -30,7 +30,6 @@ public class ContractInvoicesController : ControllerBase
         var invoices = await _context.ContractInvoices
             .Where(ci => ci.ContractId == contractId)
             .OrderByDescending(ci => ci.IssueDate)
-            .ThenByDescending(ci => ci.PaymentDate)
             .ToListAsync();
 
         var response = invoices.Select(invoice => new ContractInvoiceResponseDto
@@ -44,11 +43,13 @@ public class ContractInvoicesController : ControllerBase
             NetValue = invoice.NetValue,
             PaymentDate = invoice.PaymentDate,
             AttachmentPath = invoice.AttachmentPath,
-            ContractId = invoice.ContractId
+            ContractId = invoice.ContractId,
+            Status = invoice.Status
         });
 
         return Ok(response);
     }
+
 
     [HttpGet("{id}")]
     public async Task<ActionResult<ContractInvoiceResponseDto>> GetById(Guid id)
@@ -91,7 +92,7 @@ public class ContractInvoicesController : ControllerBase
 
         var duplicateExists = await _context.ContractInvoices
             .AnyAsync(ci => ci.ContractId == dto.ContractId && ci.InvoiceNumber == dto.InvoiceNumber);
-        
+
         if (duplicateExists)
         {
             return BadRequest($"Já existe uma nota fiscal com o número {dto.InvoiceNumber} para este contrato.");
@@ -106,7 +107,8 @@ public class ContractInvoicesController : ControllerBase
             IssValue = dto.IssValue,
             InssValue = dto.InssValue,
             PaymentDate = dto.GetPaymentDateUtc(),
-            ContractId = dto.ContractId
+            ContractId = dto.ContractId,
+            Status = InvoiceStatus.Valid
         };
 
         invoice.CalculateNetValue();
@@ -117,15 +119,15 @@ public class ContractInvoicesController : ControllerBase
             {
                 var fileName = $"{DateTime.Now:yyyyMMdd_HHmmss}_{dto.InvoiceNumber}_{dto.Attachment.FileName}";
                 var uploadsPath = Path.Combine(_environment.WebRootPath ?? _environment.ContentRootPath, "uploads");
-                
+
                 if (!Directory.Exists(uploadsPath))
                     Directory.CreateDirectory(uploadsPath);
 
                 var filePath = Path.Combine(uploadsPath, fileName);
-                
+
                 using var stream = new FileStream(filePath, FileMode.Create);
                 await dto.Attachment.CopyToAsync(stream);
-                
+
                 invoice.AttachmentPath = fileName;
             }
             catch (Exception ex)
@@ -155,6 +157,21 @@ public class ContractInvoicesController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = invoice.Id }, response);
     }
 
+    [HttpPatch("{id}/cancel")]
+    public async Task<IActionResult> CancelInvoice(Guid id)
+    {
+        var invoice = await _context.ContractInvoices.FindAsync(id);
+        if (invoice == null)
+        {
+            return NotFound();
+        }
+
+        invoice.Status = InvoiceStatus.Canceled;
+        await _context.SaveChangesAsync();
+
+        return NoContent();
+    }
+
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(Guid id, [FromForm] ContractInvoiceWithFileDto dto)
     {
@@ -168,10 +185,10 @@ public class ContractInvoicesController : ControllerBase
         }
 
         var duplicateExists = await _context.ContractInvoices
-            .AnyAsync(ci => ci.ContractId == dto.ContractId && 
-                          ci.InvoiceNumber == dto.InvoiceNumber && 
+            .AnyAsync(ci => ci.ContractId == dto.ContractId &&
+                          ci.InvoiceNumber == dto.InvoiceNumber &&
                           ci.Id != id);
-        
+
         if (duplicateExists)
         {
             return BadRequest($"Já existe outra nota fiscal com o número {dto.InvoiceNumber} para este contrato.");
@@ -201,15 +218,15 @@ public class ContractInvoicesController : ControllerBase
 
                 var fileName = $"{DateTime.Now:yyyyMMdd_HHmmss}_{dto.InvoiceNumber}_{dto.Attachment.FileName}";
                 var uploadsPath = Path.Combine(_environment.WebRootPath ?? _environment.ContentRootPath, "uploads");
-                
+
                 if (!Directory.Exists(uploadsPath))
                     Directory.CreateDirectory(uploadsPath);
 
                 var filePath = Path.Combine(uploadsPath, fileName);
-                
+
                 using var stream = new FileStream(filePath, FileMode.Create);
                 await dto.Attachment.CopyToAsync(stream);
-                
+
                 invoice.AttachmentPath = fileName;
             }
             catch (Exception ex)
@@ -263,7 +280,7 @@ public class ContractInvoicesController : ControllerBase
             return NotFound("Esta nota fiscal não possui anexo.");
 
         var filePath = Path.Combine(_environment.WebRootPath ?? _environment.ContentRootPath, "uploads", invoice.AttachmentPath);
-        
+
         if (!System.IO.File.Exists(filePath))
             return NotFound("Arquivo anexado não encontrado.");
 
@@ -277,13 +294,13 @@ public class ContractInvoicesController : ControllerBase
     public async Task<IActionResult> ViewAttachment(string fileName)
     {
         var filePath = Path.Combine(_environment.WebRootPath ?? _environment.ContentRootPath, "uploads", fileName);
-        
+
         if (!System.IO.File.Exists(filePath))
             return NotFound("Arquivo não encontrado.");
 
         var fileBytes = await System.IO.File.ReadAllBytesAsync(filePath);
-        var extension = Path.GetExtension(fileName).ToLowerInvariant();        
-      
+        var extension = Path.GetExtension(fileName).ToLowerInvariant();
+
         var contentType = extension switch
         {
             ".pdf" => "application/pdf",
@@ -313,10 +330,10 @@ public class ContractInvoicesController : ControllerBase
     public async Task<ActionResult<object>> GetContractInvoiceStats(Guid contractId)
     {
         var invoices = await _context.ContractInvoices
-            .Where(ci => ci.ContractId == contractId)
+            .Where(ci => ci.ContractId == contractId && ci.Status == InvoiceStatus.Valid)
             .ToListAsync();
 
-        if (!invoices.Any())
+        if (invoices.Count == 0)
         {
             return Ok(new
             {
@@ -368,10 +385,12 @@ public class ContractInvoicesController : ControllerBase
         if (contract == null)
             return NotFound("Contrato não encontrado.");
 
-        var invoices = await _context.ContractInvoices
+        var allInvoices = await _context.ContractInvoices
             .Where(ci => ci.ContractId == contractId)
             .OrderBy(ci => ci.IssueDate)
             .ToListAsync();
+
+        var validInvoices = allInvoices.Where(i => i.Status == InvoiceStatus.Valid).ToList();
 
         var report = new
         {
@@ -385,16 +404,15 @@ public class ContractInvoicesController : ControllerBase
             },
             Summary = new
             {
-                TotalInvoices = invoices.Count,
-                TotalGrossValue = invoices.Sum(i => i.GrossValue),
-                TotalIssValue = invoices.Sum(i => i.IssValue),
-                TotalInssValue = invoices.Sum(i => i.InssValue),
-                TotalNetValue = invoices.Sum(i => i.NetValue),
-                PercentageExecuted = contract.TotalValue > 0 ? 
-                    (invoices.Sum(i => i.NetValue) / contract.TotalValue * 100) : 0,
-                PendingValue = contract.TotalValue - invoices.Sum(i => i.NetValue)
+                TotalInvoices = validInvoices.Count, 
+                TotalGrossValue = validInvoices.Sum(i => i.GrossValue),
+                TotalIssValue = validInvoices.Sum(i => i.IssValue),
+                TotalInssValue = validInvoices.Sum(i => i.InssValue),
+                TotalNetValue = validInvoices.Sum(i => i.NetValue),
+                PercentageExecuted = contract.TotalValue > 0 ? (validInvoices.Sum(i => i.NetValue) / contract.TotalValue * 100) : 0,
+                PendingValue = contract.TotalValue - validInvoices.Sum(i => i.NetValue)
             },
-            Invoices = invoices.Select(invoice => new ContractInvoiceResponseDto
+            Invoices = allInvoices.Select(invoice => new ContractInvoiceResponseDto
             {
                 Id = invoice.Id,
                 IssueDate = invoice.IssueDate,

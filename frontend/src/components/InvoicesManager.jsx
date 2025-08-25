@@ -26,14 +26,54 @@ const InvoicesManager = ({ contractId }) => {
     const [editingInvoice, setEditingInvoice] = useState(null);
     const [previewAttachment, setPreviewAttachment] = useState(null);
 
+    const fetchInvoices = () => {
+        setLoading(true);
+        axios.get(`http://localhost:5145/api/contractinvoices/by-contract/${contractId}`)
+            .then(response => {
+                setInvoices(response.data || []);
+            })
+            .catch(err => {
+                toast.error('Não foi possível carregar as notas fiscais.');
+            })
+            .finally(() => {
+                setLoading(false);
+            });
+    };
+
     const handleInvoiceAdded = (newInvoice) => {
         setInvoices(prevInvoices => [newInvoice, ...prevInvoices]);
     };
 
     const handleInvoiceUpdated = (updatedInvoice) => {
-        setInvoices(prevInvoices =>
-            prevInvoices.map(inv => inv.id === updatedInvoice.id ? updatedInvoice : inv)
-        );
+        fetchInvoices();
+    };
+
+    const handleCancelInvoice = (invoiceId) => {
+        toast((t) => (
+            <div>
+                <p style={{ margin: 0, fontWeight: '600' }}>Marcar como cancelada esta nota fiscal?</p>
+                <small>Esta ação não pode ser desfeita.</small>
+                <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                    <button onClick={() => {
+                        toast.dismiss(t.id);
+                        const promise = axios.patch(`http://localhost:5145/api/contractinvoices/${invoiceId}/cancel`);
+                        toast.promise(promise, {
+                            loading: 'Cancelando...',
+                            success: () => {
+                                fetchInvoices();
+                                return 'Nota fiscal cancelada com sucesso!';
+                            },
+                            error: 'Falha ao cancelar a nota fiscal.',
+                        });
+                    }} style={{ flex: 1, backgroundColor: '#ef4444', color: 'white', border: 'none', padding: '8px', borderRadius: '4px', cursor: 'pointer' }}>
+                        Sim, Cancelar
+                    </button>
+                    <button onClick={() => toast.dismiss(t.id)} style={{ flex: 1, border: '1px solid #d1d5db', padding: '8px', borderRadius: '4px', cursor: 'pointer' }}>
+                        Não
+                    </button>
+                </div>
+            </div>
+        ), { icon: '⚠️' });
     };
 
     const handleDelete = (invoiceId) => {
@@ -43,16 +83,30 @@ const InvoicesManager = ({ contractId }) => {
                     toast.success('Nota fiscal deletada com sucesso.');
                     setInvoices(prevInvoices => prevInvoices.filter(inv => inv.id !== invoiceId));
                 })
-                .catch(err => {                   
+                .catch(err => {
                     toast.error('Não foi possível deletar a nota fiscal.');
                     console.error("Erro ao deletar:", err);
                 });
         }
     };
 
+    const StatusBadge = ({ status }) => {
+        const isValid = status === 1;
+        const style = {
+            padding: '4px 12px',
+            borderRadius: '12px',
+            fontSize: '12px',
+            fontWeight: '600',
+            textTransform: 'uppercase',
+            backgroundColor: isValid ? '#dcfce7' : '#fee2e2',
+            color: isValid ? '#166534' : '#991b1b',
+        };
+        return <span style={style}>{isValid ? 'Válida' : 'Cancelada'}</span>;
+    };
+
     const getFileIcon = (attachmentPath) => {
         if (!attachmentPath) return null;
-        
+
         const extension = attachmentPath.split('.').pop()?.toLowerCase();
         const iconMap = {
             'pdf': '📄',
@@ -62,12 +116,12 @@ const InvoicesManager = ({ contractId }) => {
             'xls': '📊', 'xlsx': '📊',
             'zip': '📦', 'rar': '📦'
         };
-        
+
         return iconMap[extension] || '📎';
     };
 
     const handleViewAttachment = (attachmentPath, invoiceNumber) => {
-        if (!attachmentPath) return;      
+        if (!attachmentPath) return;
         setPreviewAttachment({ path: attachmentPath, invoiceNumber });
     };
 
@@ -143,6 +197,7 @@ const InvoicesManager = ({ contractId }) => {
                     <table style={tableStyle}>
                         <thead>
                             <tr style={headerRowStyle}>
+                                <th style={thStyle}>Status</th>
                                 <th style={thStyle}>Data Emissão</th>
                                 <th style={thStyle}>Num NF</th>
                                 <th style={thStyle}>R$ Bruto</th>
@@ -157,71 +212,93 @@ const InvoicesManager = ({ contractId }) => {
                             {invoices.map(invoice => (
                                 <tr key={invoice.id} style={rowStyle}>
                                     <td style={tdStyle}>
+                                        <StatusBadge status={invoice.status} />
+                                    </td>
+                                    <td style={tdStyle}>
                                         {formatDate(invoice.issueDate)}
                                     </td>
-                                    
+
                                     <td style={tdStyle}>
                                         <span style={invoiceNumberStyle}>
                                             #{invoice.invoiceNumber}
                                         </span>
                                     </td>
-                                    
+
                                     <td style={tdStyle}>
                                         {formatCurrency(invoice.grossValue)}
                                     </td>
-                                    
+
                                     <td style={tdStyle}>
                                         <span style={deductionValueStyle}>
                                             {formatCurrency(invoice.issValue || 0)}
                                         </span>
                                     </td>
-                                    
+
                                     <td style={tdStyle}>
                                         <span style={deductionValueStyle}>
                                             {formatCurrency(invoice.inssValue || 0)}
                                         </span>
                                     </td>
-                                    
+
                                     <td style={tdStyle}>
                                         <span style={netValueStyle}>
                                             {formatCurrency(invoice.netValue)}
                                         </span>
                                     </td>
-                                    
+
                                     <td style={tdStyle}>
                                         {formatDate(invoice.paymentDate)}
                                     </td>
-                                    
+
                                     <td style={tdStyleCenter}>
                                         <div style={actionsContainerStyle}>
-                                            {/* Ícone de anexo com tipo específico */}
-                                            {invoice.attachmentPath && (
-                                                <button
-                                                    onClick={() => handleViewAttachment(invoice.attachmentPath, invoice.invoiceNumber)}
-                                                    style={attachmentButtonStyle}
-                                                    title={`Abrir anexo (${invoice.attachmentPath.split('.').pop()?.toUpperCase()})`}
-                                                >
-                                                    {getFileIcon(invoice.attachmentPath)}
-                                                </button>
-                                            )}
-                                            
+                                            {/* Ícone de anexo */}
+                                            <div style={{ width: '32px' }}>
+                                                {invoice.attachmentPath && (
+                                                    <button
+                                                        onClick={() => handleViewAttachment(invoice.attachmentPath, invoice.invoiceNumber)}
+                                                        style={attachmentButtonStyle}
+                                                        title={`Abrir anexo (${invoice.attachmentPath.split('.').pop()?.toUpperCase()})`}
+                                                    >
+                                                        {getFileIcon(invoice.attachmentPath)}
+                                                    </button>
+                                                )}
+                                            </div>                                            
+
+                                            {/* Botão de cancelar (condicional) */}
+                                            <div style={{ width: '32px' }}>
+                                                {invoice.status === 1 && ( 
+                                                    <button
+                                                        onClick={() => handleCancelInvoice(invoice.id)}
+                                                        style={{ ...iconButtonDangerStyle, color: '#ef4444' }}
+                                                        title="Cancelar Nota"
+                                                    >
+                                                        ✖️
+                                                    </button>
+                                                )}
+                                            </div>
+
                                             {/* Botão de editar */}
-                                            <button
-                                                onClick={() => setEditingInvoice(invoice)}
-                                                style={iconButtonStyle}
-                                                title="Editar nota fiscal"
-                                            >
-                                                ✏️
-                                            </button>
-                                            
+                                            <div style={{ width: '32px' }}>
+                                                <button
+                                                    onClick={() => setEditingInvoice(invoice)}
+                                                    style={iconButtonStyle}
+                                                    title="Editar nota fiscal"
+                                                >
+                                                    ✏️
+                                                </button>
+                                            </div>
+
                                             {/* Botão de deletar */}
-                                            <button
-                                                onClick={() => handleDelete(invoice.id)}
-                                                style={iconButtonDangerStyle}
-                                                title="Deletar nota fiscal"
-                                            >
-                                                🗑️
-                                            </button>
+                                            <div style={{ width: '32px' }}>
+                                                <button
+                                                    onClick={() => handleDelete(invoice.id)}
+                                                    style={iconButtonDangerStyle}
+                                                    title="Deletar nota fiscal"
+                                                >
+                                                    🗑️
+                                                </button>
+                                            </div>
                                         </div>
                                     </td>
                                 </tr>

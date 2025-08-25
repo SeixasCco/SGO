@@ -1,18 +1,20 @@
-import React, { useState } from 'react'; 
+import React, { useState } from 'react';
+import toast from 'react-hot-toast';
 
 const AddWorkForm = ({ onWorkAdded }) => {
   const [formData, setFormData] = useState({
     cno: '',
+    cnpj: '',
     name: '',
     contractor: '',
-    serviceTaker: '', 
-    responsible: '',   
+    serviceTaker: '',
+    responsible: '',
     city: '',
     state: '',
-    address: '',     
-    description: '',  
-    startDate: new Date().toISOString().split('T')[0], 
-    endDate: '', 
+    address: '',
+    description: '',
+    startDate: new Date().toISOString().split('T')[0],
+    endDate: '',
   });
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -32,6 +34,7 @@ const AddWorkForm = ({ onWorkAdded }) => {
 
     const projectDto = {
       cno: formData.cno,
+      cnpj: formData.cnpj,
       name: formData.name,
       contractor: formData.contractor,
       serviceTaker: formData.serviceTaker,
@@ -40,8 +43,8 @@ const AddWorkForm = ({ onWorkAdded }) => {
       state: formData.state,
       address: formData.address,
       description: formData.description,
-      startDate: formData.startDate,     
-      endDate: formData.endDate || null, 
+      startDate: formData.startDate,
+      endDate: formData.endDate || null,
     };
 
     fetch('http://localhost:5145/api/projects', {
@@ -53,28 +56,28 @@ const AddWorkForm = ({ onWorkAdded }) => {
     })
       .then(response => {
         if (response.ok) {
-          alert('Obra cadastrada com sucesso!');         
-          setFormData({ 
+          toast.success('Obra cadastrada com sucesso!');
+          setFormData({
             cno: '',
             name: '',
             contractor: '',
-            serviceTaker: '', 
-            responsible: '',  
+            serviceTaker: '',
+            responsible: '',
             city: '',
             state: '',
-            address: '',      
-            description: '',  
+            address: '',
+            description: '',
             startDate: new Date().toISOString().split('T')[0],
             endDate: '',
           });
-          if (onWorkAdded) onWorkAdded(); 
+          if (onWorkAdded) onWorkAdded();
         } else {
           throw new Error('Erro na resposta do servidor');
         }
       })
       .catch(err => {
         console.error("Erro ao cadastrar obra:", err);
-        setError('Falha ao cadastrar obra. Tente novamente.');
+        toast.error('Falha ao cadastrar obra. Tente novamente');
       })
       .finally(() => {
         setSubmitting(false);
@@ -112,24 +115,25 @@ const AddWorkForm = ({ onWorkAdded }) => {
     gap: '8px',
   };
 
-  const labelStyle = {
-    color: 'white',
-    fontSize: '14px',
-    fontWeight: '600',
-    textShadow: '0 1px 2px rgba(0,0,0,0.3)',
+  const inputStyle = {
+    width: '100%',
+    padding: '12px 16px',
+    border: '2px solid #d1d5db',
+    borderRadius: '8px',
+    fontSize: '1rem',
+    backgroundColor: '#f9fafb',
+    color: '#1f2937',
+    fontWeight: '500',
+    boxSizing: 'border-box',
+    transition: 'border-color 0.2s ease'
   };
 
-  const inputStyle = {
-    backgroundColor: '#dcdedfff',
-    color: '#1f2937',
-    border: '2px solid transparent',
-    borderRadius: '10px',
-    padding: '12px 16px',
-    fontSize: '14px',
-    fontWeight: '500',
-    outline: 'none',
-    transition: 'all 0.3s ease',
-    boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+  const labelStyle = {
+    display: 'block',
+    fontSize: '0.9rem',
+    fontWeight: '600',
+    color: '#374151',
+    marginBottom: '8px'
   };
 
   const inputFocusStyle = {
@@ -147,7 +151,7 @@ const AddWorkForm = ({ onWorkAdded }) => {
   };
 
   const buttonStyle = {
-    background: submitting 
+    background: submitting
       ? 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)'
       : 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
     color: 'white',
@@ -178,32 +182,44 @@ const AddWorkForm = ({ onWorkAdded }) => {
   return (
     <div style={containerStyle}>
       <h3 style={headerStyle}>🏗️ Cadastrar Nova Obra</h3>
-      
+
+      <div>
+        <label style={labelStyle}>CNPJ</label>
+        <input type="text" 
+               name="cnpj" 
+               value={formData.cnpj} 
+               onChange={handleChange} 
+               required 
+               style={inputStyle} 
+               onFocus={(e) => Object.assign(e.target.style, inputFocusStyle)}
+               onBlur={(e) => Object.assign(e.target.style, inputStyle)}
+               placeholder="XX.XXX.XXX/XXXX-XX" />
+      </div>
+
       <div style={gridStyle}>
-        {/* ✅ CNO */}
+        {/*  CNO */}
         <div style={fieldStyle}>
-          <label style={labelStyle}>CNO *</label>
-          <input 
-            type="text" 
-            name="cno" 
-            value={formData.cno} 
-            onChange={handleChange} 
-            required
+          <label style={labelStyle}>CNO</label>
+          <input
+            type="text"
+            name="cno"
+            value={formData.cno}
+            onChange={handleChange}            
             style={inputStyle}
             onFocus={(e) => Object.assign(e.target.style, inputFocusStyle)}
             onBlur={(e) => Object.assign(e.target.style, inputStyle)}
             placeholder="Cadastro Nacional de Obras"
           />
         </div>
-        
+
         {/*  Nome da Obra */}
         <div style={fieldStyle}>
           <label style={labelStyle}>Nome da Obra *</label>
-          <input 
-            type="text" 
-            name="name" 
-            value={formData.name} 
-            onChange={handleChange} 
+          <input
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
             required
             style={inputStyle}
             onFocus={(e) => Object.assign(e.target.style, inputFocusStyle)}
@@ -211,15 +227,15 @@ const AddWorkForm = ({ onWorkAdded }) => {
             placeholder="Ex: Construção Residencial"
           />
         </div>
-        
+
         {/*  Contratante */}
         <div style={fieldStyle}>
           <label style={labelStyle}>Contratante *</label>
-          <input 
-            type="text" 
-            name="contractor" 
-            value={formData.contractor} 
-            onChange={handleChange} 
+          <input
+            type="text"
+            name="contractor"
+            value={formData.contractor}
+            onChange={handleChange}
             required
             style={inputStyle}
             onFocus={(e) => Object.assign(e.target.style, inputFocusStyle)}
@@ -227,15 +243,15 @@ const AddWorkForm = ({ onWorkAdded }) => {
             placeholder="Nome da empresa contratante"
           />
         </div>
-        
+
         {/*  Tomador do Serviço */}
         <div style={fieldStyle}>
           <label style={labelStyle}>Tomador do Serviço *</label>
-          <input 
-            type="text" 
-            name="serviceTaker" 
-            value={formData.serviceTaker} 
-            onChange={handleChange} 
+          <input
+            type="text"
+            name="serviceTaker"
+            value={formData.serviceTaker}
+            onChange={handleChange}
             required
             style={inputStyle}
             onFocus={(e) => Object.assign(e.target.style, inputFocusStyle)}
@@ -243,15 +259,15 @@ const AddWorkForm = ({ onWorkAdded }) => {
             placeholder="Quem irá utilizar o serviço"
           />
         </div>
-        
+
         {/*  Responsável */}
         <div style={fieldStyle}>
           <label style={labelStyle}>Responsável *</label>
-          <input 
-            type="text" 
-            name="responsible" 
-            value={formData.responsible} 
-            onChange={handleChange} 
+          <input
+            type="text"
+            name="responsible"
+            value={formData.responsible}
+            onChange={handleChange}
             required
             style={inputStyle}
             onFocus={(e) => Object.assign(e.target.style, inputFocusStyle)}
@@ -259,15 +275,15 @@ const AddWorkForm = ({ onWorkAdded }) => {
             placeholder="Responsável técnico da obra"
           />
         </div>
-        
+
         {/* Cidade */}
         <div style={fieldStyle}>
           <label style={labelStyle}>Cidade *</label>
-          <input 
-            type="text" 
-            name="city" 
-            value={formData.city} 
-            onChange={handleChange} 
+          <input
+            type="text"
+            name="city"
+            value={formData.city}
+            onChange={handleChange}
             required
             style={inputStyle}
             onFocus={(e) => Object.assign(e.target.style, inputFocusStyle)}
@@ -275,16 +291,16 @@ const AddWorkForm = ({ onWorkAdded }) => {
             placeholder="Cidade da obra"
           />
         </div>
-        
+
         {/* Estado */}
         <div style={fieldStyle}>
           <label style={labelStyle}>Estado *</label>
-          <input 
-            type="text" 
-            name="state" 
-            value={formData.state} 
-            onChange={handleChange} 
-            maxLength="2" 
+          <input
+            type="text"
+            name="state"
+            value={formData.state}
+            onChange={handleChange}
+            maxLength="2"
             required
             style={inputStyle}
             onFocus={(e) => Object.assign(e.target.style, inputFocusStyle)}
@@ -292,14 +308,14 @@ const AddWorkForm = ({ onWorkAdded }) => {
             placeholder="UF"
           />
         </div>
-        
+
         {/* Endereço */}
         <div style={fieldStyle}>
           <label style={labelStyle}>Endereço</label>
-          <input 
-            type="text" 
-            name="address" 
-            value={formData.address} 
+          <input
+            type="text"
+            name="address"
+            value={formData.address}
             onChange={handleChange}
             style={inputStyle}
             onFocus={(e) => Object.assign(e.target.style, inputFocusStyle)}
@@ -307,29 +323,29 @@ const AddWorkForm = ({ onWorkAdded }) => {
             placeholder="Endereço completo (opcional)"
           />
         </div>
-        
+
         {/* Data Início */}
         <div style={fieldStyle}>
           <label style={labelStyle}>Data Início *</label>
-          <input 
-            type="date" 
-            name="startDate" 
-            value={formData.startDate} 
-            onChange={handleChange} 
+          <input
+            type="date"
+            name="startDate"
+            value={formData.startDate}
+            onChange={handleChange}
             required
             style={inputStyle}
             onFocus={(e) => Object.assign(e.target.style, inputFocusStyle)}
             onBlur={(e) => Object.assign(e.target.style, inputStyle)}
           />
         </div>
-        
+
         {/* Data Fim */}
         <div style={fieldStyle}>
           <label style={labelStyle}>Data Fim</label>
-          <input 
-            type="date" 
-            name="endDate" 
-            value={formData.endDate} 
+          <input
+            type="date"
+            name="endDate"
+            value={formData.endDate}
             onChange={handleChange}
             style={inputStyle}
             onFocus={(e) => Object.assign(e.target.style, inputFocusStyle)}
@@ -337,22 +353,22 @@ const AddWorkForm = ({ onWorkAdded }) => {
           />
         </div>
       </div>
-      
+
       {/*  Descrição  */}
       <div style={fieldStyle}>
         <label style={labelStyle}>Descrição</label>
-        <textarea 
-          name="description" 
-          value={formData.description} 
+        <textarea
+          name="description"
+          value={formData.description}
           onChange={handleChange}
           style={textareaStyle}
-          onFocus={(e) => Object.assign(e.target.style, {...textareaStyle, borderColor: '#4f46e5', boxShadow: '0 0 0 3px rgba(79, 70, 229, 0.1)'})}
+          onFocus={(e) => Object.assign(e.target.style, { ...textareaStyle, borderColor: '#4f46e5', boxShadow: '0 0 0 3px rgba(79, 70, 229, 0.1)' })}
           onBlur={(e) => Object.assign(e.target.style, textareaStyle)}
           placeholder="Descrição detalhada da obra (opcional)"
         />
       </div>
-      
-      <button 
+
+      <button
         type="button"
         onClick={handleSubmit}
         disabled={submitting}
@@ -372,7 +388,7 @@ const AddWorkForm = ({ onWorkAdded }) => {
       >
         {submitting ? '⏳ Salvando...' : '💾 Salvar Obra'}
       </button>
-      
+
       {error && <div style={errorStyle}>⚠️ {error}</div>}
     </div>
   );

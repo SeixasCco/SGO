@@ -8,12 +8,14 @@ public class ProjectDetailsDto
     public string CNO { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public string Contractor { get; set; } = string.Empty;
+
+    public string Cnpj { get; set; } = string.Empty;
+    public string Address { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
     public string ServiceTaker { get; set; } = string.Empty;
     public string Responsible { get; set; } = string.Empty;
     public string City { get; set; } = string.Empty;
     public string State { get; set; } = string.Empty;
-    public string? Address { get; set; }
-    public string? Description { get; set; }
     public int Status { get; set; }
     public DateTime StartDate { get; set; }
     public DateTime? EndDate { get; set; }
@@ -59,13 +61,15 @@ public class UpdateProjectDto
     public string Name { get; set; } = string.Empty;
     public string Contractor { get; set; } = string.Empty;
 
+    public string Cnpj { get; set; } = string.Empty;
+    public string Address { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+
     public string ServiceTaker { get; set; } = string.Empty;
     public string Responsible { get; set; } = string.Empty;
     public string CNO { get; set; } = string.Empty;
     public string City { get; set; } = string.Empty;
     public string State { get; set; } = string.Empty;
-    public string? Address { get; set; }
-    public string? Description { get; set; }
     public int Status { get; set; }
     public DateTime StartDate { get; set; }
     public DateTime? EndDate { get; set; }
@@ -89,6 +93,10 @@ public class ProjectSummaryDto
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Contractor { get; set; } = string.Empty;
+
+    public string Cnpj { get; set; } = string.Empty;
+    public string Address { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
     public string City { get; set; } = string.Empty;
     public string State { get; set; } = string.Empty;
     public string CNO { get; set; } = string.Empty;
@@ -104,6 +112,9 @@ public class ProjectSummaryDto
 public class CreateProjectDto
 {
     public string CNO { get; set; } = string.Empty;
+    public string Cnpj { get; set; } = string.Empty;
+    public string Address { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public string Contractor { get; set; } = string.Empty;
     public string ServiceTaker { get; set; } = string.Empty;

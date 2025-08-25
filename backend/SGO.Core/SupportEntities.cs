@@ -11,12 +11,10 @@ public enum ContractStatus
     Cancelled = 4   // Cancelado
 }
 
-public enum ExpenseStatus
+public enum InvoiceStatus
 {
-    Pending = 1,    // Pendente
-    Approved = 2,   // Aprovada
-    Paid = 3,       // Paga
-    Rejected = 4    // Rejeitada
+    Valid = 1,   // Válida
+    Canceled = 2 // Cancelada
 }
 
 
@@ -48,6 +46,9 @@ public class ContractInvoice
 
     [Required]
     public DateTime PaymentDate { get; set; }
+
+    public InvoiceStatus Status { get; set; }
+
     public string? AttachmentPath { get; set; } 
     public Guid ContractId { get; set; }  
 
@@ -71,3 +72,4 @@ public class ExpenseAttachment
     public string StoredPath { get; set; } = default!;
     public DateTime UploadedAt { get; set; }
 }
+
