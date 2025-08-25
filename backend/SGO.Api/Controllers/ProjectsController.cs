@@ -124,11 +124,11 @@ namespace SGO.Api.Controllers
             if (project == null) return NotFound();
 
             var payrollCostCenter = await _context.CostCenters
-                .FirstOrDefaultAsync(cc => cc.Name == "Folha de pagamento e rescisões");
+                .FirstOrDefaultAsync(cc => cc.Name == "Folhas de pagamento");
 
             if (payrollCostCenter == null)
             {
-                return StatusCode(500, "Centro de Custo 'Folha de pagamento e rescisões' não encontrado no banco de dados.");
+                return StatusCode(500, "Centro de Custo 'Folha de pagamento' não encontrado no banco de dados.");
             }
 
             var laborCost = project.ProjectEmployees

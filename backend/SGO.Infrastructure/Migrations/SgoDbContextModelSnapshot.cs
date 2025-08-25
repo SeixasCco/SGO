@@ -139,7 +139,7 @@ namespace SGO.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("c1b7c9b0-1000-4000-8000-000000000004"),
-                            Name = "Despesas de luz, agua e internet"
+                            Name = "Despesas de luz, água e internet"
                         },
                         new
                         {
@@ -149,7 +149,7 @@ namespace SGO.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("c1b7c9b0-1000-4000-8000-000000000006"),
-                            Name = "EPI's e Uniformes"
+                            Name = "EPI's e uniformes"
                         },
                         new
                         {
@@ -168,8 +168,23 @@ namespace SGO.Infrastructure.Migrations
                         },
                         new
                         {
+                            Id = new Guid("c1b7c9b0-1000-4000-8000-000000000023"),
+                            Name = "Folhas de 13º"
+                        },
+                        new
+                        {
+                            Id = new Guid("c1b7c9b0-1000-4000-8000-000000000024"),
+                            Name = "Folhas de Adiantamento Salarial"
+                        },
+                        new
+                        {
+                            Id = new Guid("c1b7c9b0-1000-4000-8000-000000000025"),
+                            Name = "Folhas de férias"
+                        },
+                        new
+                        {
                             Id = new Guid("c1b7c9b0-1000-4000-8000-000000000010"),
-                            Name = "Folha de pagamento e rescisões"
+                            Name = "Folhas de pagamento"
                         },
                         new
                         {
@@ -198,13 +213,13 @@ namespace SGO.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = new Guid("c1b7c9b0-1000-4000-8000-000000000016"),
-                            Name = "Locação de PTA"
+                            Id = new Guid("c1b7c9b0-1000-4000-8000-000000000017"),
+                            Name = "Locação de Munck/ Guindaste"
                         },
                         new
                         {
-                            Id = new Guid("c1b7c9b0-1000-4000-8000-000000000017"),
-                            Name = "Locação de munck"
+                            Id = new Guid("c1b7c9b0-1000-4000-8000-000000000016"),
+                            Name = "Locação de PTA"
                         },
                         new
                         {
@@ -228,8 +243,28 @@ namespace SGO.Infrastructure.Migrations
                         },
                         new
                         {
+                            Id = new Guid("c1b7c9b0-1000-4000-8000-000000000026"),
+                            Name = "Serviços de Engenharia (ART, Projetos)"
+                        },
+                        new
+                        {
                             Id = new Guid("c1b7c9b0-1000-4000-8000-000000000022"),
                             Name = "Serviços de treinamento"
+                        },
+                        new
+                        {
+                            Id = new Guid("c1b7c9b0-1000-4000-8000-000000000027"),
+                            Name = "Tributos (guias de INSS. FGTS, DCTFWeb, Impostos)"
+                        },
+                        new
+                        {
+                            Id = new Guid("c1b7c9b0-1000-4000-8000-000000000028"),
+                            Name = "Veículos (multas, licenciamentos, taxas)"
+                        },
+                        new
+                        {
+                            Id = new Guid("c1b7c9b0-1000-4000-8000-000000000029"),
+                            Name = "Verbas rescisórias"
                         });
                 });
 
