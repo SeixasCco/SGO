@@ -189,10 +189,13 @@ namespace SGO.Api.Controllers
         [HttpGet("recent-activity")]
         public async Task<IActionResult> GetRecentActivity()
         {
-            var recentExpenses = await _context.ProjectExpenses
+            var recentExpensesFromDb = await _context.ProjectExpenses
                 .Include(e => e.Project)
                 .OrderByDescending(e => e.Date)
                 .Take(10)
+                .ToListAsync();
+
+            var recentActivities = recentExpensesFromDb
                 .Select(e => new RecentActivityDto
                 {
                     ActivityType = "expense",
@@ -200,12 +203,12 @@ namespace SGO.Api.Controllers
                     ActivityDate = e.Date,
                     Amount = e.Amount,
                     RelatedId = e.Id,
-                    ProjectName = e.Project.Name,
-                    ProjectContractor = e.Project.Contractor
+                    ProjectName = e.Project?.Name ?? "Despesa da Matriz",
+                    ProjectContractor = e.Project?.Contractor ?? "N/A"
                 })
-                .ToListAsync();
+                .ToList();
 
-            return Ok(recentExpenses);
+            return Ok(recentActivities);
         }
 
         [HttpGet("alerts")]

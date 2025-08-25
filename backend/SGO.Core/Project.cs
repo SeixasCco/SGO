@@ -1,4 +1,5 @@
-﻿using SGO.Core;
+﻿using System.ComponentModel.DataAnnotations;
+using SGO.Core;
 
 namespace SGO.Core;
 
@@ -13,7 +14,12 @@ public class Project
 
     public Guid Id { get; set; }
     public Guid CompanyId { get; set; }
-    public string CNO { get; set; } = default!;
+
+    [Required]
+    [MaxLength(18)]
+    public string Cnpj { get; set; } = default!;
+    [MaxLength(12)]
+    public string? CNO { get; set; } = default!;
     public string Name { get; set; } = default!;
     public string Contractor { get; set; } = default!;
     public string ServiceTaker { get; set; } = default!;

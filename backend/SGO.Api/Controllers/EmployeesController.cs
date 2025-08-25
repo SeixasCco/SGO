@@ -84,6 +84,12 @@ namespace SGO.Api.Controllers
         [HttpPost]
         public async Task<ActionResult<EmployeeDto>> CreateEmployee(CreateEmployeeDto employeeDto)
         {
+              var company = await _context.Companies.FirstOrDefaultAsync();
+                if (company == null)
+                {                    
+                    return StatusCode(500, "Nenhuma empresa matriz está cadastrada no sistema.");
+                }
+
             var employee = new Employee
             {
                 Id = Guid.NewGuid(),
@@ -91,8 +97,9 @@ namespace SGO.Api.Controllers
                 Position = employeeDto.Position,
                 Salary = employeeDto.Salary,
                 StartDate = employeeDto.StartDate.ToUniversalTime(),
-                EndDate = employeeDto.EndDate?.ToUniversalTime(),              
-                IsActive = true
+                EndDate = employeeDto.EndDate?.ToUniversalTime(),
+                IsActive = true,
+                CompanyId = company.Id 
             };
             _context.Employees.Add(employee);
             await _context.SaveChangesAsync();

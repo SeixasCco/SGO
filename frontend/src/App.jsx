@@ -1,33 +1,35 @@
+// Local: /src/App.jsx
+
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import HomePage from './pages/HomePage'; 
 import ProjectsListPage from './pages/ProjectsListPage'; 
 import WorkDetails from './pages/WorkDetails';
 import EditWorkPage from './pages/EditWorkPage';
-import EmployeesPage from './pages/EmployeesPage';
 import EditEmployeePage from './pages/EditEmployeePage';
 import EditContractPage from './pages/EditContractPage';
 import EditExpensePage from './pages/EditExpensePage';
 import ReportsPage from './pages/ReportsPage'; 
 import { Toaster } from 'react-hot-toast';
+import AdminPage from './pages/AdminPage';
+import EmployeesPage from './pages/EmployeesPage';
+
 import './App.css';
 
 const ModernNavigation = () => {
-  const location = useLocation();
+    const location = useLocation();    
   
-  const navItems = [
-    { path: '/', label: 'Dashboard', icon: '📊' },
-    { path: '/projects', label: 'Obras', icon: '🏗️' },
-    { path: '/employees', label: 'Funcionários', icon: '👥' },
-    { path: '/reports', label: 'Relatórios', icon: '📋' }
-  ];
+    const navItems = [
+        { path: '/', label: 'Dashboard', icon: '📊' },
+        { path: '/projects', label: 'Obras', icon: '🏗️' },
+        { path: '/admin', label: 'Administrativo', icon: '🗂️' },
+        { path: '/reports', label: 'Relatórios', icon: '📋' }
+    ];
 
-  const isActive = (path) => {
-    if (path === '/') {
-      return location.pathname === '/';
-    }
-    return location.pathname.startsWith(path);
-  };
+    const isActive = (path) => {
+        if (path === '/') return location.pathname === '/';
+        return location.pathname.startsWith(path);
+    };
 
   return (
     <nav style={{
@@ -191,7 +193,7 @@ function App() {
               <Route path="/projects" element={<ProjectsListPage />} />
               <Route path="/project/:id" element={<WorkDetails />} />
               <Route path="/project/edit/:id" element={<EditWorkPage />} />
-              <Route path="/employees" element={<EmployeesPage />} />
+              <Route path="/admin" element={<AdminPage />} /> 
               <Route path="/employee/edit/:id" element={<EditEmployeePage />} />
               <Route path="/contract/edit/:id" element={<EditContractPage />} />
               <Route path="/expense/edit/:id" element={<EditExpensePage />} />

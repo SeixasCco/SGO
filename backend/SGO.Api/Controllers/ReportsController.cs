@@ -30,8 +30,8 @@ namespace SGO.Api.Controllers
             if (filters.EndDate.HasValue)
                 query = query.Where(e => e.Date <= filters.EndDate.Value.ToUniversalTime());
 
-            if (filters.ProjectIds != null && filters.ProjectIds.Any())
-                query = query.Where(e => filters.ProjectIds.Contains(e.ProjectId));
+            if (filters.ProjectIds != null && filters.ProjectIds.Any())                
+                query = query.Where(e => e.ProjectId.HasValue && filters.ProjectIds.Contains(e.ProjectId.Value));
 
             return query;
         }
@@ -51,7 +51,7 @@ namespace SGO.Api.Controllers
             var detailedList = filteredExpenses.Select(e => new ExpenseReportItemDto
             {
                 Date = e.Date,
-                ProjectName = e.Project.Name,
+                ProjectName = e.Project?.Name?? "Despesa da Matriz",
                 CostCenterName = e.CostCenter.Name,
                 Description = e.Description,
                 Amount = e.Amount,
@@ -86,20 +86,23 @@ namespace SGO.Api.Controllers
 
             var query = GetFilteredExpensesQuery(filters);
 
-            var expensesForExport = await query
+            var expensesFromDb = await query
                 .Include(e => e.Project)
                 .Include(e => e.CostCenter)
                 .OrderBy(e => e.Date)
+                .ToListAsync();
+
+           var expensesForExport = expensesFromDb
                 .Select(e => new
                 {
                     Data = e.Date.ToString("dd/MM/yyyy"),
-                    Obra = e.Project.Name,
+                    Obra = e.Project?.Name ?? "Despesa da Matriz", 
                     CentroDeCusto = e.CostCenter.Name,
                     Descricao = e.Description,
                     Valor = e.Amount,
                     Anexo = !string.IsNullOrEmpty(e.AttachmentPath) ? $"http://localhost:5145{e.AttachmentPath}" : ""
                 })
-                .ToListAsync();
+                .ToList();
 
             using (var package = new ExcelPackage())
             {

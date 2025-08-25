@@ -1,5 +1,5 @@
-
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema; 
 
 namespace SGO.Core
 {
@@ -18,10 +18,14 @@ namespace SGO.Core
 
         [Required]
         public DateTime StartDate { get; set; } 
-        public DateTime? EndDate { get; set; }   
+        public DateTime? EndDate { get; set; }  
         
-        public bool IsActive { get; set; } = true;       
-        
+        public bool IsActive { get; set; } = true;    
+     
+        public Guid CompanyId { get; set; }
+        [ForeignKey("CompanyId")]
+        public Company Company { get; set; } = default!;   
+
         public ICollection<ProjectEmployee> ProjectEmployees { get; set; } = new List<ProjectEmployee>();
     }
 }

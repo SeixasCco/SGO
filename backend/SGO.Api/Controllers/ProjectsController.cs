@@ -82,7 +82,7 @@ namespace SGO.Api.Controllers
                     Contractor = data.Project.Contractor,
                     City = data.Project.City,
                     State = data.Project.State,
-                    CNO = data.Project.CNO,
+                    CNO = data.Project.CNO ?? "N/A",
                     Responsible = data.Project.Responsible,
                     Status = (int)data.Project.Status,
                     StatusText = GetStatusText(data.Project.Status),
@@ -188,7 +188,7 @@ namespace SGO.Api.Controllers
             var projectDto = new ProjectDetailsDto
             {
                 Id = project.Id,
-                CNO = project.CNO,
+                CNO = project.CNO ?? "N/A",
                 Name = project.Name,
                 Contractor = project.Contractor,
                 ServiceTaker = project.ServiceTaker,

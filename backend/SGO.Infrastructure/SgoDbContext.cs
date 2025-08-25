@@ -1,5 +1,4 @@
-﻿// Local: SGO.Infrastructure/SgoDbContext.cs
-namespace SGO.Infrastructure;
+﻿namespace SGO.Infrastructure;
 
 using Microsoft.EntityFrameworkCore;
 using SGO.Core;
@@ -10,6 +9,7 @@ public class SgoDbContext : DbContext
     {
     }
 
+    public DbSet<Company> Companies { get; set; }
     public DbSet<Project> Projects { get; set; }
     public DbSet<Contract> Contracts { get; set; }
     public DbSet<ProjectExpense> ProjectExpenses { get; set; }

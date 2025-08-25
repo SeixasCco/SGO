@@ -3,6 +3,7 @@ import axios from 'axios';
 import AddInvoiceModal from './AddInvoiceModal';
 import EditInvoiceModal from './EditInvoiceModal';
 import AttachmentPreviewModal from './AttachmentPreviewModal';
+import toast from 'react-hot-toast';
 
 const formatCurrency = (value) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -39,10 +40,11 @@ const InvoicesManager = ({ contractId }) => {
         if (window.confirm('Tem certeza que deseja deletar esta nota fiscal?')) {
             axios.delete(`http://localhost:5145/api/contractinvoices/${invoiceId}`)
                 .then(() => {
+                    toast.success('Nota fiscal deletada com sucesso.');
                     setInvoices(prevInvoices => prevInvoices.filter(inv => inv.id !== invoiceId));
                 })
-                .catch(err => {
-                    alert('Não foi possível deletar a nota fiscal.');
+                .catch(err => {                   
+                    toast.error('Não foi possível deletar a nota fiscal.');
                     console.error("Erro ao deletar:", err);
                 });
         }

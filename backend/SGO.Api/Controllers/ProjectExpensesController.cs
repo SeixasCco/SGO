@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Text.Json;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SGO.Api.Dtos;
 using SGO.Core;
@@ -36,12 +37,16 @@ namespace SGO.Api.Controllers
         // POST: api/projectexpenses
         [HttpPost]
         public async Task<ActionResult<ProjectExpense>> CreateExpense([FromBody] CreateExpenseDto expenseDto)
-        {
+        {           
+            if (expenseDto.ProjectId.HasValue && !expenseDto.ContractId.HasValue)
+            {
+                return BadRequest(new { message = "Para despesas de obra, é obrigatório selecionar um contrato." });
+            }
 
             if (expenseDto.CostCenterId == Guid.Empty)
-            {                
+            {
                 return BadRequest(new { message = "O Centro de Custo é obrigatório." });
-            }
+            }            
 
             var newExpense = new ProjectExpense
             {
@@ -51,16 +56,26 @@ namespace SGO.Api.Controllers
                 Description = expenseDto.Description,
                 Amount = expenseDto.Amount,
                 Date = expenseDto.Date.ToUniversalTime(),
+                CostCenterId = expenseDto.CostCenterId,
                 Observations = expenseDto.Observations,
                 SupplierName = expenseDto.SupplierName,
                 InvoiceNumber = expenseDto.InvoiceNumber,
                 AttachmentPath = expenseDto.AttachmentPath,
-                CostCenterId = expenseDto.CostCenterId
+                IsAutomaticallyCalculated = false, 
+
+                DetailsJson = expenseDto.Details != null && expenseDto.Details.Any()
+                    ? JsonSerializer.Serialize(expenseDto.Details)
+                    : null
             };
 
             _context.ProjectExpenses.Add(newExpense);
             await _context.SaveChangesAsync();
+           
             await _context.Entry(newExpense).Reference(e => e.CostCenter).LoadAsync();
+            if (newExpense.ProjectId.HasValue)
+            {
+                await _context.Entry(newExpense).Reference(e => e.Project).LoadAsync();
+            }
 
             return Ok(newExpense);
         }
