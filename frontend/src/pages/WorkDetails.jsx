@@ -583,200 +583,71 @@ const WorkDetails = () => {
 
             {/* TAB: VISÃO GERAL */}
             {activeTab === 'overview' && (
+                // --- BLOCO DE CARDS DA VISÃO GERAL ATUALIZADO ---
                 <div style={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
                     gap: '24px'
                 }}>
 
-                    {/* Resumo de Contratos */}
+                    {/* Card de Contratos */}
                     <div style={{
                         backgroundColor: 'white',
                         borderRadius: '12px',
-                        padding: '24px',
+                        padding: '16px', // Altura reduzida
                         border: '1px solid #e2e8f0',
-                        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
+                        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.05)'
                     }}>
-                        <h3 style={{
-                            fontSize: '1.25rem',
-                            fontWeight: '600',
-                            color: '#1e293b',
-                            margin: '0 0 16px 0',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px'
-                        }}>
+                        <h3 style={{ fontSize: '1rem', fontWeight: '600', color: '#475569', margin: '0 0 12px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
                             📄 Contratos
                         </h3>
-                        <div style={{
-                            textAlign: 'center',
-                            padding: '20px'
-                        }}>
-                            <div style={{
-                                fontSize: '2.5rem',
-                                fontWeight: '700',
-                                color: '#3b82f6',
-                                marginBottom: '8px'
-                            }}>
-                                {contracts.length}
-                            </div>
-                            <div style={{
-                                fontSize: '0.9rem',
-                                color: '#64748b'
-                            }}>
-                                Contratos Ativos
-                            </div>
+                        <div style={{ fontSize: '1.75rem', fontWeight: '700', color: '#3b82f6', marginBottom: '4px' }}>
+                            {formatCurrency(contracts.reduce((sum, contract) => sum + contract.totalValue, 0))}
                         </div>
-                        {contracts.length > 0 && (
-                            <div style={{
-                                borderTop: '1px solid #f1f5f9',
-                                paddingTop: '16px',
-                                marginTop: '16px'
-                            }}>
-                                <div style={{
-                                    fontSize: '0.875rem',
-                                    color: '#64748b',
-                                    marginBottom: '4px'
-                                }}>
-                                    Valor Total
-                                </div>
-                                <div style={{
-                                    fontSize: '1.25rem',
-                                    fontWeight: '700',
-                                    color: '#10b981'
-                                }}>
-                                    {formatCurrency(contracts.reduce((sum, contract) => sum + contract.totalValue, 0))}
-                                </div>
-                            </div>
-                        )}
+                        <div style={{ fontSize: '0.8rem', color: '#64748b', textTransform: 'uppercase', fontWeight: '500' }}>
+                            em {contracts.length} contrato(s) ativo(s)
+                        </div>
                     </div>
 
-                    {/* Resumo da Equipe */}
+                    {/* Card de Equipe */}
                     <div style={{
                         backgroundColor: 'white',
                         borderRadius: '12px',
-                        padding: '24px',
+                        padding: '16px', // Altura reduzida
                         border: '1px solid #e2e8f0',
-                        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
+                        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.05)'
                     }}>
-                        <h3 style={{
-                            fontSize: '1.25rem',
-                            fontWeight: '600',
-                            color: '#1e293b',
-                            margin: '0 0 16px 0',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px'
-                        }}>
+                        <h3 style={{ fontSize: '1rem', fontWeight: '600', color: '#475569', margin: '0 0 12px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
                             👥 Equipe
                         </h3>
-                        <div style={{
-                            textAlign: 'center',
-                            padding: '20px'
-                        }}>
-                            <div style={{
-                                fontSize: '2.5rem',
-                                fontWeight: '700',
-                                color: '#10b981',
-                                marginBottom: '8px'
-                            }}>
-                                {allocations.filter(alloc => !alloc.endDate).length}
-                            </div>
-                            <div style={{
-                                fontSize: '0.9rem',
-                                color: '#64748b'
-                            }}>
-                                Funcionários Ativos
-                            </div>
+                        <div style={{ fontSize: '1.75rem', fontWeight: '700', color: '#10b981', marginBottom: '4px' }}>
+                            {allocations.filter(alloc => !alloc.endDate).length}
                         </div>
-                        {allocations.length > 0 && (
-                            <div style={{
-                                borderTop: '1px solid #f1f5f9',
-                                paddingTop: '16px',
-                                marginTop: '16px'
-                            }}>
-                                <div style={{
-                                    fontSize: '0.875rem',
-                                    color: '#64748b',
-                                    marginBottom: '4px'
-                                }}>
-                                    Total de Alocações
-                                </div>
-                                <div style={{
-                                    fontSize: '1.25rem',
-                                    fontWeight: '700',
-                                    color: '#6366f1'
-                                }}>
-                                    {allocations.length}
-                                </div>
-                            </div>
-                        )}
+                        <div style={{ fontSize: '0.8rem', color: '#64748b', textTransform: 'uppercase', fontWeight: '500' }}>
+                            Funcionários Ativos
+                        </div>
                     </div>
 
-                    {/* Resumo de Despesas */}
+                    {/* Card de Despesas */}
                     <div style={{
                         backgroundColor: 'white',
                         borderRadius: '12px',
-                        padding: '24px',
+                        padding: '16px', // Altura reduzida
                         border: '1px solid #e2e8f0',
-                        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
+                        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.05)'
                     }}>
-                        <h3 style={{
-                            fontSize: '1.25rem',
-                            fontWeight: '600',
-                            color: '#1e293b',
-                            margin: '0 0 16px 0',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px'
-                        }}>
+                        <h3 style={{ fontSize: '1rem', fontWeight: '600', color: '#475569', margin: '0 0 12px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
                             💰 Despesas
                         </h3>
-                        <div style={{
-                            textAlign: 'center',
-                            padding: '20px'
-                        }}>
-                            <div style={{
-                                fontSize: '2.5rem',
-                                fontWeight: '700',
-                                color: '#f59e0b',
-                                marginBottom: '8px'
-                            }}>
-                                {project.expenses ? project.expenses.length : 0}
-                            </div>
-                            <div style={{
-                                fontSize: '0.9rem',
-                                color: '#64748b'
-                            }}>
-                                Lançamentos
-                            </div>
+                        <div style={{ fontSize: '1.75rem', fontWeight: '700', color: '#ef4444', marginBottom: '4px' }}>
+                            {formatCurrency(project.expenses.reduce((sum, expense) => sum + expense.amount, 0))}
                         </div>
-                        {project.expenses && project.expenses.length > 0 && (
-                            <div style={{
-                                borderTop: '1px solid #f1f5f9',
-                                paddingTop: '16px',
-                                marginTop: '16px'
-                            }}>
-                                <div style={{
-                                    fontSize: '0.875rem',
-                                    color: '#64748b',
-                                    marginBottom: '4px'
-                                }}>
-                                    Total Gasto
-                                </div>
-                                <div style={{
-                                    fontSize: '1.25rem',
-                                    fontWeight: '700',
-                                    color: '#ef4444'
-                                }}>
-                                    {formatCurrency(project.expenses.reduce((sum, expense) => sum + expense.amount, 0))}
-                                </div>
-                            </div>
-                        )}
+                        <div style={{ fontSize: '0.8rem', color: '#64748b', textTransform: 'uppercase', fontWeight: '500' }}>
+                            Total Gasto
+                        </div>
                     </div>
                 </div>
             )}
-
             {/* TAB: CONTRATOS */}
             {activeTab === 'contracts' && (
                 <div style={{
