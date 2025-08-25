@@ -48,7 +48,7 @@ const ProjectsListPage = () => {
         e.stopPropagation();
         navigate(`/project/edit/${projectId}`);
     };
-    
+
     const getStatusBadgeJsx = (status, statusText) => {
         const statusStyles = {
             1: { bg: '#fef3c7', color: '#92400e', border: '#f59e0b' },
@@ -72,11 +72,11 @@ const ProjectsListPage = () => {
         );
     };
 
-    if (error) return ( <div>{error}</div> );
+    if (error) return (<div>{error}</div>);
 
     return (
         <div style={{ minHeight: '100vh', backgroundColor: '#f1f5f9', padding: '0' }}>
-            
+
             {/* Header da Página */}
             <div style={{ backgroundColor: 'white', borderBottom: '1px solid #e2e8f0', padding: '32px 48px', marginBottom: '32px', boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)' }}>
                 <div style={{ maxWidth: '1400px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -88,7 +88,23 @@ const ProjectsListPage = () => {
                             {projects.length} obra{projects.length !== 1 ? 's' : ''} encontrada{projects.length !== 1 ? 's' : ''}
                         </p>
                     </div>
-                    <button onClick={() => setIsFormVisible(!isFormVisible)} style={{ /* ...estilos do botão Nova Obra... */ }}>
+                    <button onClick={() => setIsFormVisible(!isFormVisible)} style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        padding: '16px 32px',
+                        backgroundColor: isFormVisible ? '#ef4444' : '#3b82f6',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '12px',
+                        fontSize: '1.1rem',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease',
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                        minWidth: '180px',
+                        justifyContent: 'center'
+                    }}>
                         {isFormVisible ? '❌ Cancelar' : '➕ Nova Obra'}
                     </button>
                 </div>
@@ -110,11 +126,11 @@ const ProjectsListPage = () => {
                     <div style={{ textAlign: 'center', padding: '120px 0' }}>Carregando obras...</div>
                 ) : projects.length === 0 ? (
                     <div style={{ textAlign: 'center', padding: '120px 0' }}>Nenhuma obra cadastrada</div>
-                ) : (                    
+                ) : (
                     <div>
-                        {projects.map(project => {                           
+                        {projects.map(project => {
                             const formatCurrency = (value) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value || 0);
-                           
+
                             const cardStyle = {
                                 display: 'grid',
                                 gridTemplateColumns: '2fr 1fr 1fr 1fr auto',
@@ -170,13 +186,13 @@ const ProjectsListPage = () => {
 
                                     {/* COLUNA 5: AÇÕES */}
                                     <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                                        <button onClick={(e) => handleEditClick(project.id, e)} style={{ padding: '8px 16px', border: '1px solid #d1d5db', backgroundColor: 'white', borderRadius: '6px', cursor: 'pointer', fontWeight: '500' }}>Editar</button>
+                                        <button onClick={(e) => handleEditClick(project.id, e)} style={{ padding: '8px 16px', border: '1px solid #d1d5db', backgroundColor: '#fef2f2', color: '#353333ff', borderRadius: '6px', cursor: 'pointer', fontWeight: '500' }}>Editar</button>
                                         <button onClick={(e) => handleDeleteProject(project.id, e)} style={{ padding: '8px 16px', border: '1px solid #fecaca', backgroundColor: '#fef2f2', color: '#b91c1c', borderRadius: '6px', cursor: 'pointer', fontWeight: '500' }}>Deletar</button>
                                     </div>
                                 </div>
                             );
                         })}
-                    </div>                    
+                    </div>
                 )}
             </div>
         </div>

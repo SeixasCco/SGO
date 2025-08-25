@@ -1,5 +1,3 @@
-// ✅ ARQUIVO: /frontend/src/App.jsx
-
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import HomePage from './pages/HomePage'; 
@@ -10,10 +8,10 @@ import EmployeesPage from './pages/EmployeesPage';
 import EditEmployeePage from './pages/EditEmployeePage';
 import EditContractPage from './pages/EditContractPage';
 import EditExpensePage from './pages/EditExpensePage';
-import ReportsPage from './pages/ReportsPage'; // ✅ NOVA IMPORTAÇÃO
+import ReportsPage from './pages/ReportsPage'; 
+import { Toaster } from 'react-hot-toast';
 import './App.css';
 
-// ✅ COMPONENTE DE NAVEGAÇÃO MODERNA ATUALIZADA
 const ModernNavigation = () => {
   const location = useLocation();
   
@@ -21,7 +19,7 @@ const ModernNavigation = () => {
     { path: '/', label: 'Dashboard', icon: '📊' },
     { path: '/projects', label: 'Obras', icon: '🏗️' },
     { path: '/employees', label: 'Funcionários', icon: '👥' },
-    { path: '/reports', label: 'Relatórios', icon: '📋' } // ✅ NOVA OPÇÃO
+    { path: '/reports', label: 'Relatórios', icon: '📋' }
   ];
 
   const isActive = (path) => {
@@ -166,32 +164,45 @@ const ModernNavigation = () => {
   );
 };
 
-// ✅ COMPONENTE PRINCIPAL COM LAYOUT ATUALIZADO
 function App() {
   return (
-    <Router>
-      <div className="App" style={{ 
-        minHeight: '100vh',
-        backgroundColor: '#f1f5f9'
-      }}>
-        <ModernNavigation />
-        
-        <main>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/projects" element={<ProjectsListPage />} />
-            <Route path="/project/:id" element={<WorkDetails />} />
-            <Route path="/project/edit/:id" element={<EditWorkPage />} />
-            <Route path="/employees" element={<EmployeesPage />} />
-            <Route path="/employee/edit/:id" element={<EditEmployeePage />} />
-            <Route path="/contract/edit/:id" element={<EditContractPage />} />
-            <Route path="/expense/edit/:id" element={<EditExpensePage />} />
-            <Route path="/reports" element={<ReportsPage />} /> {/* ✅ NOVA ROTA */}
-          </Routes>
-        </main>
-      </div>
-    </Router>
+    <>
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 5000,
+          style: {
+            background: '#363636',
+            color: '#fff',
+          },
+        }}
+      />
+
+      <Router>
+        <div className="App" style={{ 
+          minHeight: '100vh',
+          backgroundColor: '#f1f5f9'
+        }}>
+          <ModernNavigation />
+          
+          <main>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/projects" element={<ProjectsListPage />} />
+              <Route path="/project/:id" element={<WorkDetails />} />
+              <Route path="/project/edit/:id" element={<EditWorkPage />} />
+              <Route path="/employees" element={<EmployeesPage />} />
+              <Route path="/employee/edit/:id" element={<EditEmployeePage />} />
+              <Route path="/contract/edit/:id" element={<EditContractPage />} />
+              <Route path="/expense/edit/:id" element={<EditExpensePage />} />
+              <Route path="/reports" element={<ReportsPage />} /> 
+            </Routes>
+          </main>
+        </div>
+      </Router>
+    </>
   );
 }
+
 
 export default App;

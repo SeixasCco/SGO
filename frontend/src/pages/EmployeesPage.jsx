@@ -1,7 +1,7 @@
-// Local: frontend/src/pages/EmployeesPage.jsx
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import toast from 'react-hot-toast';
 
 const EmployeesPage = () => {
   const [employees, setEmployees] = useState([]);
@@ -59,10 +59,13 @@ const EmployeesPage = () => {
     if (window.confirm("Tem certeza que deseja deletar este funcionário?")) {
       axios.delete(`http://localhost:5145/api/employees/${employeeId}`)
         .then(() => {
-          alert("Funcionário deletado com sucesso!");
+          toast.success('Funcionário deletado com sucesso!');
           fetchEmployees();
         })
-        .catch(error => alert("Falha ao deletar o funcionário."));
+        .catch((error) => {               
+                const errorMessage = error.response?.data?.message || error.response?.data || 'Falha ao deletar o funcionário.';
+                toast.error(errorMessage);              
+            });
     }
   };
 
@@ -123,8 +126,7 @@ const EmployeesPage = () => {
       margin: '0 auto',
       padding: '48px'
     }}>
-
-      {/* ✅ HEADER DA PÁGINA */}
+      
       <div style={{
         marginBottom: '32px'
       }}>
@@ -147,8 +149,7 @@ const EmployeesPage = () => {
           Gerencie sua equipe de colaboradores
         </p>
       </div>
-
-      {/* ✅ FORMULÁRIO DE CADASTRO MODERNIZADO */}
+     
       <div style={{
         backgroundColor: 'white',
         borderRadius: '12px',
@@ -169,16 +170,14 @@ const EmployeesPage = () => {
           ➕ Cadastrar Novo Funcionário
         </h3>
 
-        <form onSubmit={handleSubmit}>
-          {/* Grid responsivo para campos */}
+        <form onSubmit={handleSubmit}>         
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
             gap: '20px',
             marginBottom: '24px'
           }}>
-
-            {/* Campo Nome */}
+          
             <div>
               <label style={{
                 display: 'block',
@@ -211,8 +210,7 @@ const EmployeesPage = () => {
                 placeholder="Digite o nome completo"
               />
             </div>
-
-            {/* Campo Cargo */}
+           
             <div>
               <label style={{
                 display: 'block',
@@ -245,8 +243,7 @@ const EmployeesPage = () => {
                 placeholder="Ex: Engenheiro Civil"
               />
             </div>
-
-            {/* Campo Salário */}
+            
             <div>
               <label style={{
                 display: 'block',
@@ -281,8 +278,7 @@ const EmployeesPage = () => {
                 placeholder="5000.00"
               />
             </div>
-
-            {/* Campo Data Início */}
+           
             <div>
               <label style={{
                 display: 'block',
@@ -314,8 +310,7 @@ const EmployeesPage = () => {
                 onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
               />
             </div>
-
-            {/* Campo Data Fim */}
+           
             <div>
               <label style={{
                 display: 'block',
@@ -347,8 +342,7 @@ const EmployeesPage = () => {
               />
             </div>
           </div>
-
-          {/* Botão de Submissão */}
+         
           <button
             type="submit"
             style={{
@@ -373,7 +367,7 @@ const EmployeesPage = () => {
         </form>
       </div>
 
-      {/* ✅ LISTA DE FUNCIONÁRIOS MODERNIZADA */}
+      {/*  LISTA DE FUNCIONÁRIOS */}
       <div style={{
         backgroundColor: 'white',
         borderRadius: '12px',
@@ -449,8 +443,7 @@ const EmployeesPage = () => {
                     e.currentTarget.style.boxShadow = 'none';
                   }}
                 >
-
-                  {/* Layout responsivo do card do funcionário */}
+                 
                   <div style={{
                     display: 'grid',
                     gridTemplateColumns: 'auto 1fr auto',
