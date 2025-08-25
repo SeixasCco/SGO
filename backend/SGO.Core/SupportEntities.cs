@@ -3,8 +3,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SGO.Core;
 
-// --- Enums de Suporte ---
-
 public enum ContractStatus
 {
     Draft = 1,      // Rascunho
@@ -21,35 +19,48 @@ public enum ExpenseStatus
     Rejected = 4    // Rejeitada
 }
 
+
 public class ContractInvoice
 {
     [Key]
     public Guid Id { get; set; }
 
     [Required]
-    [MaxLength(200)]
-    public string Title { get; set; } = default!;
+    public DateTime IssueDate { get; set; }
+
+    [Required]
+    [MaxLength(50)]
+    public string InvoiceNumber { get; set; } = default!;
 
     [Required]
     [Column(TypeName = "decimal(18,2)")]
     public decimal GrossValue { get; set; }
 
     [Column(TypeName = "decimal(18,2)")]
-    public decimal DeductionsValue { get; set; }
+    public decimal IssValue { get; set; }
+
+    [Column(TypeName = "decimal(18,2)")]
+    public decimal InssValue { get; set; }
 
     [Required]
     [Column(TypeName = "decimal(18,2)")]
     public decimal NetValue { get; set; }
 
     [Required]
-    public DateTime DepositDate { get; set; }
-
-   public string? AttachmentPath { get; set; }
-   
+    public DateTime PaymentDate { get; set; }
+    public string? AttachmentPath { get; set; } 
     public Guid ContractId { get; set; }  
 
     [ForeignKey("ContractId")]
     public virtual Contract Contract { get; set; } = default!;
+    public void CalculateNetValue()
+    {
+        NetValue = GrossValue - IssValue - InssValue;
+    }
+    public bool IsValid => NetValue >= 0 && GrossValue > 0 && !string.IsNullOrWhiteSpace(InvoiceNumber);
+    public string FormattedInvoiceNumber => $"#{InvoiceNumber}";   
+    public decimal TotalDeductions => IssValue + InssValue;
+    public bool HasAttachment => !string.IsNullOrWhiteSpace(AttachmentPath);
 }
 
 public class ExpenseAttachment
