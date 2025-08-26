@@ -1,31 +1,27 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
+import toast from 'react-hot-toast';
+
 import AddContractModal from '../components/AddContractModal';
 import TeamManager from '../components/TeamManager';
+import AddExpenseModal from '../components/AddExpenseModal';
 
 const WorkDetails = () => {
     const { id } = useParams();
     const [project, setProject] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [isExpenseFormVisible, setIsExpenseFormVisible] = useState(false);
     const [activeTab, setActiveTab] = useState('overview');
     const [showAddContractModal, setShowAddContractModal] = useState(false);
-
     const [contracts, setContracts] = useState([]);
-    const [loadingContracts, setLoadingContracts] = useState(false);
-
-    // Estados para gerenciamento de equipe
-    const [availableEmployees, setAvailableEmployees] = useState([]);
     const [allocations, setAllocations] = useState([]);
+    const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
+    
+    // Estados que estavam faltando:
     const [selectedEmployee, setSelectedEmployee] = useState('');
-    const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
-
-    const [costCenters, setCostCenters] = useState([]);
-    const [loadingCostCenters, setLoadingCostCenters] = useState(true);
-
-    // Estados para formulário de despesas
+    const [startDate, setStartDate] = useState('');
+    const [selectedFile, setSelectedFile] = useState(null);
     const [expenseFormData, setExpenseFormData] = useState({
         description: '',
         amount: '',
@@ -33,23 +29,20 @@ const WorkDetails = () => {
         costCenterId: '',
         numberOfPeople: ''
     });
-    const [selectedFile, setSelectedFile] = useState(null);
+    const [isExpenseFormVisible, setIsExpenseFormVisible] = useState(false);
     const [submittingExpense, setSubmittingExpense] = useState(false);
+    const [loadingContracts, setLoadingContracts] = useState(false);
 
     const fetchProjectDetails = useCallback(() => {
         setLoading(true);
         axios.get(`http://localhost:5145/api/projects/${id}`)
             .then(response => {
                 setProject(response.data);
-                setLoading(false);
             })
             .catch(error => {
-                console.error("Erro ao buscar detalhes da obra!", error);
-                if (error.response && error.response.status === 404) {
-                    setError("Obra não encontrada. Verifique o endereço ou crie uma nova obra.");
-                } else {
-                    setError("Ocorreu um erro ao carregar os dados da obra.");
-                }
+                setError(error.response?.data?.message || "Erro ao carregar detalhes da obra.");
+            })
+            .finally(() => {
                 setLoading(false);
             });
     }, [id]);
@@ -59,24 +52,23 @@ const WorkDetails = () => {
         axios.get(`http://localhost:5145/api/contracts/byproject/${id}`)
             .then(response => {
                 setContracts(response.data || []);
-                setLoadingContracts(false);
             })
             .catch(error => {
                 console.error("Erro ao buscar contratos:", error);
+            })
+            .finally(() => {
                 setLoadingContracts(false);
             });
     }, [id]);
 
     const fetchTeamData = useCallback(() => {
-        Promise.all([
-            axios.get('http://localhost:5145/api/employees/available'),
-            axios.get(`http://localhost:5145/api/projects/${id}/team`)
-        ]).then(([availableEmployeesRes, teamAllocationsRes]) => {
-            setAvailableEmployees(availableEmployeesRes.data || []);
-            setAllocations(teamAllocationsRes.data || []);
-        }).catch(error => {
-            console.error("Erro ao buscar dados da equipe:", error);
-        });
+        axios.get(`http://localhost:5145/api/projects/${id}/team`)
+            .then(response => {
+                setAllocations(response.data || []);
+            })
+            .catch(error => {
+                console.error("Erro ao buscar dados da equipe:", error);
+            });
     }, [id]);
 
     const handleTeamUpdate = useCallback(() => {
@@ -84,41 +76,32 @@ const WorkDetails = () => {
         fetchProjectDetails();
     }, [fetchTeamData, fetchProjectDetails]);
 
-    const fetchCostCenters = useCallback(() => {
-        axios.get('http://localhost:5145/api/costcenters')
-            .then(response => {
-                setCostCenters(response.data);
-                setLoadingCostCenters(false);
-            })
-            .catch(err => {
-                console.error("Erro ao buscar centros de custo:", err);
-                setLoadingCostCenters(false);
-            });
-    }, []);
-
     useEffect(() => {
         fetchProjectDetails();
         fetchContracts();
         fetchTeamData();
-        fetchCostCenters();
-    }, [fetchProjectDetails, fetchContracts, fetchTeamData]);
+    }, [id, fetchProjectDetails, fetchContracts, fetchTeamData]);
 
-    // Função para adicionar contrato
+    // Funções que estavam faltando:
     const handleAddContract = () => {
         setShowAddContractModal(true);
-    };
-
-    const handleContractAdded = () => {
-        fetchContracts();
-        fetchProjectDetails();
     };
 
     const handleCloseContractModal = () => {
         setShowAddContractModal(false);
     };
 
+    const handleExpenseAdded = () => {
+        setIsExpenseFormVisible(false);
+        fetchProjectDetails();
+    };
 
-    // Função para deletar contrato
+    const handleContractAdded = () => {
+        setShowAddContractModal(false);
+        fetchContracts();
+        fetchProjectDetails();
+    };
+
     const handleDeleteContract = (contractId) => {
         if (window.confirm("Tem certeza que deseja deletar este contrato?")) {
             axios.delete(`http://localhost:5145/api/contracts/${contractId}`)
@@ -131,7 +114,6 @@ const WorkDetails = () => {
         }
     };
 
-    // Função para adicionar funcionário à equipe
     const handleAddTeamMember = () => {
         if (!selectedEmployee) {
             alert("Por favor, selecione um funcionário.");
@@ -146,7 +128,6 @@ const WorkDetails = () => {
             .catch(error => alert("Erro ao alocar funcionário."));
     };
 
-    // Função para dar baixa na alocação
     const handleEndAllocation = (allocationId) => {
         if (window.confirm("Tem certeza que deseja dar baixa nesta alocação?")) {
             axios.put(`http://localhost:5145/api/projects/${id}/team/${allocationId}/end`)
@@ -161,7 +142,6 @@ const WorkDetails = () => {
         }
     };
 
-    // Função para adicionar despesa
     const handleExpenseSubmit = async (e) => {
         e.preventDefault();
         setSubmittingExpense(true);
@@ -220,7 +200,6 @@ const WorkDetails = () => {
         }
     };
 
-    // Função para deletar despesa
     const handleDeleteExpense = (expenseId) => {
         if (window.confirm("Tem certeza que deseja deletar esta despesa?")) {
             axios.delete(`http://localhost:5145/api/projectexpenses/${expenseId}`)
@@ -251,97 +230,25 @@ const WorkDetails = () => {
             5: { text: 'Aditivo', bg: '#e5e7eb', color: '#374151', border: '#6b7280' },
             6: { text: 'Cancelada', bg: '#fecaca', color: '#991b1b', border: '#ef4444' }
         };
-
         const style = statusMap[status] || statusMap[2];
-
         return (
             <span style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                padding: '6px 12px',
-                fontSize: '0.75rem',
-                fontWeight: '600',
-                borderRadius: '20px',
                 backgroundColor: style.bg,
                 color: style.color,
                 border: `1px solid ${style.border}`,
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px'
+                padding: '4px 12px',
+                borderRadius: '20px',
+                fontSize: '0.875rem',
+                fontWeight: '600'
             }}>
                 {style.text}
             </span>
         );
     };
 
-    if (loading) {
-        return (
-            <div style={{
-                maxWidth: '1400px',
-                margin: '0 auto',
-                padding: '48px',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                minHeight: '400px'
-            }}>
-                <div style={{
-                    textAlign: 'center',
-                    color: '#64748b'
-                }}>
-                    <div style={{ fontSize: '2rem', marginBottom: '16px' }}>⏳</div>
-                    <div style={{ fontSize: '1.1rem' }}>Carregando detalhes da obra...</div>
-                </div>
-            </div>
-        );
-    }
-
-    if (error) {
-        return (
-            <div style={{
-                maxWidth: '1400px',
-                margin: '0 auto',
-                padding: '48px',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                minHeight: '400px'
-            }}>
-                <div style={{
-                    backgroundColor: '#fef2f2',
-                    border: '1px solid #fecaca',
-                    borderRadius: '12px',
-                    padding: '24px',
-                    textAlign: 'center',
-                    color: '#b91c1c'
-                }}>
-                    <div style={{ fontSize: '2rem', marginBottom: '16px' }}>❌</div>
-                    <div style={{ fontSize: '1.1rem', fontWeight: '600' }}>{error}</div>
-                </div>
-            </div>
-        );
-    }
-
-    if (!project) {
-        return (
-            <div style={{
-                maxWidth: '1400px',
-                margin: '0 auto',
-                padding: '48px',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                minHeight: '400px'
-            }}>
-                <div style={{
-                    textAlign: 'center',
-                    color: '#64748b'
-                }}>
-                    <div style={{ fontSize: '2rem', marginBottom: '16px' }}>🔍</div>
-                    <div style={{ fontSize: '1.1rem' }}>Obra não encontrada.</div>
-                </div>
-            </div>
-        );
-    }
+    if (loading) return <div>Carregando...</div>;
+    if (error) return <div>{error}</div>;
+    if (!project) return <div>Projeto não encontrado.</div>;
 
     return (
         <div style={{
@@ -349,11 +256,25 @@ const WorkDetails = () => {
             margin: '0 auto',
             padding: '48px'
         }}>
+            {/* Renderiza os modais no topo para que fiquem sobre todo o conteúdo */}
+            <AddContractModal
+                isOpen={showAddContractModal}
+                onClose={handleCloseContractModal}
+                projectId={id}
+                projectName={`${project.contractor} - ${project.name}`}
+                onContractAdded={handleContractAdded}
+            />
+            {isExpenseFormVisible && (
+                <AddExpenseModal
+                    onClose={() => setIsExpenseFormVisible(false)}
+                    onExpenseAdded={handleExpenseAdded}
+                    projectId={id}
+                    contractId={contracts.length > 0 ? contracts[0].id : null}
+                />
+            )}
 
-            {/* ✅ BREADCRUMB/NAVEGAÇÃO */}
-            <div style={{
-                marginBottom: '32px'
-            }}>
+            {/* BREADCRUMB/NAVEGAÇÃO */}
+            <div style={{ marginBottom: '32px' }}>
                 <Link
                     to="/projects"
                     style={{
@@ -364,17 +285,14 @@ const WorkDetails = () => {
                         display: 'flex',
                         alignItems: 'center',
                         gap: '8px',
-                        marginBottom: '16px',
-                        transition: 'color 0.2s ease'
+                        marginBottom: '16px'
                     }}
-                    onMouseEnter={(e) => e.target.style.color = '#2563eb'}
-                    onMouseLeave={(e) => e.target.style.color = '#3b82f6'}
                 >
                     ← Voltar para Lista de Obras
                 </Link>
             </div>
 
-            {/* ✅ HEADER DA OBRA */}
+            {/* HEADER DA OBRA */}
             <div style={{
                 backgroundColor: 'white',
                 borderRadius: '12px',
@@ -383,904 +301,206 @@ const WorkDetails = () => {
                 boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
                 marginBottom: '32px'
             }}>
-
-                {/* Header Superior */}
-                <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'flex-start',
-                    marginBottom: '24px'
-                }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
                     <div>
-                        <h1 style={{
-                            fontSize: '2.5rem',
-                            fontWeight: '700',
-                            color: '#0f172a',
-                            margin: '0 0 8px 0',
-                            lineHeight: '1.2'
-                        }}>
+                        <h1 style={{ fontSize: '2.5rem', fontWeight: '700', color: '#0f172a', margin: '0 0 8px 0', lineHeight: '1.2' }}>
                             {project.contractor} - {project.name}
                         </h1>
-                        <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '16px',
-                            flexWrap: 'wrap'
-                        }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
                             {getStatusBadge(project.status)}
-                            <span style={{
-                                fontSize: '1rem',
-                                color: '#64748b',
-                                fontWeight: '500'
-                            }}>
+                            <span style={{ fontSize: '1rem', color: '#64748b', fontWeight: '500' }}>
                                 📍 {project.city}/{project.state}
                             </span>
                         </div>
                     </div>
-
-                    <Link
-                        to={`/project/edit/${project.id}`}
-                        style={{ textDecoration: 'none' }}
-                    >
-                        <button style={{
-                            backgroundColor: '#3b82f6',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '8px',
-                            padding: '12px 24px',
-                            fontSize: '1rem',
-                            fontWeight: '600',
-                            cursor: 'pointer',
-                            transition: 'background-color 0.2s ease',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px'
-                        }}
-                            onMouseEnter={(e) => e.target.style.backgroundColor = '#2563eb'}
-                            onMouseLeave={(e) => e.target.style.backgroundColor = '#3b82f6'}
-                        >
+                    <Link to={`/project/edit/${project.id}`} style={{ textDecoration: 'none' }}>
+                        <button style={{ backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '8px', padding: '12px 24px', fontSize: '1rem', fontWeight: '600', cursor: 'pointer' }}>
                             ✏️ Editar Obra
                         </button>
                     </Link>
                 </div>
-
-                {/* Informações Principais */}
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-                    gap: '24px',
-                    marginBottom: '24px'
-                }}>
-
-                    {/* CNO */}
-                    <div style={{
-                        padding: '16px',
-                        backgroundColor: '#eff6ff',
-                        borderRadius: '8px',
-                        border: '1px solid #bfdbfe'
-                    }}>
-                        <div style={{
-                            fontSize: '0.75rem',
-                            fontWeight: '600',
-                            color: '#1d4ed8',
-                            textTransform: 'uppercase',
-                            letterSpacing: '0.5px',
-                            marginBottom: '4px'
-                        }}>
-                            CNO
-                        </div>
-                        <div style={{
-                            fontSize: '1rem',
-                            fontWeight: '700',
-                            color: '#1e40af'
-                        }}>
-                            {project.cno}
-                        </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '24px' }}>
+                    <div style={{ padding: '16px', backgroundColor: '#eff6ff', borderRadius: '8px', border: '1px solid #bfdbfe' }}>
+                        <div style={{ fontSize: '0.75rem', fontWeight: '600', color: '#1d4ed8', textTransform: 'uppercase', marginBottom: '4px' }}>CNO</div>
+                        <div style={{ fontSize: '1rem', fontWeight: '700', color: '#1e40af' }}>{project.cno}</div>
                     </div>
-
-                    {/* Responsável */}
-                    <div style={{
-                        padding: '16px',
-                        backgroundColor: '#f0fdf4',
-                        borderRadius: '8px',
-                        border: '1px solid #bbf7d0'
-                    }}>
-                        <div style={{
-                            fontSize: '0.75rem',
-                            fontWeight: '600',
-                            color: '#15803d',
-                            textTransform: 'uppercase',
-                            letterSpacing: '0.5px',
-                            marginBottom: '4px'
-                        }}>
-                            RESPONSÁVEL
-                        </div>
-                        <div style={{
-                            fontSize: '1rem',
-                            fontWeight: '600',
-                            color: '#166534'
-                        }}>
-                            {project.responsible}
-                        </div>
+                    <div style={{ padding: '16px', backgroundColor: '#f0fdf4', borderRadius: '8px', border: '1px solid #bbf7d0' }}>
+                        <div style={{ fontSize: '0.75rem', fontWeight: '600', color: '#15803d', textTransform: 'uppercase', marginBottom: '4px' }}>RESPONSÁVEL</div>
+                        <div style={{ fontSize: '1rem', fontWeight: '600', color: '#166534' }}>{project.responsible}</div>
                     </div>
-
-                    {/* Período */}
-                    <div style={{
-                        padding: '16px',
-                        backgroundColor: '#fef3c7',
-                        borderRadius: '8px',
-                        border: '1px solid #fbbf24'
-                    }}>
-                        <div style={{
-                            fontSize: '0.75rem',
-                            fontWeight: '600',
-                            color: '#92400e',
-                            textTransform: 'uppercase',
-                            letterSpacing: '0.5px',
-                            marginBottom: '4px'
-                        }}>
-                            PERÍODO
-                        </div>
-                        <div style={{
-                            fontSize: '0.9rem',
-                            fontWeight: '600',
-                            color: '#b45309'
-                        }}>
+                    <div style={{ padding: '16px', backgroundColor: '#fef3c7', borderRadius: '8px', border: '1px solid #fbbf24' }}>
+                        <div style={{ fontSize: '0.75rem', fontWeight: '600', color: '#92400e', textTransform: 'uppercase', marginBottom: '4px' }}>PERÍODO</div>
+                        <div style={{ fontSize: '0.9rem', fontWeight: '600', color: '#b45309' }}>
                             {new Date(project.startDate).toLocaleDateString('pt-BR')} - {project.endDate ? new Date(project.endDate).toLocaleDateString('pt-BR') : 'Em andamento'}
                         </div>
                     </div>
                 </div>
-
-                {/* Tabs de Navegação */}
-                <div style={{
-                    display: 'flex',
-                    gap: '8px',
-                    borderBottom: '1px solid #f1f5f9'
-                }}>
-                    {[
-                        { id: 'overview', label: '📊 Visão Geral', icon: '📊' },
-                        { id: 'contracts', label: '📄 Contratos', icon: '📄' },
-                        { id: 'team', label: '👥 Equipe', icon: '👥' },
-                        { id: 'expenses', label: '💰 Despesas', icon: '💰' }
-                    ].map((tab) => (
-                        <button
-                            key={tab.id}
-                            onClick={() => setActiveTab(tab.id)}
-                            style={{
-                                padding: '12px 20px',
-                                border: 'none',
-                                backgroundColor: activeTab === tab.id ? '#3b82f6' : 'transparent',
-                                color: activeTab === tab.id ? 'white' : '#64748b',
-                                borderRadius: '8px 8px 0 0',
-                                fontSize: '1rem',
-                                fontWeight: '600',
-                                cursor: 'pointer',
-                                transition: 'all 0.2s ease',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '8px'
-                            }}
-                            onMouseEnter={(e) => {
-                                if (activeTab !== tab.id) {
-                                    e.target.style.backgroundColor = '#f8fafc';
-                                    e.target.style.color = '#374151';
-                                }
-                            }}
-                            onMouseLeave={(e) => {
-                                if (activeTab !== tab.id) {
-                                    e.target.style.backgroundColor = 'transparent';
-                                    e.target.style.color = '#64748b';
-                                }
-                            }}
-                        >
-                            {tab.label}
-                        </button>
-                    ))}
-                </div>
             </div>
 
-            {/* ✅ CONTEÚDO DAS TABS */}
-
-            {/* TAB: VISÃO GERAL */}
-            {activeTab === 'overview' && (
-                // --- BLOCO DE CARDS DA VISÃO GERAL ATUALIZADO ---
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-                    gap: '24px'
-                }}>
-
-                    {/* Card de Contratos */}
-                    <div style={{
-                        backgroundColor: 'white',
-                        borderRadius: '12px',
-                        padding: '16px', // Altura reduzida
-                        border: '1px solid #e2e8f0',
-                        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.05)'
-                    }}>
-                        <h3 style={{ fontSize: '1rem', fontWeight: '600', color: '#475569', margin: '0 0 12px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            📄 Contratos
-                        </h3>
-                        <div style={{ fontSize: '1.75rem', fontWeight: '700', color: '#3b82f6', marginBottom: '4px' }}>
-                            {formatCurrency(contracts.reduce((sum, contract) => sum + contract.totalValue, 0))}
-                        </div>
-                        <div style={{ fontSize: '0.8rem', color: '#64748b', textTransform: 'uppercase', fontWeight: '500' }}>
-                            em {contracts.length} contrato(s) ativo(s)
-                        </div>
-                    </div>
-
-                    {/* Card de Equipe */}
-                    <div style={{
-                        backgroundColor: 'white',
-                        borderRadius: '12px',
-                        padding: '16px', // Altura reduzida
-                        border: '1px solid #e2e8f0',
-                        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.05)'
-                    }}>
-                        <h3 style={{ fontSize: '1rem', fontWeight: '600', color: '#475569', margin: '0 0 12px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            👥 Equipe
-                        </h3>
-                        <div style={{ fontSize: '1.75rem', fontWeight: '700', color: '#10b981', marginBottom: '4px' }}>
-                            {allocations.filter(alloc => !alloc.endDate).length}
-                        </div>
-                        <div style={{ fontSize: '0.8rem', color: '#64748b', textTransform: 'uppercase', fontWeight: '500' }}>
-                            Funcionários Ativos
-                        </div>
-                    </div>
-
-                    {/* Card de Despesas */}
-                    <div style={{
-                        backgroundColor: 'white',
-                        borderRadius: '12px',
-                        padding: '16px', // Altura reduzida
-                        border: '1px solid #e2e8f0',
-                        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.05)'
-                    }}>
-                        <h3 style={{ fontSize: '1rem', fontWeight: '600', color: '#475569', margin: '0 0 12px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            💰 Despesas
-                        </h3>
-                        <div style={{ fontSize: '1.75rem', fontWeight: '700', color: '#ef4444', marginBottom: '4px' }}>
-                            {formatCurrency(project.expenses.reduce((sum, expense) => sum + expense.amount, 0))}
-                        </div>
-                        <div style={{ fontSize: '0.8rem', color: '#64748b', textTransform: 'uppercase', fontWeight: '500' }}>
-                            Total Gasto
-                        </div>
-                    </div>
-                </div>
-            )}
-            {/* TAB: CONTRATOS */}
-            {activeTab === 'contracts' && (
-                <div style={{
-                    backgroundColor: 'white',
-                    borderRadius: '12px',
-                    border: '1px solid #e2e8f0',
-                    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
-                    overflow: 'hidden'
-                }}>
-
-                    {/* Header da Seção */}
-                    <div style={{
-                        padding: '24px 32px',
-                        borderBottom: '1px solid #f1f5f9',
-                        backgroundColor: '#f8fafc',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center'
-                    }}>
-                        <h2 style={{
-                            fontSize: '1.5rem',
+            {/* Navegação por Abas */}
+            <div style={{ display: 'flex', gap: '8px', borderBottom: '1px solid #e2e8f0' }}>
+                {[
+                    { id: 'overview', label: '📊 Visão Geral' },
+                    { id: 'contracts', label: '📄 Contratos' },
+                    { id: 'team', label: '👥 Equipe' },
+                    { id: 'expenses', label: '💰 Despesas' }
+                ].map((tab) => (
+                    <button
+                        key={tab.id}
+                        onClick={() => setActiveTab(tab.id)}
+                        style={{
+                            padding: '12px 20px',
+                            border: 'none',
+                            backgroundColor: activeTab === tab.id ? '#3b82f6' : 'transparent',
+                            color: activeTab === tab.id ? 'white' : '#64748b',
+                            borderRadius: '8px 8px 0 0',
+                            fontSize: '1rem',
                             fontWeight: '600',
-                            color: '#1e293b',
-                            margin: '0',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '12px'
-                        }}>
-                            📄 Contratos da Obra
-                            <span style={{
-                                backgroundColor: '#e0e7ff',
-                                color: '#3730a3',
-                                padding: '4px 12px',
-                                borderRadius: '20px',
-                                fontSize: '0.875rem',
-                                fontWeight: '700'
-                            }}>
-                                {contracts.length}
-                            </span>
-                        </h2>
+                            cursor: 'pointer'
+                        }}
+                    >
+                        {tab.label}
+                    </button>
+                ))}
+            </div>
 
-                        <button
-                            onClick={handleAddContract}
-                            style={{
-                                backgroundColor: '#3b82f6',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '8px',
-                                padding: '12px 20px',
-                                fontSize: '0.875rem',
+            {/* CONTEÚDO DAS TABS */}
+            <div style={{ backgroundColor: 'white', borderRadius: '0 0 12px 12px', border: '1px solid #e2e8f0', borderTop: 'none', padding: '32px' }}>
+                {/* TAB: VISÃO GERAL COM CARDS COMPACTOS */}
+                {activeTab === 'overview' && (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '24px' }}>
+                        <div style={{ padding: '16px', border: '1px solid #e2e8f0', borderRadius: '12px' }}>
+                            <h3 style={{ fontSize: '1rem', fontWeight: '600', color: '#475569', margin: '0 0 12px 0' }}>📄 Contratos</h3>
+                            <div style={{ fontSize: '1.75rem', fontWeight: '700', color: '#3b82f6', marginBottom: '4px' }}>
+                                {formatCurrency(contracts.reduce((sum, contract) => sum + contract.totalValue, 0))}
+                            </div>
+                            <div style={{ fontSize: '0.8rem', color: '#64748b', textTransform: 'uppercase', fontWeight: '500' }}>
+                                em {contracts.length} contrato(s) ativo(s)
+                            </div>
+                        </div>
+                        <div style={{ padding: '16px', border: '1px solid #e2e8f0', borderRadius: '12px' }}>
+                            <h3 style={{ fontSize: '1rem', fontWeight: '600', color: '#475569', margin: '0 0 12px 0' }}>👥 Equipe</h3>
+                            <div style={{ fontSize: '1.75rem', fontWeight: '700', color: '#10b981', marginBottom: '4px' }}>
+                                {allocations.filter(alloc => !alloc.endDate).length}
+                            </div>
+                            <div style={{ fontSize: '0.8rem', color: '#64748b', textTransform: 'uppercase', fontWeight: '500' }}>
+                                Funcionários Ativos
+                            </div>
+                        </div>
+                        <div style={{ padding: '16px', border: '1px solid #e2e8f0', borderRadius: '12px' }}>
+                            <h3 style={{ fontSize: '1rem', fontWeight: '600', color: '#475569', margin: '0 0 12px 0' }}>💰 Despesas</h3>
+                            <div style={{ fontSize: '1.75rem', fontWeight: '700', color: '#ef4444', marginBottom: '4px' }}>
+                                {formatCurrency(project.expenses?.reduce((sum, expense) => sum + expense.amount, 0) || 0)}
+                            </div>
+                            <div style={{ fontSize: '0.8rem', color: '#64748b', textTransform: 'uppercase', fontWeight: '500' }}>
+                                Total Gasto
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* TAB: CONTRATOS */}
+                {activeTab === 'contracts' && (
+                    <div style={{
+                        backgroundColor: 'white',
+                        borderRadius: '12px',
+                        border: '1px solid #e2e8f0',
+                        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
+                        overflow: 'hidden'
+                    }}>
+                        {/* Header da Seção */}
+                        <div style={{
+                            padding: '24px 32px',
+                            borderBottom: '1px solid #f1f5f9',
+                            backgroundColor: '#f8fafc',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center'
+                        }}>
+                            <h2 style={{
+                                fontSize: '1.5rem',
                                 fontWeight: '600',
-                                cursor: 'pointer',
-                                transition: 'background-color 0.2s ease',
+                                color: '#1e293b',
+                                margin: '0',
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: '8px'
-                            }}
-                            onMouseEnter={(e) => e.target.style.backgroundColor = '#2563eb'}
-                            onMouseLeave={(e) => e.target.style.backgroundColor = '#3b82f6'}
-                        >
-                            ➕ Adicionar Contrato
-                        </button>
-                    </div>
-
-                    {/* Lista de Contratos */}
-                    <div style={{ padding: '32px' }}>
-                        {loadingContracts ? (
-                            <div style={{
-                                textAlign: 'center',
-                                padding: '48px',
-                                color: '#64748b'
+                                gap: '12px'
                             }}>
-                                <div style={{ fontSize: '2rem', marginBottom: '16px' }}>⏳</div>
-                                <div style={{ fontSize: '1.1rem' }}>Carregando contratos...</div>
-                            </div>
-                        ) : contracts.length === 0 ? (
-                            <div style={{
-                                textAlign: 'center',
-                                padding: '48px',
-                                color: '#64748b'
-                            }}>
-                                <div style={{ fontSize: '3rem', marginBottom: '16px' }}>📄</div>
-                                <h3 style={{ fontSize: '1.2rem', marginBottom: '8px' }}>Nenhum contrato cadastrado</h3>
-                                <p style={{ margin: '0' }}>Comece adicionando o primeiro contrato da obra.</p>
-                            </div>
-                        ) : (
-                            <div style={{
-                                display: 'grid',
-                                gap: '16px'
-                            }}>
-                                {contracts.map(contract => (
-                                    <div key={contract.id} style={{
-                                        border: '1px solid #e2e8f0',
-                                        borderRadius: '12px',
-                                        padding: '24px',
-                                        transition: 'all 0.2s ease',
-                                        backgroundColor: '#fafafa'
-                                    }}
-                                        onMouseEnter={(e) => {
-                                            e.currentTarget.style.backgroundColor = '#f8fafc';
-                                            e.currentTarget.style.borderColor = '#c7d2fe';
-                                            e.currentTarget.style.transform = 'translateY(-2px)';
-                                            e.currentTarget.style.boxShadow = '0 4px 12px 0 rgba(0, 0, 0, 0.1)';
-                                        }}
-                                        onMouseLeave={(e) => {
-                                            e.currentTarget.style.backgroundColor = '#fafafa';
-                                            e.currentTarget.style.borderColor = '#e2e8f0';
-                                            e.currentTarget.style.transform = 'translateY(0)';
-                                            e.currentTarget.style.boxShadow = 'none';
-                                        }}
-                                    >
+                                📄 Contratos da Obra
+                                <span style={{
+                                    backgroundColor: '#e0e7ff',
+                                    color: '#3730a3',
+                                    padding: '4px 12px',
+                                    borderRadius: '20px',
+                                    fontSize: '0.875rem',
+                                    fontWeight: '700'
+                                }}>
+                                    {contracts.length}
+                                </span>
+                            </h2>
 
-                                        <div style={{
-                                            display: 'grid',
-                                            gridTemplateColumns: 'auto 1fr auto',
-                                            gap: '20px',
-                                            alignItems: 'center'
-                                        }}>
-
-                                            {/* Ícone e Info Principal */}
-                                            <div style={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '16px'
-                                            }}>
-                                                <div style={{
-                                                    width: '48px',
-                                                    height: '48px',
-                                                    backgroundColor: '#eff6ff',
-                                                    borderRadius: '12px',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center',
-                                                    fontSize: '1.5rem',
-                                                    border: '2px solid #bfdbfe'
-                                                }}>
-                                                    📄
-                                                </div>
-
-                                                <div>
-                                                    <h3 style={{
-                                                        fontSize: '1.1rem',
-                                                        fontWeight: '600',
-                                                        color: '#1e293b',
-                                                        margin: '0 0 4px 0'
-                                                    }}>
-                                                        {contract.contractNumber}
-                                                    </h3>
-                                                    <p style={{
-                                                        fontSize: '0.9rem',
-                                                        color: '#64748b',
-                                                        margin: '0'
-                                                    }}>
-                                                        {new Date(contract.startDate).toLocaleDateString('pt-BR')} - {contract.endDate ? new Date(contract.endDate).toLocaleDateString('pt-BR') : 'Em andamento'}
-                                                    </p>
-                                                </div>
-                                            </div>
-
-                                            {/* Valor */}
-                                            <div style={{
-                                                textAlign: 'center',
-                                                padding: '12px',
-                                                backgroundColor: '#f0fdf4',
-                                                borderRadius: '8px',
-                                                border: '1px solid #bbf7d0'
-                                            }}>
-                                                <div style={{
-                                                    fontSize: '0.75rem',
-                                                    fontWeight: '600',
-                                                    color: '#15803d',
-                                                    textTransform: 'uppercase',
-                                                    letterSpacing: '0.5px',
-                                                    marginBottom: '4px'
-                                                }}>
-                                                    VALOR TOTAL
-                                                </div>
-                                                <div style={{
-                                                    fontSize: '1.1rem',
-                                                    fontWeight: '700',
-                                                    color: '#166534'
-                                                }}>
-                                                    {formatCurrency(contract.totalValue)}
-                                                </div>
-                                            </div>
-
-                                            {/* Ações */}
-                                            <div style={{
-                                                display: 'flex',
-                                                gap: '8px'
-                                            }}>
-                                                <Link
-                                                    to={`/contract/edit/${contract.id}`}
-                                                    style={{ textDecoration: 'none' }}
-                                                >
-                                                    <button style={{
-                                                        backgroundColor: '#3b82f6',
-                                                        color: 'white',
-                                                        border: 'none',
-                                                        borderRadius: '8px',
-                                                        padding: '8px 16px',
-                                                        fontSize: '0.875rem',
-                                                        fontWeight: '600',
-                                                        cursor: 'pointer',
-                                                        transition: 'background-color 0.2s ease',
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        gap: '6px'
-                                                    }}
-                                                        onMouseEnter={(e) => e.target.style.backgroundColor = '#2563eb'}
-                                                        onMouseLeave={(e) => e.target.style.backgroundColor = '#3b82f6'}
-                                                    >
-                                                        ✏️ Editar
-                                                    </button>
-                                                </Link>
-
-                                                <button
-                                                    onClick={() => handleDeleteContract(contract.id)}
-                                                    style={{
-                                                        backgroundColor: '#ef4444',
-                                                        color: 'white',
-                                                        border: 'none',
-                                                        borderRadius: '8px',
-                                                        padding: '8px 16px',
-                                                        fontSize: '0.875rem',
-                                                        fontWeight: '600',
-                                                        cursor: 'pointer',
-                                                        transition: 'background-color 0.2s ease',
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        gap: '6px'
-                                                    }}
-                                                    onMouseEnter={(e) => e.target.style.backgroundColor = '#dc2626'}
-                                                    onMouseLeave={(e) => e.target.style.backgroundColor = '#ef4444'}
-                                                >
-                                                    🗑️ Deletar
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                </div>
-            )}
-
-            {/* TAB: EQUIPE */}
-            {activeTab === 'team' && (
-                <TeamManager
-                    projectId={id}
-                    allocations={allocations}
-                    onTeamUpdate={handleTeamUpdate}
-                />
-            )}
-
-            {/* TAB: DESPESAS */}
-            {activeTab === 'expenses' && (
-                <div style={{
-                    backgroundColor: 'white',
-                    borderRadius: '12px',
-                    border: '1px solid #e2e8f0',
-                    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
-                    overflow: 'hidden'
-                }}>
-
-                    {/* Header da Seção */}
-                    <div style={{
-                        padding: '24px 32px',
-                        borderBottom: '1px solid #f1f5f9',
-                        backgroundColor: '#f8fafc',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center'
-                    }}>
-                        <h2 style={{
-                            fontSize: '1.5rem',
-                            fontWeight: '600',
-                            color: '#1e293b',
-                            margin: '0',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '12px'
-                        }}>
-                            💰 Despesas da Obra
-                            <span style={{
-                                backgroundColor: '#e0e7ff',
-                                color: '#3730a3',
-                                padding: '4px 12px',
-                                borderRadius: '20px',
-                                fontSize: '0.875rem',
-                                fontWeight: '700'
-                            }}>
-                                {project.expenses ? project.expenses.length : 0}
-                            </span>
-                        </h2>
-
-                        <button
-                            onClick={() => setIsExpenseFormVisible(!isExpenseFormVisible)}
-                            style={{
-                                backgroundColor: isExpenseFormVisible ? '#6b7280' : '#10b981',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '8px',
-                                padding: '12px 20px',
-                                fontSize: '0.875rem',
-                                fontWeight: '600',
-                                cursor: 'pointer',
-                                transition: 'background-color 0.2s ease',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '8px'
-                            }}
-                            onMouseEnter={(e) => {
-                                if (isExpenseFormVisible) {
-                                    e.target.style.backgroundColor = '#4b5563';
-                                } else {
-                                    e.target.style.backgroundColor = '#059669';
-                                }
-                            }}
-                            onMouseLeave={(e) => {
-                                if (isExpenseFormVisible) {
-                                    e.target.style.backgroundColor = '#6b7280';
-                                } else {
-                                    e.target.style.backgroundColor = '#10b981';
-                                }
-                            }}
-                        >
-                            {isExpenseFormVisible ? '✖️ Cancelar' : '➕ Nova Despesa'}
-                        </button>
-                    </div>
-
-                    <div style={{ padding: '32px' }}>
-
-                        {/* Formulário de Nova Despesa */}
-                        {isExpenseFormVisible && (
-                            <div style={{
-                                backgroundColor: '#f0fdf4',
-                                border: '1px solid #bbf7d0',
-                                borderRadius: '12px',
-                                padding: '24px',
-                                marginBottom: '32px'
-                            }}>
-                                <h3 style={{
-                                    fontSize: '1.2rem',
+                            <button
+                                onClick={handleAddContract}
+                                style={{
+                                    backgroundColor: '#3b82f6',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '8px',
+                                    padding: '12px 20px',
+                                    fontSize: '0.875rem',
                                     fontWeight: '600',
-                                    color: '#166534',
-                                    marginBottom: '20px',
+                                    cursor: 'pointer',
+                                    transition: 'background-color 0.2s ease',
                                     display: 'flex',
                                     alignItems: 'center',
                                     gap: '8px'
-                                }}>
-                                    💸 Lançar Nova Despesa
-                                </h3>
+                                }}
+                                onMouseEnter={(e) => e.target.style.backgroundColor = '#2563eb'}
+                                onMouseLeave={(e) => e.target.style.backgroundColor = '#3b82f6'}
+                            >
+                                ➕ Adicionar Contrato
+                            </button>
+                        </div>
 
-                                {contracts.length === 0 ? (
-                                    <div style={{
-                                        padding: '20px',
-                                        backgroundColor: '#fef3c7',
-                                        borderRadius: '8px',
-                                        border: '1px solid #f59e0b',
-                                        textAlign: 'center'
-                                    }}>
-                                        <p style={{
-                                            color: '#92400e',
-                                            margin: '0',
-                                            fontWeight: '600'
-                                        }}>
-                                            ⚠️ Cadastre um contrato para esta obra antes de lançar despesas.
-                                        </p>
-                                    </div>
-                                ) : (
-                                    <form onSubmit={handleExpenseSubmit}>
-                                        <div style={{
-                                            display: 'grid',
-                                            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-                                            gap: '16px',
-                                            marginBottom: '20px'
-                                        }}>
-
-                                            <div>
-                                                <label style={{
-                                                    display: 'block',
-                                                    fontSize: '0.875rem',
-                                                    fontWeight: '600',
-                                                    color: '#374151',
-                                                    marginBottom: '6px'
-                                                }}>
-                                                    Descrição
-                                                </label>
-                                                <input
-                                                    type="text"
-                                                    name="description"
-                                                    value={expenseFormData.description}
-                                                    onChange={(e) => setExpenseFormData({ ...expenseFormData, description: e.target.value })}
-                                                    required
-                                                    style={{
-                                                        width: '100%',
-                                                        padding: '12px 16px',
-                                                        border: '1px solid #d1d5db',
-                                                        backgroundColor: '#dcdedfff',
-                                                        color: '#1f2937',
-                                                        borderRadius: '8px',
-                                                        fontSize: '1rem',
-                                                        transition: 'border-color 0.2s ease',
-                                                        boxSizing: 'border-box'
-                                                    }}
-                                                    placeholder="Ex: Cimento Portland"
-                                                />
-                                            </div>
-
-                                            <div>
-                                                <label style={{
-                                                    display: 'block',
-                                                    fontSize: '0.875rem',
-                                                    fontWeight: '600',
-                                                    color: '#374151',
-                                                    marginBottom: '6px'
-                                                }}>
-                                                    Valor (R$)
-                                                </label>
-                                                <input
-                                                    type="number"
-                                                    step="0.01"
-                                                    name="amount"
-                                                    min="0"
-                                                    value={expenseFormData.amount}
-                                                    onChange={(e) => setExpenseFormData({ ...expenseFormData, amount: e.target.value })}
-                                                    required
-                                                    style={{
-                                                        width: '100%',
-                                                        padding: '12px 16px',
-                                                        border: '1px solid #d1d5db',
-                                                        backgroundColor: '#dcdedfff',
-                                                        color: '#1f2937',
-                                                        borderRadius: '8px',
-                                                        fontSize: '1rem',
-                                                        transition: 'border-color 0.2s ease',
-                                                        boxSizing: 'border-box'
-                                                    }}
-                                                    placeholder="0.00"
-                                                />
-                                            </div>
-
-                                            <div>
-                                                <label style={{
-                                                    display: 'block',
-                                                    fontSize: '0.875rem',
-                                                    fontWeight: '600',
-                                                    color: '#374151',
-                                                    marginBottom: '6px'
-                                                }}>
-                                                    Data
-                                                </label>
-                                                <input
-                                                    type="date"
-                                                    name="date"
-                                                    value={expenseFormData.date}
-                                                    onChange={(e) => setExpenseFormData({ ...expenseFormData, date: e.target.value })}
-                                                    required
-                                                    style={{
-                                                        width: '100%',
-                                                        padding: '12px 16px',
-                                                        border: '1px solid #d1d5db',
-                                                        backgroundColor: '#dcdedfff',
-                                                        color: '#1f2937',
-                                                        borderRadius: '8px',
-                                                        fontSize: '1rem',
-                                                        transition: 'border-color 0.2s ease',
-                                                        boxSizing: 'border-box'
-                                                    }}
-                                                />
-                                            </div>
-
-                                            <div>
-                                                <label style={{
-                                                    display: 'block',
-                                                    fontSize: '0.875rem',
-                                                    fontWeight: '600',
-                                                    color: '#374151',
-                                                    marginBottom: '6px'
-                                                }}>
-                                                    Centro de Custo
-                                                </label>
-                                                <select
-                                                    name="costCenterId"
-                                                    value={expenseFormData.costCenterId}
-                                                    onChange={(e) => setExpenseFormData({ ...expenseFormData, costCenterId: e.target.value })}
-                                                    required
-                                                    disabled={loadingCostCenters}
-                                                    style={{
-                                                        width: '100%',
-                                                        padding: '12px 16px',
-                                                        border: '1px solid #d1d5db',
-                                                        backgroundColor: '#dcdedfff',
-                                                        color: '#1f2937',
-                                                        borderRadius: '8px',
-                                                        fontSize: '1rem',
-                                                        transition: 'border-color 0.2s ease',
-                                                        boxSizing: 'border-box',
-                                                        cursor: loadingCostCenters ? 'not-allowed' : 'pointer'
-                                                    }}
-                                                >
-                                                    <option value="">{loadingCostCenters ? 'Carregando...' : 'Selecione...'}</option>
-                                                    {costCenters.map(cc => (
-                                                        <option key={cc.id} value={cc.id}>
-                                                            {cc.name}
-                                                        </option>
-                                                    ))}
-                                                </select>
-                                            </div>
-                                            <div>
-                                                <label style={{
-                                                    display: 'block',
-                                                    fontSize: '0.875rem',
-                                                    fontWeight: '600',
-                                                    color: '#374151',
-                                                    marginBottom: '6px'
-                                                }}>
-                                                    Nº Pessoas (Opcional)
-                                                </label>
-                                                <input
-                                                    type="number"
-                                                    name="numberOfPeople"
-                                                    value={expenseFormData.numberOfPeople}
-                                                    onChange={(e) => setExpenseFormData({ ...expenseFormData, numberOfPeople: e.target.value })}
-                                                    min="0"
-                                                    style={{
-                                                        width: '100%',
-                                                        padding: '12px 16px',
-                                                        border: '1px solid #d1d5db',
-                                                        backgroundColor: '#dcdedfff',
-                                                        color: '#1f2937',
-                                                        borderRadius: '8px',
-                                                        fontSize: '1rem',
-                                                        transition: 'border-color 0.2s ease',
-                                                        boxSizing: 'border-box'
-                                                    }}
-                                                    placeholder="0"
-                                                />
-                                            </div>
-
-                                            <div>
-                                                <label style={{
-                                                    display: 'block',
-                                                    fontSize: '0.875rem',
-                                                    fontWeight: '600',
-                                                    color: '#374151',
-                                                    marginBottom: '6px'
-                                                }}>
-                                                    Anexo (NF)
-                                                </label>
-                                                <input
-                                                    type="file"
-                                                    onChange={(e) => setSelectedFile(e.target.files[0])}
-                                                    style={{
-                                                        width: '100%',
-                                                        padding: '12px 16px',
-                                                        border: '1px solid #d1d5db',
-                                                        backgroundColor: '#dcdedfff',
-                                                        color: '#1f2937',
-                                                        borderRadius: '8px',
-                                                        fontSize: '1rem',
-                                                        transition: 'border-color 0.2s ease',
-                                                        boxSizing: 'border-box'
-                                                    }}
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <button
-                                            type="submit"
-                                            disabled={submittingExpense}
-                                            style={{
-                                                backgroundColor: submittingExpense ? '#9ca3af' : '#10b981',
-                                                color: 'white',
-                                                border: 'none',
-                                                borderRadius: '8px',
-                                                padding: '12px 24px',
-                                                fontSize: '1rem',
-                                                fontWeight: '600',
-                                                cursor: submittingExpense ? 'not-allowed' : 'pointer',
-                                                transition: 'background-color 0.2s ease',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '8px'
-                                            }}
-                                        >
-                                            {submittingExpense ? '⏳ Salvando...' : '💾 Salvar Despesa'}
-                                        </button>
-                                    </form>
-                                )}
-                            </div>
-                        )}
-
-                        {/* Lista de Despesas */}
-                        <div>
-                            <h4 style={{
-                                fontSize: '1.1rem',
-                                fontWeight: '600',
-                                color: '#1e293b',
-                                marginBottom: '20px'
-                            }}>
-                                Despesas Lançadas
-                            </h4>
-
-                            {!project.expenses || project.expenses.length === 0 ? (
+                        {/* Lista de Contratos */}
+                        <div style={{ padding: '32px' }}>
+                            {loadingContracts ? (
                                 <div style={{
                                     textAlign: 'center',
                                     padding: '48px',
                                     color: '#64748b'
                                 }}>
-                                    <div style={{ fontSize: '3rem', marginBottom: '16px' }}>💰</div>
-                                    <h3 style={{ fontSize: '1.2rem', marginBottom: '8px' }}>Nenhuma despesa lançada</h3>
-                                    <p style={{ margin: '0' }}>Comece adicionando a primeira despesa desta obra.</p>
+                                    <div style={{ fontSize: '2rem', marginBottom: '16px' }}>⏳</div>
+                                    <div style={{ fontSize: '1.1rem' }}>Carregando contratos...</div>
+                                </div>
+                            ) : contracts.length === 0 ? (
+                                <div style={{
+                                    textAlign: 'center',
+                                    padding: '48px',
+                                    color: '#64748b'
+                                }}>
+                                    <div style={{ fontSize: '3rem', marginBottom: '16px' }}>📄</div>
+                                    <h3 style={{ fontSize: '1.2rem', marginBottom: '8px' }}>Nenhum contrato cadastrado</h3>
+                                    <p style={{ margin: '0' }}>Comece adicionando o primeiro contrato da obra.</p>
                                 </div>
                             ) : (
                                 <div style={{
                                     display: 'grid',
                                     gap: '16px'
                                 }}>
-                                    {project.expenses.map(expense => (
-                                        <div key={expense.id} style={{
+                                    {contracts.map(contract => (
+                                        <div key={contract.id} style={{
                                             border: '1px solid #e2e8f0',
                                             borderRadius: '12px',
-                                            padding: '20px',
+                                            padding: '24px',
                                             transition: 'all 0.2s ease',
                                             backgroundColor: '#fafafa'
                                         }}
                                             onMouseEnter={(e) => {
                                                 e.currentTarget.style.backgroundColor = '#f8fafc';
                                                 e.currentTarget.style.borderColor = '#c7d2fe';
-                                                e.currentTarget.style.transform = 'translateY(-1px)';
-                                                e.currentTarget.style.boxShadow = '0 2px 8px 0 rgba(0, 0, 0, 0.1)';
+                                                e.currentTarget.style.transform = 'translateY(-2px)';
+                                                e.currentTarget.style.boxShadow = '0 4px 12px 0 rgba(0, 0, 0, 0.1)';
                                             }}
                                             onMouseLeave={(e) => {
                                                 e.currentTarget.style.backgroundColor = '#fafafa';
@@ -1289,65 +509,48 @@ const WorkDetails = () => {
                                                 e.currentTarget.style.boxShadow = 'none';
                                             }}
                                         >
-
                                             <div style={{
                                                 display: 'grid',
-                                                gridTemplateColumns: 'auto 1fr auto auto',
+                                                gridTemplateColumns: 'auto 1fr auto',
                                                 gap: '20px',
                                                 alignItems: 'center'
                                             }}>
-
                                                 {/* Ícone e Info Principal */}
                                                 <div style={{
                                                     display: 'flex',
-                                                    alignItems: 'flex-start',
+                                                    alignItems: 'center',
                                                     gap: '16px'
                                                 }}>
                                                     <div style={{
                                                         width: '48px',
                                                         height: '48px',
-                                                        backgroundColor: '#fef3c7',
+                                                        backgroundColor: '#eff6ff',
                                                         borderRadius: '12px',
                                                         display: 'flex',
                                                         alignItems: 'center',
                                                         justifyContent: 'center',
                                                         fontSize: '1.5rem',
-                                                        border: '2px solid #fbbf24'
+                                                        border: '2px solid #bfdbfe'
                                                     }}>
-                                                        💰
+                                                        📄
                                                     </div>
 
                                                     <div>
-                                                        <h4 style={{
+                                                        <h3 style={{
                                                             fontSize: '1.1rem',
                                                             fontWeight: '600',
                                                             color: '#1e293b',
                                                             margin: '0 0 4px 0'
                                                         }}>
-                                                            {expense.description}
-                                                        </h4>
-                                                        <div style={{
-                                                            fontSize: '0.875rem',
+                                                            {contract.contractNumber}
+                                                        </h3>
+                                                        <p style={{
+                                                            fontSize: '0.9rem',
                                                             color: '#64748b',
-                                                            marginBottom: '4px'
+                                                            margin: '0'
                                                         }}>
-                                                            📅 {new Date(expense.date).toLocaleDateString('pt-BR')}
-                                                        </div>
-                                                        <div style={{
-                                                            fontSize: '0.875rem',
-                                                            color: '#6366f1',
-                                                            fontWeight: '500'
-                                                        }}>
-                                                            🏷️ {expense.costCenterName}
-                                                        </div>
-                                                        {expense.numberOfPeople && (
-                                                            <div style={{
-                                                                fontSize: '0.875rem',
-                                                                color: '#64748b'
-                                                            }}>
-                                                                👥 {expense.numberOfPeople} pessoas
-                                                            </div>
-                                                        )}
+                                                            {new Date(contract.startDate).toLocaleDateString('pt-BR')} - {contract.endDate ? new Date(contract.endDate).toLocaleDateString('pt-BR') : 'Em andamento'}
+                                                        </p>
                                                     </div>
                                                 </div>
 
@@ -1355,174 +558,137 @@ const WorkDetails = () => {
                                                 <div style={{
                                                     textAlign: 'center',
                                                     padding: '12px',
-                                                    backgroundColor: '#fef2f2',
+                                                    backgroundColor: '#f0fdf4',
                                                     borderRadius: '8px',
-                                                    border: '1px solid #fecaca'
+                                                    border: '1px solid #bbf7d0'
                                                 }}>
                                                     <div style={{
                                                         fontSize: '0.75rem',
                                                         fontWeight: '600',
-                                                        color: '#991b1b',
+                                                        color: '#15803d',
                                                         textTransform: 'uppercase',
                                                         letterSpacing: '0.5px',
                                                         marginBottom: '4px'
                                                     }}>
-                                                        VALOR
+                                                        VALOR TOTAL
                                                     </div>
                                                     <div style={{
                                                         fontSize: '1.1rem',
                                                         fontWeight: '700',
-                                                        color: '#dc2626'
+                                                        color: '#166534'
                                                     }}>
-                                                        {formatCurrency(expense.amount)}
+                                                        {formatCurrency(contract.totalValue)}
                                                     </div>
-                                                </div>
-
-                                                {/* Anexo */}
-                                                <div style={{
-                                                    textAlign: 'center'
-                                                }}>
-                                                    {expense.attachmentPath ? (
-                                                        <a
-                                                            href={`http://localhost:5145${expense.attachmentPath}`}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            style={{
-                                                                display: 'inline-flex',
-                                                                alignItems: 'center',
-                                                                gap: '6px',
-                                                                padding: '8px 12px',
-                                                                backgroundColor: '#e0e7ff',
-                                                                color: '#3730a3',
-                                                                textDecoration: 'none',
-                                                                borderRadius: '6px',
-                                                                fontSize: '0.875rem',
-                                                                fontWeight: '600',
-                                                                border: '1px solid #c7d2fe',
-                                                                transition: 'all 0.2s ease'
-                                                            }}
-                                                            onMouseEnter={(e) => {
-                                                                e.target.style.backgroundColor = '#c7d2fe';
-                                                            }}
-                                                            onMouseLeave={(e) => {
-                                                                e.target.style.backgroundColor = '#e0e7ff';
-                                                            }}
-                                                        >
-                                                            📎 Ver Anexo
-                                                        </a>
-                                                    ) : (
-                                                        <span style={{
-                                                            fontSize: '0.875rem',
-                                                            color: '#9ca3af'
-                                                        }}>
-                                                            Sem anexo
-                                                        </span>
-                                                    )}
                                                 </div>
 
                                                 {/* Ações */}
                                                 <div style={{
                                                     display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center', // Centraliza os botões na célula
                                                     gap: '8px'
                                                 }}>
-                                                    {/* A verificação condicional envolve os dois botões */}
-                                                    {!expense.isVirtual && (
-                                                        <>
-                                                            <Link
-                                                                to={`/expense/edit/${expense.id}`}
-                                                                style={{ textDecoration: 'none' }}
-                                                            >
-                                                                <button style={{
-                                                                    backgroundColor: '#3b82f6',
-                                                                    color: 'white',
-                                                                    border: 'none',
-                                                                    borderRadius: '6px',
-                                                                    padding: '6px 12px',
-                                                                    fontSize: '0.75rem',
-                                                                    fontWeight: '600',
-                                                                    cursor: 'pointer',
-                                                                    transition: 'background-color 0.2s ease',
-                                                                    display: 'flex',
-                                                                    alignItems: 'center',
-                                                                    gap: '4px'
-                                                                }}
-                                                                    onMouseEnter={(e) => e.target.style.backgroundColor = '#2563eb'}
-                                                                    onMouseLeave={(e) => e.target.style.backgroundColor = '#3b82f6'}
-                                                                >
-                                                                    ✏️ Editar
-                                                                </button>
-                                                            </Link>
+                                                    <Link
+                                                        to={`/contract/edit/${contract.id}`}
+                                                        style={{ textDecoration: 'none' }}
+                                                    >
+                                                        <button style={{
+                                                            backgroundColor: '#3b82f6',
+                                                            color: 'white',
+                                                            border: 'none',
+                                                            borderRadius: '8px',
+                                                            padding: '8px 16px',
+                                                            fontSize: '0.875rem',
+                                                            fontWeight: '600',
+                                                            cursor: 'pointer',
+                                                            transition: 'background-color 0.2s ease',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: '6px'
+                                                        }}
+                                                            onMouseEnter={(e) => e.target.style.backgroundColor = '#2563eb'}
+                                                            onMouseLeave={(e) => e.target.style.backgroundColor = '#3b82f6'}
+                                                        >
+                                                            ✏️ Editar
+                                                        </button>
+                                                    </Link>
 
-                                                            <button
-                                                                onClick={() => handleDeleteExpense(expense.id)}
-                                                                style={{
-                                                                    backgroundColor: '#ef4444',
-                                                                    color: 'white',
-                                                                    border: 'none',
-                                                                    borderRadius: '6px',
-                                                                    padding: '6px 12px',
-                                                                    fontSize: '0.75rem',
-                                                                    fontWeight: '600',
-                                                                    cursor: 'pointer',
-                                                                    transition: 'background-color 0.2s ease',
-                                                                    display: 'flex',
-                                                                    alignItems: 'center',
-                                                                    gap: '4px'
-                                                                }}
-                                                                onMouseEnter={(e) => e.target.style.backgroundColor = '#dc2626'}
-                                                                onMouseLeave={(e) => e.target.style.backgroundColor = '#ef4444'}
-                                                            >
-                                                                🗑️ Deletar
-                                                            </button>
-                                                        </>
-                                                    )}
+                                                    <button
+                                                        onClick={() => handleDeleteContract(contract.id)}
+                                                        style={{
+                                                            backgroundColor: '#ef4444',
+                                                            color: 'white',
+                                                            border: 'none',
+                                                            borderRadius: '8px',
+                                                            padding: '8px 16px',
+                                                            fontSize: '0.875rem',
+                                                            fontWeight: '600',
+                                                            cursor: 'pointer',
+                                                            transition: 'background-color 0.2s ease',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: '6px'
+                                                        }}
+                                                        onMouseEnter={(e) => e.target.style.backgroundColor = '#dc2626'}
+                                                        onMouseLeave={(e) => e.target.style.backgroundColor = '#ef4444'}
+                                                    >
+                                                        🗑️ Deletar
+                                                    </button>
                                                 </div>
                                             </div>
                                         </div>
                                     ))}
                                 </div>
                             )}
+                        </div>
+                    </div>
+                )}
 
-                            {/* Total de Despesas */}
-                            {project.expenses && project.expenses.length > 0 && (
-                                <div style={{
-                                    marginTop: '24px',
-                                    padding: '20px',
-                                    backgroundColor: '#f8fafc',
-                                    borderRadius: '12px',
-                                    border: '1px solid #e2e8f0',
-                                    textAlign: 'center'
-                                }}>
-                                    <div style={{
-                                        fontSize: '0.875rem',
-                                        fontWeight: '600',
-                                        color: '#64748b',
-                                        marginBottom: '8px'
-                                    }}>
-                                        TOTAL GASTO NA OBRA
+                {/* TAB: EQUIPE (DELEGADA AO TEAMMANAGER) */}
+                {activeTab === 'team' && (
+                    <TeamManager
+                        projectId={id}
+                        allocations={allocations}
+                        onTeamUpdate={handleTeamUpdate}
+                    />
+                )}
+
+                {/* TAB: DESPESAS (USA O NOVO MODAL) */}
+                {activeTab === 'expenses' && (
+                    <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '16px', borderBottom: '1px solid #f1f5f9' }}>
+                            <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: '600', color: '#1e2d3b' }}>
+                                Despesas Lançadas
+                            </h2>
+                            <button onClick={() => setIsExpenseFormVisible(true)} style={{ backgroundColor: '#10b981', color: 'white', border: 'none', borderRadius: '8px', padding: '10px 20px', cursor: 'pointer', fontWeight: '600' }}>
+                                ➕ Nova Despesa
+                            </button>
+                        </div>
+                        <div style={{ marginTop: '24px' }}>
+                            {!project.expenses || project.expenses.length === 0 ? (
+                                <p>Nenhuma despesa lançada para esta obra.</p>
+                            ) : (
+                                project.expenses.map(expense => (
+                                    <div key={expense.id} style={{ borderBottom: '1px solid #f1f5f9', padding: '16px 0', display: 'grid', gridTemplateColumns: '2fr 1fr 1fr auto', alignItems: 'center' }}>
+                                        <div>
+                                            <div style={{ fontWeight: '600', color: '#1e2d3b' }}>{expense.description}</div>
+                                            <div style={{ fontSize: '0.8rem', color: '#64748b' }}>{new Date(expense.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</div>
+                                        </div>
+                                        <div style={{ fontSize: '0.9rem', color: '#475569' }}>{expense.costCenterName}</div>
+                                        <div style={{ fontWeight: '700', color: '#dc2626' }}>{formatCurrency(expense.amount)}</div>
+                                        <div style={{ display: 'flex', gap: '8px' }}>
+                                            {!expense.isVirtual && (
+                                                <>
+                                                    <Link to={`/expense/edit/${expense.id}`}><button>✏️</button></Link>
+                                                    <button onClick={() => handleDeleteExpense(expense.id)}>🗑️</button>
+                                                </>
+                                            )}
+                                        </div>
                                     </div>
-                                    <div style={{
-                                        fontSize: '2rem',
-                                        fontWeight: '700',
-                                        color: '#dc2626'
-                                    }}>
-                                        {formatCurrency(project.expenses.reduce((sum, expense) => sum + expense.amount, 0))}
-                                    </div>
-                                </div>
+                                ))
                             )}
                         </div>
                     </div>
-                </div>
-            )}
-            <AddContractModal
-                isOpen={showAddContractModal}
-                onClose={handleCloseContractModal}
-                projectId={id}
-                projectName={`${project.contractor} - ${project.name}`}
-                onContractAdded={handleContractAdded}
-            />
+                )}
+            </div>
         </div>
     );
 };
