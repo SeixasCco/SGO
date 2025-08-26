@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { expenseFormMap } from '../config/expenseFormMap';
 
-const DynamicExpenseForm = ({ costCenterId, onSubmit, onCancel, initialData = {} }) => {   
+const DynamicExpenseForm = ({ costCenterId, onSubmit, onCancel, initialData = {}, submitting = false }) => {   
     const [commonData, setCommonData] = useState({
         description: initialData.description || '',
         amount: initialData.amount || '',
@@ -10,7 +10,6 @@ const DynamicExpenseForm = ({ costCenterId, onSubmit, onCancel, initialData = {}
         attachment: null
     });
 
-  
     const [detailsData, setDetailsData] = useState(initialData.detailsJson ? JSON.parse(initialData.detailsJson) : {});      
     const specificFields = expenseFormMap[costCenterId] || [];
    
@@ -47,25 +46,63 @@ const DynamicExpenseForm = ({ costCenterId, onSubmit, onCancel, initialData = {}
         onSubmit(fullExpenseData);
     };
     
-    const inputStyle = { width: '100%', padding: '8px', marginBottom: '10px' };
-    const labelStyle = { display: 'block', marginBottom: '4px', fontWeight: 'bold' };
+    const inputStyle = { 
+        width: '100%', 
+        padding: '12px', 
+        marginBottom: '10px',
+        border: '1px solid #ddd',
+        borderRadius: '4px',
+        boxSizing: 'border-box'
+    };
+    const labelStyle = { 
+        display: 'block', 
+        marginBottom: '6px', 
+        fontWeight: 'bold',
+        color: '#333'
+    };
 
     return (
         <form onSubmit={handleSubmit}>
-            {/* Campos Comuns */}
-            <fieldset style={{ border: '1px solid #ccc', padding: '16px', borderRadius: '8px' }}>
-                <legend>Informações Gerais</legend>
-                <label style={labelStyle}>Data da Despesa*</label>
-                <input name="date" type="date" value={commonData.date} onChange={handleCommonChange} required style={inputStyle} />
+            <fieldset style={{ border: '1px solid #ddd', padding: '16px', borderRadius: '8px', marginBottom: '16px' }}>
+                <legend style={{ fontWeight: 'bold', color: '#333' }}>2. Informações Gerais</legend>
                 
-                <label style={labelStyle}>Valor (R$)*</label>
-                <input name="amount" type="number" step="0.01" value={commonData.amount} onChange={handleCommonChange} placeholder="0.00" required style={inputStyle} />
+                <label style={labelStyle}>Descrição *</label>
+                <input 
+                    name="description" 
+                    type="text" 
+                    value={commonData.description} 
+                    onChange={handleCommonChange} 
+                    required 
+                    style={inputStyle}
+                    placeholder="Descreva a despesa..."
+                />
+                
+                <label style={labelStyle}>Data da Despesa *</label>
+                <input 
+                    name="date" 
+                    type="date" 
+                    value={commonData.date} 
+                    onChange={handleCommonChange} 
+                    required 
+                    style={inputStyle} 
+                />
+                
+                <label style={labelStyle}>Valor (R$) *</label>
+                <input 
+                    name="amount" 
+                    type="number" 
+                    step="0.01" 
+                    value={commonData.amount} 
+                    onChange={handleCommonChange} 
+                    placeholder="0.00" 
+                    required 
+                    style={inputStyle} 
+                />
             </fieldset>
 
-            {/* Campos Dinâmicos */}
             {specificFields.length > 0 && (
-                <fieldset style={{ border: '1px solid #ccc', padding: '16px', borderRadius: '8px', marginTop: '16px' }}>
-                    <legend>Detalhes Específicos</legend>
+                <fieldset style={{ border: '1px solid #ddd', padding: '16px', borderRadius: '8px', marginBottom: '16px' }}>
+                    <legend style={{ fontWeight: 'bold', color: '#333' }}>3. Detalhes Específicos</legend>
                     {specificFields.map(field => (
                         <div key={field.name}>
                             <label style={labelStyle}>{field.label}</label>
@@ -82,19 +119,63 @@ const DynamicExpenseForm = ({ costCenterId, onSubmit, onCancel, initialData = {}
                 </fieldset>
             )}
 
-            {/* Campos Adicionais */}
-            <fieldset style={{ border: '1px solid #ccc', padding: '16px', borderRadius: '8px', marginTop: '16px' }}>
-                <legend>Informações Adicionais</legend>
-                <label style={labelStyle}>Observações</label>
-                <textarea name="observations" value={commonData.observations} onChange={handleCommonChange} style={{...inputStyle, height: '80px'}} />               
+            <fieldset style={{ border: '1px solid #ddd', padding: '16px', borderRadius: '8px', marginBottom: '16px' }}>
+                <legend style={{ fontWeight: 'bold', color: '#333' }}>4. Informações Adicionais</legend>
                 
-                <label style={labelStyle}>Anexo</label>
-                <input name="attachment" type="file" onChange={handleCommonChange} style={inputStyle} />
+                <label style={labelStyle}>Observações</label>
+                <textarea 
+                    name="observations" 
+                    value={commonData.observations} 
+                    onChange={handleCommonChange} 
+                    style={{...inputStyle, height: '80px'}} 
+                    placeholder="Observações adicionais..."
+                />               
+                
+                <label style={labelStyle}>Anexo (Nota Fiscal, Comprovante)</label>
+                <input 
+                    name="attachment" 
+                    type="file" 
+                    onChange={handleCommonChange} 
+                    style={inputStyle}
+                    accept=".pdf,.jpg,.jpeg,.png,.gif,.doc,.docx"
+                />
+                {commonData.attachment && (
+                    <div style={{ fontSize: '0.9rem', color: '#666', marginTop: '4px' }}>
+                        Arquivo selecionado: {commonData.attachment.name}
+                    </div>
+                )}
             </fieldset>
             
-            <div style={{ marginTop: '24px' }}>
-                <button type="button" onClick={onCancel}>Cancelar</button>
-                <button type="submit" style={{ marginLeft: '12px' }}>Salvar Despesa</button>
+            <div style={{ marginTop: '24px', textAlign: 'right' }}>
+                <button 
+                    type="button" 
+                    onClick={onCancel}
+                    disabled={submitting}
+                    style={{
+                        padding: '10px 20px',
+                        marginRight: '12px',
+                        border: '1px solid #ddd',
+                        borderRadius: '4px',
+                        background: '#f5f5f5',
+                        cursor: submitting ? 'not-allowed' : 'pointer'
+                    }}
+                >
+                    Cancelar
+                </button>
+                <button 
+                    type="submit"
+                    disabled={submitting}
+                    style={{
+                        padding: '10px 20px',
+                        border: 'none',
+                        borderRadius: '4px',
+                        background: submitting ? '#ccc' : '#007bff',
+                        color: 'white',
+                        cursor: submitting ? 'not-allowed' : 'pointer'
+                    }}
+                >
+                    {submitting ? 'Salvando...' : 'Salvar Despesa'}
+                </button>
             </div>
         </form>
     );

@@ -14,53 +14,117 @@ const AddExpenseModal = ({ onClose, onExpenseAdded, projectId, contractId }) => 
             .catch(err => toast.error('Não foi possível carregar os centros de custo.'));
     }, []);
 
-    const handleSubmit = (formData) => {
+    const handleSubmit = async (formData) => {
         setSubmitting(true);
+        
+        let attachmentPath = null;
+        
+        // Upload do anexo se existir
+        if (formData.attachment) {
+            const uploadData = new FormData();
+            uploadData.append('file', formData.attachment);
+            
+            try {
+                const uploadResponse = await axios.post('http://localhost:5145/api/attachments/upload', uploadData);
+                attachmentPath = uploadResponse.data.filePath;
+                console.log('Anexo enviado:', attachmentPath);
+            } catch (err) {
+                toast.error('Falha ao enviar o anexo.');
+                setSubmitting(false);
+                return;
+            }
+        }
+        
         const finalData = {
-            ...formData, 
+            description: formData.description,
+            amount: formData.amount,
+            date: formData.date,
+            observations: formData.observations,
+            details: formData.details,
             costCenterId: selectedCostCenterId,
             projectId: projectId || null,
-            contractId: contractId || null, 
+            contractId: contractId || null,
+            attachmentPath: attachmentPath
         };
 
-        const postData = new FormData();
-        Object.keys(finalData).forEach(key => {
-            if (key === 'details') {               
-                postData.append(key, JSON.stringify(finalData[key]));
-            } else if (finalData[key] !== null && finalData[key] !== undefined) {
-                postData.append(key, finalData[key]);
-            }
-        });
+        console.log('Dados finais:', finalData);
         
-        axios.post('http://localhost:5145/api/projectexpenses', finalData)
-            .then(() => {
-                toast.success('Despesa lançada com sucesso!');
-                onExpenseAdded();
-            })
-            .catch(err => {
-                const message = err.response?.data?.message || "Falha ao lançar despesa.";
-                toast.error(message);
-            })
-            .finally(() => {
-                setSubmitting(false);
-            });
+        try {
+            await axios.post('http://localhost:5145/api/projectexpenses', finalData);
+            toast.success('Despesa lançada com sucesso!');
+            onExpenseAdded();
+        } catch (err) {
+            const message = err.response?.data?.message || "Falha ao lançar despesa.";
+            toast.error(message);
+            console.error('Erro:', err);
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     return (
-        <div style={{ /* Estilos do Overlay */ }}>
-            <div style={{ /* Estilos do Modal */ }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <h2>Lançar Nova Despesa {projectId ? '(Obra)' : '(Matriz)'}</h2>
-                    <button onClick={onClose}>✖️</button>
+        <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 1000
+        }}>
+            <div style={{
+                backgroundColor: 'white',
+                borderRadius: '12px',
+                padding: '32px',
+                width: '90%',
+                maxWidth: '600px',
+                maxHeight: '90vh',
+                overflow: 'auto',
+                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+            }}>
+                <div style={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center',
+                    marginBottom: '20px'
+                }}>
+                    <h2 style={{ margin: 0 }}>
+                        Lançar Nova Despesa {projectId ? '(Obra)' : '(Matriz)'}
+                    </h2>
+                    <button 
+                        onClick={onClose}
+                        style={{
+                            background: 'none',
+                            border: 'none',
+                            fontSize: '24px',
+                            cursor: 'pointer',
+                            color: '#666'
+                        }}
+                    >
+                        ×
+                    </button>
                 </div>
 
-                {/* Passo 1: Selecionar Centro de Custo */}
                 <div style={{ margin: '20px 0' }}>
-                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>1. Selecione o Centro de Custo</label>
+                    <label style={{ 
+                        display: 'block', 
+                        marginBottom: '8px', 
+                        fontWeight: 'bold' 
+                    }}>
+                        1. Selecione o Centro de Custo *
+                    </label>
                     <select
                         value={selectedCostCenterId}
                         onChange={(e) => setSelectedCostCenterId(e.target.value)}
-                        style={{ width: '100%', padding: '10px' }}
+                        style={{ 
+                            width: '100%', 
+                            padding: '10px',
+                            border: '1px solid #ddd',
+                            borderRadius: '4px'
+                        }}
                     >
                         <option value="">Selecione...</option>
                         {costCenters.map(cc => (
@@ -69,12 +133,12 @@ const AddExpenseModal = ({ onClose, onExpenseAdded, projectId, contractId }) => 
                     </select>
                 </div>
 
-                {/* Passo 2: Renderizar o Formulário Dinâmico */}
                 {selectedCostCenterId && (
                     <DynamicExpenseForm
                         costCenterId={selectedCostCenterId}
                         onSubmit={handleSubmit}
                         onCancel={onClose}
+                        submitting={submitting}
                     />
                 )}
             </div>

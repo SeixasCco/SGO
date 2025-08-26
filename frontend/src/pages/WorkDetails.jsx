@@ -17,8 +17,6 @@ const WorkDetails = () => {
     const [contracts, setContracts] = useState([]);
     const [allocations, setAllocations] = useState([]);
     const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
-    
-    // Estados que estavam faltando:
     const [selectedEmployee, setSelectedEmployee] = useState('');
     const [startDate, setStartDate] = useState('');
     const [selectedFile, setSelectedFile] = useState(null);
@@ -26,7 +24,7 @@ const WorkDetails = () => {
         description: '',
         amount: '',
         date: new Date().toISOString().split('T')[0],
-        costCenterId: ''       
+        costCenterId: ''
     });
     const [isExpenseFormVisible, setIsExpenseFormVisible] = useState(false);
     const [submittingExpense, setSubmittingExpense] = useState(false);
@@ -172,7 +170,7 @@ const WorkDetails = () => {
             description: expenseFormData.description,
             amount: parseFloat(expenseFormData.amount),
             date: expenseFormData.date,
-            costCenterId: expenseFormData.costCenterId,       
+            costCenterId: expenseFormData.costCenterId,
             projectId: id,
             contractId: defaultContractId,
             attachmentPath: attachmentPath,
@@ -185,7 +183,7 @@ const WorkDetails = () => {
                 description: '',
                 amount: '',
                 date: new Date().toISOString().split('T')[0],
-                costCenterId: ''                
+                costCenterId: ''
             });
             setSelectedFile(null);
             setIsExpenseFormVisible(false);
@@ -639,7 +637,7 @@ const WorkDetails = () => {
                     </div>
                 )}
 
-                {/* TAB: EQUIPE (DELEGADA AO TEAMMANAGER) */}
+                {/* TAB: EQUIPE */}
                 {activeTab === 'team' && (
                     <TeamManager
                         projectId={id}
@@ -661,21 +659,109 @@ const WorkDetails = () => {
                         </div>
                         <div style={{ marginTop: '24px' }}>
                             {!project.expenses || project.expenses.length === 0 ? (
-                                <p>Nenhuma despesa lançada para esta obra.</p>
+                                <div style={{
+                                    textAlign: 'center',
+                                    padding: '40px',
+                                    color: '#64748b',
+                                    fontSize: '1.1rem'
+                                }}>
+                                    📋 Nenhuma despesa lançada para esta obra.
+                                </div>
                             ) : (
                                 project.expenses.map(expense => (
-                                    <div key={expense.id} style={{ borderBottom: '1px solid #f1f5f9', padding: '16px 0', display: 'grid', gridTemplateColumns: '2fr 1fr 1fr auto', alignItems: 'center' }}>
+                                    <div key={expense.id} style={{
+                                        borderBottom: '1px solid #f1f5f9',
+                                        padding: '20px 0',
+                                        display: 'grid',
+                                        gridTemplateColumns: '2fr 1fr 1fr auto auto',
+                                        alignItems: 'center',
+                                        gap: '16px'
+                                    }}>
+                                        {/* Coluna 1: Descrição e Data */}
                                         <div>
-                                            <div style={{ fontWeight: '600', color: '#1e2d3b' }}>{expense.description}</div>
-                                            <div style={{ fontSize: '0.8rem', color: '#64748b' }}>{new Date(expense.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</div>
+                                            <div style={{ fontWeight: '600', color: '#1e2d3b', marginBottom: '4px' }}>
+                                                {expense.description}
+                                            </div>
+                                            <div style={{ fontSize: '0.875rem', color: '#64748b' }}>
+                                                📅 {new Date(expense.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}
+                                            </div>
                                         </div>
-                                        <div style={{ fontSize: '0.9rem', color: '#475569' }}>{expense.costCenterName}</div>
-                                        <div style={{ fontWeight: '700', color: '#dc2626' }}>{formatCurrency(expense.amount)}</div>
+
+                                        {/* Coluna 2: Centro de Custo */}
+                                        <div style={{ fontSize: '0.9rem', color: '#475569' }}>
+                                            {expense.costCenterName}
+                                        </div>
+
+                                        {/* Coluna 3: Valor */}
+                                        <div style={{ fontWeight: '700', color: '#dc2626' }}>
+                                            {formatCurrency(expense.amount)}
+                                        </div>
+
+                                        {/* Coluna 4: Anexo (se existir) */}
+                                        <div>
+                                            {expense.attachmentPath && (
+                                                <a
+                                                    href={`http://localhost:5145/api/attachments/${expense.attachmentPath.replace('/uploads/', '')}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    style={{
+                                                        color: '#3b82f6',
+                                                        textDecoration: 'none',
+                                                        fontSize: '0.875rem',
+                                                        fontWeight: '500',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: '4px',
+                                                        padding: '4px 8px',
+                                                        borderRadius: '4px',
+                                                        border: '1px solid #bfdbfe',
+                                                        backgroundColor: '#eff6ff'
+                                                    }}
+                                                    onMouseEnter={(e) => {
+                                                        e.target.style.backgroundColor = '#dbeafe';
+                                                        e.target.style.borderColor = '#93c5fd';
+                                                    }}
+                                                    onMouseLeave={(e) => {
+                                                        e.target.style.backgroundColor = '#eff6ff';
+                                                        e.target.style.borderColor = '#bfdbfe';
+                                                    }}
+                                                >
+                                                    📎 Anexo
+                                                </a>
+                                            )}
+                                        </div>
+
+                                        {/* Coluna 5: Ações */}
                                         <div style={{ display: 'flex', gap: '8px' }}>
-                                            {!expense.isVirtual && (
+                                            {!expense.isAutomaticallyCalculated && (
                                                 <>
-                                                    <Link to={`/expense/edit/${expense.id}`}><button>✏️</button></Link>
-                                                    <button onClick={() => handleDeleteExpense(expense.id)}>🗑️</button>
+                                                    <Link to={`/expense/edit/${expense.id}`}>
+                                                        <button style={{
+                                                            backgroundColor: '#3b82f6',
+                                                            color: 'white',
+                                                            border: 'none',
+                                                            borderRadius: '4px',
+                                                            padding: '6px 12px',
+                                                            fontSize: '0.75rem',
+                                                            cursor: 'pointer'
+                                                        }}>
+                                                            ✏️
+                                                        </button>
+                                                    </Link>
+                                                    <button
+                                                        onClick={() => handleDeleteExpense(expense.id)}
+                                                        style={{
+                                                            backgroundColor: '#ef4444',
+                                                            color: 'white',
+                                                            border: 'none',
+                                                            borderRadius: '4px',
+                                                            padding: '6px 12px',
+                                                            fontSize: '0.75rem',
+                                                            cursor: 'pointer'
+                                                        }}
+                                                    >
+                                                        🗑️
+                                                    </button>
                                                 </>
                                             )}
                                         </div>
