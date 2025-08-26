@@ -6,8 +6,7 @@ const DynamicExpenseForm = ({ costCenterId, onSubmit, onCancel, initialData = {}
         description: initialData.description || '',
         amount: initialData.amount || '',
         date: initialData.date || new Date().toISOString().split('T')[0],
-        observations: initialData.observations || '',
-        numberOfPeople: initialData.numberOfPeople || '',
+        observations: initialData.observations || '',       
         attachment: null
     });
 
@@ -87,10 +86,7 @@ const DynamicExpenseForm = ({ costCenterId, onSubmit, onCancel, initialData = {}
             <fieldset style={{ border: '1px solid #ccc', padding: '16px', borderRadius: '8px', marginTop: '16px' }}>
                 <legend>Informações Adicionais</legend>
                 <label style={labelStyle}>Observações</label>
-                <textarea name="observations" value={commonData.observations} onChange={handleCommonChange} style={{...inputStyle, height: '80px'}} />
-
-                <label style={labelStyle}>Nº de Pessoas</label>
-                <input name="numberOfPeople" type="number" value={commonData.numberOfPeople} onChange={handleCommonChange} style={inputStyle} />
+                <textarea name="observations" value={commonData.observations} onChange={handleCommonChange} style={{...inputStyle, height: '80px'}} />               
                 
                 <label style={labelStyle}>Anexo</label>
                 <input name="attachment" type="file" onChange={handleCommonChange} style={inputStyle} />

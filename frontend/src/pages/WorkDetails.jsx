@@ -26,8 +26,7 @@ const WorkDetails = () => {
         description: '',
         amount: '',
         date: new Date().toISOString().split('T')[0],
-        costCenterId: '',
-        numberOfPeople: ''
+        costCenterId: ''       
     });
     const [isExpenseFormVisible, setIsExpenseFormVisible] = useState(false);
     const [submittingExpense, setSubmittingExpense] = useState(false);
@@ -173,8 +172,7 @@ const WorkDetails = () => {
             description: expenseFormData.description,
             amount: parseFloat(expenseFormData.amount),
             date: expenseFormData.date,
-            costCenterId: expenseFormData.costCenterId,
-            numberOfPeople: expenseFormData.numberOfPeople ? parseInt(expenseFormData.numberOfPeople, 10) : null,
+            costCenterId: expenseFormData.costCenterId,       
             projectId: id,
             contractId: defaultContractId,
             attachmentPath: attachmentPath,
@@ -187,8 +185,7 @@ const WorkDetails = () => {
                 description: '',
                 amount: '',
                 date: new Date().toISOString().split('T')[0],
-                costCenterId: '',
-                numberOfPeople: ''
+                costCenterId: ''                
             });
             setSelectedFile(null);
             setIsExpenseFormVisible(false);
