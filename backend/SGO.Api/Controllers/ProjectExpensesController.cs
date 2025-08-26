@@ -37,7 +37,7 @@ namespace SGO.Api.Controllers
         // POST: api/projectexpenses
         [HttpPost]
         public async Task<ActionResult<ProjectExpense>> CreateExpense([FromBody] CreateExpenseDto expenseDto)
-        {           
+        {
             if (expenseDto.ProjectId.HasValue && !expenseDto.ContractId.HasValue)
             {
                 return BadRequest(new { message = "Para despesas de obra, é obrigatório selecionar um contrato." });
@@ -46,7 +46,7 @@ namespace SGO.Api.Controllers
             if (expenseDto.CostCenterId == Guid.Empty)
             {
                 return BadRequest(new { message = "O Centro de Custo é obrigatório." });
-            }            
+            }
 
             var newExpense = new ProjectExpense
             {
@@ -60,24 +60,31 @@ namespace SGO.Api.Controllers
                 Observations = expenseDto.Observations,
                 SupplierName = expenseDto.SupplierName,
                 InvoiceNumber = expenseDto.InvoiceNumber,
-                AttachmentPath = expenseDto.AttachmentPath,
-                IsAutomaticallyCalculated = false, 
+                AttachmentPath = expenseDto.AttachmentPath,                      
+                IsAutomaticallyCalculated = false,
 
-                DetailsJson = expenseDto.Details != null && expenseDto.Details.Any()
-                    ? JsonSerializer.Serialize(expenseDto.Details)
-                    : null
+                DetailsJson = expenseDto.Details != null ? JsonSerializer.Serialize(expenseDto.Details) : null
             };
 
             _context.ProjectExpenses.Add(newExpense);
             await _context.SaveChangesAsync();
-           
-            await _context.Entry(newExpense).Reference(e => e.CostCenter).LoadAsync();
-            if (newExpense.ProjectId.HasValue)
-            {
-                await _context.Entry(newExpense).Reference(e => e.Project).LoadAsync();
-            }
 
-            return Ok(newExpense);
+            await _context.Entry(newExpense).Reference(e => e.CostCenter).LoadAsync();
+
+            var responseDto = new ExpenseResponseDto
+            {
+                Id = newExpense.Id,
+                ProjectId = newExpense.ProjectId,
+                Description = newExpense.Description,
+                Amount = newExpense.Amount,
+                Date = newExpense.Date,
+                CostCenterId = newExpense.CostCenterId,
+                CostCenterName = newExpense.CostCenter.Name,
+                DetailsJson = newExpense.DetailsJson,
+                IsAutomaticallyCalculated = newExpense.IsAutomaticallyCalculated
+            };
+
+            return CreatedAtAction(nameof(GetExpenseById), new { id = newExpense.Id }, responseDto);
         }
 
         // PUT: api/projectexpenses/{id}        
@@ -124,6 +131,28 @@ namespace SGO.Api.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
+        }
+
+        [HttpGet("administrative")]
+        public async Task<ActionResult<IEnumerable<ExpenseListItemDto>>> GetAdminExpenses()
+        {
+            var expenses = await _context.ProjectExpenses
+                .Where(e => e.ProjectId == null)
+                .Include(e => e.CostCenter)
+                .OrderByDescending(e => e.Date)
+                .Select(e => new ExpenseListItemDto
+                {
+                    Id = e.Id,
+                    Date = e.Date,
+                    Description = e.Description,
+                    CostCenterName = e.CostCenter.Name,
+                    Amount = e.Amount,
+                    HasAttachment = !string.IsNullOrEmpty(e.AttachmentPath),
+                    AttachmentPath = e.AttachmentPath
+                })
+                .ToListAsync();
+
+            return Ok(expenses);
         }
 
     }

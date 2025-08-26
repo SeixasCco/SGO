@@ -7,8 +7,7 @@ const AddExpenseForm = ({ projectId, contractId, onExpenseAdded }) => {
     description: '',
     amount: '',
     date: new Date().toISOString().split('T')[0],
-    costCenterId: '',
-    numberOfPeople: ''
+    costCenterId: ''   
   });
   const [selectedFile, setSelectedFile] = useState(null);
   const [error, setError] = useState('');
@@ -25,7 +24,7 @@ const AddExpenseForm = ({ projectId, contractId, onExpenseAdded }) => {
     setSelectedFile(e.target.files[0]);
   };
 
-  const handleSubmit = async (e) => {
+ const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setSubmitting(true);
@@ -35,7 +34,6 @@ const AddExpenseForm = ({ projectId, contractId, onExpenseAdded }) => {
     if (selectedFile) {
       const uploadData = new FormData();
       uploadData.append('file', selectedFile);
-
       try {
         const uploadResponse = await axios.post('http://localhost:5145/api/attachments/upload', uploadData);
         attachmentPath = uploadResponse.data.filePath;
@@ -50,14 +48,15 @@ const AddExpenseForm = ({ projectId, contractId, onExpenseAdded }) => {
     const newExpense = {
       ...formData,
       amount: parseFloat(formData.amount),
-      costCenterId: formData.costCenterId,
-      numberOfPeople: formData.numberOfPeople ? parseInt(formData.numberOfPeople, 10) : null,
+      costCenterId: formData.costCenterId,      
       projectId: projectId,
       contractId: contractId,
       attachmentPath: attachmentPath,
     };
 
     delete newExpense.costCenterName;
+
+    console.log('Dados que serão enviados para a API:', JSON.stringify(newExpense, null, 2));
 
     try {
       await axios.post('http://localhost:5145/api/projectexpenses', newExpense);      
@@ -66,8 +65,7 @@ const AddExpenseForm = ({ projectId, contractId, onExpenseAdded }) => {
         description: '',
         amount: '',
         date: new Date().toISOString().split('T')[0],
-        costCenterId: '',
-        numberOfPeople: ''
+        costCenterId: ''        
       });
       setSelectedFile(null);
       if (document.querySelector('input[type="file"]')) {
@@ -283,49 +281,7 @@ const AddExpenseForm = ({ projectId, contractId, onExpenseAdded }) => {
             }}>
               🏷️ Categoria para organização da despesa
             </div>
-          </div>
-
-          {/* Número de Pessoas */}
-          <div>
-            <label style={{
-              display: 'block',
-              fontSize: '0.9rem',
-              fontWeight: '600',
-              color: '#374151',
-              marginBottom: '8px'
-            }}>
-              Nº de Pessoas (Opcional)
-            </label>
-            <input
-              type="number"
-              name="numberOfPeople"
-              value={formData.numberOfPeople}
-              min="0"
-              onChange={handleChange}
-              style={{
-                width: '100%',
-                padding: '12px 16px',
-                border: '2px solid #d1d5db',
-                borderRadius: '8px',
-                fontSize: '1rem',
-                backgroundColor: '#dcdedfff',
-                color: '#1f2937',
-                fontWeight: '600',
-                boxSizing: 'border-box',
-                transition: 'border-color 0.2s ease'
-              }}
-              onFocus={(e) => e.target.style.borderColor = '#3b82f6'}
-              onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
-              placeholder="0"
-            />
-            <div style={{
-              fontSize: '0.875rem',
-              color: '#64748b',
-              marginTop: '4px'
-            }}>
-              👥 Para despesas relacionadas à equipe
-            </div>
-          </div>
+          </div>          
 
           {/* Anexo */}
           <div>

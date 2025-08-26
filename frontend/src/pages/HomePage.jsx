@@ -186,30 +186,14 @@ const HomePage = () => {
                         >
                             🏗️ Ver Obras
                         </button>
-
-                        <button
-                            onClick={() => navigate('/employees')}
-                            style={{
-                                padding: '12px 24px',
-                                backgroundColor: '#10b981',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '12px',
-                                fontSize: '1rem',
-                                fontWeight: '600',
-                                cursor: 'pointer'
-                            }}
-                        >
-                            👥 Funcionários
-                        </button>
+                        
                     </div>
                 </div>
             </div>
 
             {/* ✅ CONTAINER LARGURA COMPLETA */}
-            <div style={{
-                // ✅ REMOVIDO maxWidth e margin auto
-                padding: '0 24px' // ✅ Apenas padding nas laterais
+            <div style={{               
+                padding: '0 24px' 
             }}>
 
                 {/* ✅ ALERTAS LARGURA COMPLETA */}
@@ -218,7 +202,7 @@ const HomePage = () => {
                         <h3 style={{ marginLeft: '8px', marginBottom: '16px' }}>🔔 Alertas</h3>
                         <div style={{
                             display: 'grid',
-                            gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', // ✅ Grid responsivo
+                            gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', 
                             gap: '16px'
                         }}>
                             {alerts.map((alert, index) => (

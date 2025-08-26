@@ -1,35 +1,36 @@
 // Local: /src/App.jsx
 
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
-import HomePage from './pages/HomePage'; 
-import ProjectsListPage from './pages/ProjectsListPage'; 
+import { BrowserRouter as Router, Routes, Route, Link, useLocation, Outlet } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
+
+import HomePage from './pages/HomePage';
+import ProjectsListPage from './pages/ProjectsListPage';
 import WorkDetails from './pages/WorkDetails';
 import EditWorkPage from './pages/EditWorkPage';
 import EditEmployeePage from './pages/EditEmployeePage';
 import EditContractPage from './pages/EditContractPage';
 import EditExpensePage from './pages/EditExpensePage';
-import ReportsPage from './pages/ReportsPage'; 
-import { Toaster } from 'react-hot-toast';
+import ReportsPage from './pages/ReportsPage';
 import AdminPage from './pages/AdminPage';
 import EmployeesPage from './pages/EmployeesPage';
 
 import './App.css';
 
 const ModernNavigation = () => {
-    const location = useLocation();    
-  
-    const navItems = [
-        { path: '/', label: 'Dashboard', icon: '📊' },
-        { path: '/projects', label: 'Obras', icon: '🏗️' },
-        { path: '/admin', label: 'Administrativo', icon: '🗂️' },
-        { path: '/reports', label: 'Relatórios', icon: '📋' }
-    ];
+  const location = useLocation();
 
-    const isActive = (path) => {
-        if (path === '/') return location.pathname === '/';
-        return location.pathname.startsWith(path);
-    };
+  const navItems = [
+    { path: '/', label: 'Dashboard', icon: '📊' },
+    { path: '/projects', label: 'Obras', icon: '🏗️' },
+    { path: '/admin', label: 'Administrativo', icon: '🗂️' },
+    { path: '/reports', label: 'Relatórios', icon: '📋' }
+  ];
+
+  const isActive = (path) => {
+    if (path === '/') return location.pathname === '/';
+    return location.pathname.startsWith(path);
+  };
 
   return (
     <nav style={{
@@ -49,10 +50,10 @@ const ModernNavigation = () => {
         justifyContent: 'space-between',
         height: '80px'
       }}>
-        
+
         {/* ✅ LOGO/BRAND */}
-        <Link 
-          to="/" 
+        <Link
+          to="/"
           style={{
             textDecoration: 'none',
             display: 'flex',
@@ -145,7 +146,7 @@ const ModernNavigation = () => {
               {new Date().toLocaleDateString('pt-BR')}
             </div>
           </div>
-          
+
           {/* Avatar do usuário */}
           <div style={{
             width: '40px',
@@ -166,6 +167,17 @@ const ModernNavigation = () => {
   );
 };
 
+const AppLayout = () => {
+  return (
+    <div className="App" style={{ minHeight: '100vh', backgroundColor: '#f1f5f9' }}>
+      <ModernNavigation />
+      <main>
+        <Outlet />
+      </main>
+    </div>
+  );
+};
+
 function App() {
   return (
     <>
@@ -179,28 +191,20 @@ function App() {
           },
         }}
       />
-
-      <Router>
-        <div className="App" style={{ 
-          minHeight: '100vh',
-          backgroundColor: '#f1f5f9'
-        }}>
-          <ModernNavigation />
-          
-          <main>
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/projects" element={<ProjectsListPage />} />
-              <Route path="/project/:id" element={<WorkDetails />} />
-              <Route path="/project/edit/:id" element={<EditWorkPage />} />
-              <Route path="/admin" element={<AdminPage />} /> 
-              <Route path="/employee/edit/:id" element={<EditEmployeePage />} />
-              <Route path="/contract/edit/:id" element={<EditContractPage />} />
-              <Route path="/expense/edit/:id" element={<EditExpensePage />} />
-              <Route path="/reports" element={<ReportsPage />} /> 
-            </Routes>
-          </main>
-        </div>
+      <Router>       
+        <Routes>
+          <Route path="/" element={<AppLayout />}>
+            <Route index element={<HomePage />} />
+            <Route path="projects" element={<ProjectsListPage />} />
+            <Route path="project/:id" element={<WorkDetails />} />
+            <Route path="project/edit/:id" element={<EditWorkPage />} />
+            <Route path="admin" element={<AdminPage />} />
+            <Route path="employee/edit/:id" element={<EditEmployeePage />} />
+            <Route path="contract/edit/:id" element={<EditContractPage />} />
+            <Route path="expense/edit/:id" element={<EditExpensePage />} />
+            <Route path="reports" element={<ReportsPage />} />
+          </Route>
+        </Routes>
       </Router>
     </>
   );
