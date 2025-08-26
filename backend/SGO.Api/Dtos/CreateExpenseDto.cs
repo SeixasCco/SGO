@@ -17,10 +17,7 @@ namespace SGO.Api.Dtos
         public string? Observations { get; set; }
         public string? SupplierName { get; set; }
         public string? InvoiceNumber { get; set; }
-        public string? AttachmentPath { get; set; }
-
-        [Range(0, int.MaxValue, ErrorMessage = "O número de pessoas não pode ser negativo.")]
-        public int? NumberOfPeople { get; set; }
+        public string? AttachmentPath { get; set; }           
     }
 
     public class ExpenseResponseDto

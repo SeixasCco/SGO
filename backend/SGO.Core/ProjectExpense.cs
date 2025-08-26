@@ -27,7 +27,7 @@ public class ProjectExpense
     public string? SupplierName { get; set; }
     public string? InvoiceNumber { get; set; }
     public DateTime? PaymentDate { get; set; }
-    public string? AttachmentPath { get; set; }
+    public string? AttachmentPath { get; set; }    
     public bool IsAutomaticallyCalculated { get; set; }
     public Project? Project { get; set; } = default!;
     public Contract? Contract { get; set; } = default!;

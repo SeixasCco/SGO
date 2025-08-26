@@ -60,7 +60,7 @@ namespace SGO.Api.Controllers
                 Observations = expenseDto.Observations,
                 SupplierName = expenseDto.SupplierName,
                 InvoiceNumber = expenseDto.InvoiceNumber,
-                AttachmentPath = expenseDto.AttachmentPath,
+                AttachmentPath = expenseDto.AttachmentPath,                      
                 IsAutomaticallyCalculated = false,
 
                 DetailsJson = expenseDto.Details != null ? JsonSerializer.Serialize(expenseDto.Details) : null
