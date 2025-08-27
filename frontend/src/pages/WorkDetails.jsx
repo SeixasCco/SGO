@@ -361,7 +361,7 @@ const WorkDetails = () => {
 
             {/* CONTEÚDO DAS TABS */}
             <div style={{ backgroundColor: 'white', borderRadius: '0 0 12px 12px', border: '1px solid #e2e8f0', borderTop: 'none', padding: '32px' }}>
-                {/* TAB: VISÃO GERAL COM CARDS COMPACTOS */}
+                {/* TAB: VISÃO GERAL  */}
                 {activeTab === 'overview' && (
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '24px' }}>
                         <div style={{ padding: '16px', border: '1px solid #e2e8f0', borderRadius: '12px' }}>
@@ -646,7 +646,7 @@ const WorkDetails = () => {
                     />
                 )}
 
-                {/* TAB: DESPESAS (USA O NOVO MODAL) */}
+                {/* TAB: DESPESAS */}
                 {activeTab === 'expenses' && (
                     <div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '16px', borderBottom: '1px solid #f1f5f9' }}>
@@ -697,7 +697,7 @@ const WorkDetails = () => {
                                             {formatCurrency(expense.amount)}
                                         </div>
 
-                                        {/* Coluna 4: Anexo (se existir) */}
+                                        {/* Coluna 4: Anexo  */}
                                         <div>
                                             {expense.attachmentPath && (
                                                 <a
