@@ -45,7 +45,7 @@ const ProjectFilters = ({ onFilter }) => {
       boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
     }}>
 
-      {/* ✅ HEADER DOS FILTROS SEMPRE VISÍVEL */}
+      {/* HEADER DOS FILTROS SEMPRE VISÍVEL */}
       <div style={{
         display: 'flex',
         justifyContent: 'space-between',
@@ -110,7 +110,7 @@ const ProjectFilters = ({ onFilter }) => {
         )}
       </div>
 
-      {/* ✅ GRID DESKTOP - 5 COLUNAS */}
+      {/*  GRID DESKTOP - 5 COLUNAS */}
       <div style={{
         display: 'grid',
         gridTemplateColumns: '1fr 1fr 1fr 150px 150px',
@@ -211,7 +211,7 @@ const ProjectFilters = ({ onFilter }) => {
               padding: '12px 16px',
               border: '2px solid #d1d5db',
               borderRadius: '8px',
-              fontSize: '1rem',              
+              fontSize: '1rem',
               backgroundColor: '#dcdedfff',
               color: '#1f2937',
               fontWeight: '600'
@@ -309,7 +309,7 @@ const ProjectFilters = ({ onFilter }) => {
         </div>
       </div>
 
-      {/* ✅ BOTÃO APLICAR FILTROS CENTRALIZADO */}
+      {/* BOTÃO APLICAR FILTROS CENTRALIZADO */}
       <div style={{ textAlign: 'center' }}>
         <button
           onClick={handleFilterClick}

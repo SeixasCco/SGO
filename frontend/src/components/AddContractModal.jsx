@@ -1,19 +1,14 @@
-// frontend/src/components/AddContractModal.jsx
-
 import React, { useState } from 'react';
 import axios from 'axios';
-import toast from 'react-hot-toast'; // Importe o toast
+import toast from 'react-hot-toast';
 
-// Importando os componentes de formulário padronizados
 import FormGroup from './common/FormGroup';
 import StyledInput from './common/StyledInput';
 
-// Componente de Textarea padronizado
 const StyledTextarea = (props) => (
     <textarea className="form-textarea" {...props} />
 );
 
-// Componentes de botão padronizados
 const PrimaryButton = ({ children, submitting, ...props }) => (
     <button type="submit" disabled={submitting} className="form-button" {...props}>
         {submitting ? 'Criando...' : children}
@@ -44,7 +39,7 @@ const AddContractModal = ({ isOpen, onClose, projectId, projectName, onContractA
             [e.target.name]: e.target.value
         });
     };
-    
+
     const resetForm = () => {
         setFormData({
             contractNumber: '',
@@ -79,16 +74,16 @@ const AddContractModal = ({ isOpen, onClose, projectId, projectName, onContractA
             };
 
             await axios.post('http://localhost:5145/api/contracts', contractData);
-            
-            toast.success('Contrato criado com sucesso!'); // <-- MENSAGEM DE SUCESSO
-            
+
+            toast.success('Contrato criado com sucesso!');
+
             resetForm();
-            onContractAdded(); // Atualiza a lista de contratos na página
-            onClose(); // Fecha o modal
+            onContractAdded();
+            onClose();
         } catch (err) {
             const errorMessage = err.response?.data?.title || 'Erro ao criar contrato. Verifique os dados.';
             setError(errorMessage);
-            toast.error(errorMessage); // <-- MENSAGEM DE ERRO
+            toast.error(errorMessage);
             console.error('Erro ao criar contrato:', err);
         } finally {
             setSubmitting(false);
@@ -98,7 +93,6 @@ const AddContractModal = ({ isOpen, onClose, projectId, projectName, onContractA
     if (!isOpen) return null;
 
     return (
-        // ESTRUTURA DO MODAL RESTAURADA COM CLASSES CSS
         <div className="modal-overlay">
             <div className="modal-container">
 
@@ -114,7 +108,7 @@ const AddContractModal = ({ isOpen, onClose, projectId, projectName, onContractA
 
                 <form onSubmit={handleSubmit} className="modal-body">
                     {error && <div className="form-error-message">{error}</div>}
-                    
+
                     <div className="form-grid">
                         <div style={{ gridColumn: '1 / -1' }}>
                             <FormGroup label="Número do Contrato *">
@@ -141,7 +135,7 @@ const AddContractModal = ({ isOpen, onClose, projectId, projectName, onContractA
                                 />
                             </FormGroup>
                         </div>
-                        
+
                         <FormGroup label="Valor Total (R$) *">
                            <StyledInput
                                 type="number"
@@ -164,7 +158,7 @@ const AddContractModal = ({ isOpen, onClose, projectId, projectName, onContractA
                                 required
                             />
                         </FormGroup>
-                        
+
                         <FormGroup label="Data de Fim (Opcional)">
                             <StyledInput
                                 type="date"
@@ -174,7 +168,7 @@ const AddContractModal = ({ isOpen, onClose, projectId, projectName, onContractA
                             />
                         </FormGroup>
                     </div>
-                    
+
                     <FormGroup label="Observações (Opcional)">
                         <StyledTextarea
                             name="observations"

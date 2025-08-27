@@ -8,8 +8,7 @@ const EmployeesPage = () => {
   const [loading, setLoading] = useState(true);
   const [submittingForm, setSubmittingForm] = useState(false);
   const [error, setError] = useState(null);
-  
-  // Estados para o formulário
+
   const [formData, setFormData] = useState({
     name: '',
     position: '',
@@ -18,7 +17,6 @@ const EmployeesPage = () => {
     isActive: true
   });
 
-  // Estados para filtros
   const [filters, setFilters] = useState({
     name: '',
     position: '',
@@ -26,7 +24,7 @@ const EmployeesPage = () => {
     salaryMax: '',
     startDate: '',
     EndDate: '',
-    status: 'all' // 'all', 'active', 'inactive'
+    status: 'all'
   });
 
   const fetchEmployees = () => {
@@ -45,52 +43,45 @@ const EmployeesPage = () => {
       });
   };
 
-  // Aplicar filtros
   useEffect(() => {
     let filtered = employees;
 
-    // Filtro por nome
     if (filters.name) {
-      filtered = filtered.filter(emp => 
+      filtered = filtered.filter(emp =>
         emp.name.toLowerCase().includes(filters.name.toLowerCase())
       );
     }
 
-    // Filtro por cargo
     if (filters.position) {
-      filtered = filtered.filter(emp => 
+      filtered = filtered.filter(emp =>
         emp.position.toLowerCase().includes(filters.position.toLowerCase())
       );
     }
 
-    // Filtro por salário mínimo
     if (filters.salaryMin) {
-      filtered = filtered.filter(emp => 
+      filtered = filtered.filter(emp =>
         emp.salary >= parseFloat(filters.salaryMin)
       );
     }
 
-    // Filtro por salário máximo
     if (filters.salaryMax) {
-      filtered = filtered.filter(emp => 
+      filtered = filtered.filter(emp =>
         emp.salary <= parseFloat(filters.salaryMax)
       );
     }
 
-    // Filtro por data de início
     if (filters.startDate) {
-      filtered = filtered.filter(emp => 
+      filtered = filtered.filter(emp =>
         new Date(emp.startDate) >= new Date(filters.startDate)
       );
     }
 
     if (filters.EndDate) {
-      filtered = filtered.filter(emp => 
+      filtered = filtered.filter(emp =>
         new Date(emp.startDate) <= new Date(filters.EndDate)
       );
     }
 
-    // Filtro por status
     if (filters.status === 'active') {
       filtered = filtered.filter(emp => emp.isActive);
     } else if (filters.status === 'inactive') {
@@ -241,7 +232,7 @@ const EmployeesPage = () => {
             gap: '20px',
             marginBottom: '24px'
           }}>
-            
+
             <div>
               <label style={{
                 display: 'block',
@@ -274,7 +265,7 @@ const EmployeesPage = () => {
                 placeholder="Ex: João da Silva"
               />
             </div>
-            
+
             <div>
               <label style={{
                 display: 'block',
@@ -307,7 +298,7 @@ const EmployeesPage = () => {
                 placeholder="Ex: Engenheiro Civil"
               />
             </div>
-            
+
             <div>
               <label style={{
                 display: 'block',
@@ -375,7 +366,7 @@ const EmployeesPage = () => {
               />
             </div>
           </div>
-         
+
           <button
             type="submit"
             disabled={submittingForm}
@@ -668,8 +659,8 @@ const EmployeesPage = () => {
                 {employees.length === 0 ? 'Nenhum funcionário cadastrado' : 'Nenhum funcionário encontrado'}
               </h3>
               <p style={{ margin: '0' }}>
-                {employees.length === 0 
-                  ? 'Comece cadastrando o primeiro funcionário.' 
+                {employees.length === 0
+                  ? 'Comece cadastrando o primeiro funcionário.'
                   : 'Tente ajustar os filtros para encontrar os funcionários desejados.'
                 }
               </p>

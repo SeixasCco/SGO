@@ -10,8 +10,7 @@ const AdminExpensesPage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
-    
-    // Estados para filtros
+
     const [costCenters, setCostCenters] = useState([]);
     const [filters, setFilters] = useState({
         startDate: '',
@@ -41,24 +40,23 @@ const AdminExpensesPage = () => {
             });
     }, []);
 
-    // Aplicar filtros
     useEffect(() => {
         let filtered = expenses;
 
         if (filters.startDate) {
-            filtered = filtered.filter(expense => 
+            filtered = filtered.filter(expense =>
                 new Date(expense.date) >= new Date(filters.startDate)
             );
         }
 
         if (filters.endDate) {
-            filtered = filtered.filter(expense => 
+            filtered = filtered.filter(expense =>
                 new Date(expense.date) <= new Date(filters.endDate)
             );
         }
 
         if (filters.costCenterId) {
-            filtered = filtered.filter(expense => 
+            filtered = filtered.filter(expense =>
                 expense.costCenterId === filters.costCenterId
             );
         }
@@ -314,19 +312,19 @@ const AdminExpensesPage = () => {
                             {expenses.length === 0 ? 'Nenhuma despesa cadastrada' : 'Nenhuma despesa encontrada'}
                         </h3>
                         <p style={{ margin: '0' }}>
-                            {expenses.length === 0 
-                                ? 'Comece adicionando a primeira despesa da matriz.' 
+                            {expenses.length === 0
+                                ? 'Comece adicionando a primeira despesa da matriz.'
                                 : 'Tente ajustar os filtros para encontrar as despesas desejadas.'
                             }
                         </p>
                     </div>
                 ) : (
-                    <div style={{ display: 'grid', gap: '12px' }}> {/* Reduzido de 16px para 12px */}
+                    <div style={{ display: 'grid', gap: '12px' }}>
                         {filteredExpenses.map(expense => (
                             <div key={expense.id} style={{
                                 border: '1px solid #e2e8f0',
                                 borderRadius: '12px',
-                                padding: '16px', // Reduzido de 24px para 16px (redução de ~33%)
+                                padding: '16px',
                                 transition: 'all 0.2s ease',
                                 backgroundColor: '#fafafa',
                                 display: 'grid',
@@ -349,51 +347,51 @@ const AdminExpensesPage = () => {
                             >
                                 {/* Coluna 1: Descrição e Data */}
                                 <div>
-                                    <div style={{ 
-                                        fontWeight: '600', 
-                                        color: '#1e2d3b', 
-                                        marginBottom: '2px', // Reduzido de 4px para 2px
-                                        fontSize: '1rem' // Reduzido de 1.1rem para 1rem
+                                    <div style={{
+                                        fontWeight: '600',
+                                        color: '#1e2d3b',
+                                        marginBottom: '2px',
+                                        fontSize: '1rem'
                                     }}>
                                         {expense.description}
                                     </div>
-                                    <div style={{ 
-                                        fontSize: '0.8rem', // Reduzido de 0.875rem para 0.8rem
+                                    <div style={{
+                                        fontSize: '0.8rem',
                                         color: '#64748b'
                                     }}>
                                         {new Date(expense.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}
                                     </div>
                                 </div>
-                                
+
                                 {/* Coluna 2: Centro de Custo */}
-                                <div style={{ 
-                                    fontSize: '0.85rem', // Reduzido de 0.9rem para 0.85rem
+                                <div style={{
+                                    fontSize: '0.85rem',
                                     color: '#475569',
                                     fontWeight: '500'
                                 }}>
                                     {expense.costCenterName}
                                 </div>
-                                
+
                                 {/* Coluna 3: Valor */}
-                                <div style={{ 
-                                    fontWeight: '700', 
+                                <div style={{
+                                    fontWeight: '700',
                                     color: '#dc2626',
-                                    fontSize: '1rem' // Reduzido de 1.1rem para 1rem
+                                    fontSize: '1rem'
                                 }}>
                                     {formatCurrency(expense.amount)}
                                 </div>
-                                
+
                                 {/* Coluna 4: Anexo */}
                                 <div>
                                     {expense.attachmentPath ? (
-                                        <a 
+                                        <a
                                             href={`http://localhost:5145/api/attachments/${expense.attachmentPath.replace('/uploads/', '')}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             style={{
                                                 color: '#3b82f6',
                                                 textDecoration: 'none',
-                                                fontSize: '0.8rem', // Reduzido de 0.875rem para 0.8rem
+                                                fontSize: '0.8rem',
                                                 fontWeight: '500',
                                                 display: 'flex',
                                                 alignItems: 'center',
@@ -416,7 +414,7 @@ const AdminExpensesPage = () => {
                                         </a>
                                     ) : null}
                                 </div>
-                                
+
                                 {/* Coluna 5: Ações */}
                                 <div style={{ display: 'flex', gap: '8px' }}>
                                     <Link to={`/expense/edit/${expense.id}`}>
@@ -432,7 +430,7 @@ const AdminExpensesPage = () => {
                                             ✏️
                                         </button>
                                     </Link>
-                                    <button 
+                                    <button
                                         onClick={() => handleDeleteExpense(expense.id)}
                                         style={{
                                             backgroundColor: '#ef4444',

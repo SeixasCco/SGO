@@ -138,16 +138,14 @@ const HomePage = () => {
             padding: '0'
         }}>
 
-            {/* ✅ HEADER LARGURA COMPLETA */}
             <div style={{
                 backgroundColor: 'white',
                 borderBottom: '1px solid #e2e8f0',
-                padding: '32px 24px', // ✅ Padding menor nas laterais
+                padding: '32px 24px',
                 marginBottom: '24px',
                 boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
             }}>
                 <div style={{
-                    // ✅ REMOVIDO maxWidth - agora usa largura completa
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center'
@@ -159,7 +157,7 @@ const HomePage = () => {
                             color: '#0f172a',
                             margin: '0 0 8px 0'
                         }}>
-                            📊 Dashboard 
+                            📊 Dashboard
                         </h1>
                         <p style={{
                             fontSize: '1.25rem',
@@ -186,23 +184,21 @@ const HomePage = () => {
                         >
                             🏗️ Ver Obras
                         </button>
-                        
+
                     </div>
                 </div>
             </div>
 
-            {/* ✅ CONTAINER LARGURA COMPLETA */}
-            <div style={{               
-                padding: '0 24px' 
+            <div style={{
+                padding: '0 24px'
             }}>
 
-                {/* ✅ ALERTAS LARGURA COMPLETA */}
                 {alerts.length > 0 && (
                     <div style={{ marginBottom: '24px' }}>
                         <h3 style={{ marginLeft: '8px', marginBottom: '16px' }}>🔔 Alertas</h3>
                         <div style={{
                             display: 'grid',
-                            gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', 
+                            gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
                             gap: '16px'
                         }}>
                             {alerts.map((alert, index) => (
@@ -220,11 +216,10 @@ const HomePage = () => {
                     </div>
                 )}
 
-                {/* ✅ MÉTRICAS PRINCIPAIS - GRID ADAPTATIVO */}
                 {dashboardData && (
                     <div style={{
                         display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', // ✅ Se adapta à largura
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
                         gap: '20px',
                         marginBottom: '32px'
                     }}>
@@ -327,15 +322,13 @@ const HomePage = () => {
                     </div>
                 )}
 
-                {/* ✅ SEÇÃO INFERIOR - LAYOUT FLEXÍVEL */}
                 <div style={{
                     display: 'grid',
-                    gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr)', // ✅ Grid flexível
+                    gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr)',
                     gap: '24px',
                     marginBottom: '32px'
                 }}>
 
-                    {/* ✅ TOP PROJETOS - LARGURA FLEXÍVEL */}
                     {topProjects.length > 0 && (
                         <div style={{
                             backgroundColor: 'white',
@@ -345,16 +338,16 @@ const HomePage = () => {
                             boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
                         }}>
                             <h3 style={{ marginBottom: '20px' }}>🏆 Top Projetos</h3>
-                            <div style={{ overflowX: 'auto' }}> {/* ✅ Scroll horizontal se necessário */}
+                            <div style={{ overflowX: 'auto' }}>
                                 {topProjects.map((project, index) => (
                                     <div key={project.id} style={{
                                         padding: '12px 0',
                                         borderBottom: index < topProjects.length - 1 ? '1px solid #f1f5f9' : 'none',
                                         display: 'grid',
-                                        gridTemplateColumns: '1fr auto auto auto', // ✅ Grid para organizar colunas
+                                        gridTemplateColumns: '1fr auto auto auto',
                                         gap: '16px',
                                         alignItems: 'center',
-                                        minWidth: '600px' // ✅ Largura mínima para evitar quebra
+                                        minWidth: '600px'
                                     }}>
                                         <div>
                                             <Link to={`/project/${project.id}`} style={{
@@ -396,7 +389,6 @@ const HomePage = () => {
                         </div>
                     )}
 
-                    {/* ✅ ATIVIDADES RECENTES - ALTURA FLEXÍVEL */}
                     {recentActivity.length > 0 && (
                         <div style={{
                             backgroundColor: 'white',
@@ -404,7 +396,7 @@ const HomePage = () => {
                             padding: '24px',
                             border: '1px solid #e2e8f0',
                             boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
-                            maxHeight: '500px', // ✅ Altura máxima com scroll
+                            maxHeight: '500px', 
                             display: 'flex',
                             flexDirection: 'column'
                         }}>

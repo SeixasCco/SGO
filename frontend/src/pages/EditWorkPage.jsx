@@ -1,4 +1,3 @@
-// Local: frontend/src/pages/EditWorkPage.jsx
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
@@ -180,7 +179,7 @@ const EditWorkPage = () => {
       padding: '48px'
     }}>
 
-      {/* ✅ BREADCRUMB/NAVEGAÇÃO */}
+      {/*  BREADCRUMB/NAVEGAÇÃO */}
       <div style={{
         marginBottom: '32px'
       }}>
@@ -227,7 +226,7 @@ const EditWorkPage = () => {
         </p>
       </div>
 
-      {/* ✅ FORMULÁRIO DE EDIÇÃO MODERNIZADO */}
+      {/*  FORMULÁRIO DE EDIÇÃO MODERNIZADO */}
       <div style={{
         backgroundColor: 'white',
         borderRadius: '12px',

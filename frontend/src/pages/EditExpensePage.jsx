@@ -1,4 +1,3 @@
-// Local: frontend/src/pages/EditExpensePage.jsx
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
@@ -153,7 +152,7 @@ const EditExpensePage = () => {
             padding: '48px'
         }}>
 
-            {/* ✅ BREADCRUMB/NAVEGAÇÃO */}
+            {/* BREADCRUMB/NAVEGAÇÃO */}
             <div style={{
                 marginBottom: '32px'
             }}>
@@ -196,7 +195,7 @@ const EditExpensePage = () => {
                 </p>
             </div>
 
-            {/* ✅ INFORMAÇÕES DA OBRA */}
+            {/*  INFORMAÇÕES DA OBRA */}
             {projectInfo && (
                 <div style={{
                     backgroundColor: '#f0fdf4',
@@ -243,7 +242,7 @@ const EditExpensePage = () => {
                 </div>
             )}
 
-            {/* ✅ FORMULÁRIO DE EDIÇÃO MODERNIZADO */}
+            {/*  FORMULÁRIO DE EDIÇÃO MODERNIZADO */}
             <div style={{
                 backgroundColor: 'white',
                 borderRadius: '12px',
@@ -440,12 +439,12 @@ const EditExpensePage = () => {
                                 style={{
                                     width: '100%',
                                     padding: '12px 16px',
-                                    border: '1px solid #d1d5db', 
+                                    border: '1px solid #d1d5db',
                                     backgroundColor: '#dcdedfff',
-                                    color: '#1f2937',  
+                                    color: '#1f2937',
                                     borderRadius: '8px',
                                     fontSize: '1rem',
-                                    transition: 'border-color 0.2s ease',                                  
+                                    transition: 'border-color 0.2s ease',
                                     boxSizing: 'border-box'
                                 }}
                                 onFocus={(e) => e.target.style.borderColor = '#3b82f6'}

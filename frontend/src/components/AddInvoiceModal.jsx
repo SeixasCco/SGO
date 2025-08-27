@@ -1,25 +1,23 @@
-// Local: frontend/src/components/AddInvoiceModal.jsx - VERSÃO REESTRUTURADA
-
 import React, { useState } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
 const AddInvoiceModal = ({ contractId, onClose, onInvoiceAdded }) => {
-  
-  const [issueDate, setIssueDate] = useState('');           // Data Emissão
-  const [invoiceNumber, setInvoiceNumber] = useState('');   // Num NF
-  const [grossValue, setGrossValue] = useState('');         // R$ Bruto
-  const [issValue, setIssValue] = useState('');             // R$ ISS
-  const [inssValue, setInssValue] = useState('');           // R$ INSS
-  const [paymentDate, setPaymentDate] = useState('');       // Data Pgto
-  const [attachment, setAttachment] = useState(null);       // Anexo
+
+  const [issueDate, setIssueDate] = useState('');
+  const [invoiceNumber, setInvoiceNumber] = useState('');
+  const [grossValue, setGrossValue] = useState('');
+  const [issValue, setIssValue] = useState('');
+  const [inssValue, setInssValue] = useState('');
+  const [paymentDate, setPaymentDate] = useState('');
+  const [attachment, setAttachment] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
   const handleFileChange = (e) => {
     setAttachment(e.target.files[0]);
   };
- 
+
   const calculateNetValue = () => {
     const gross = parseFloat(grossValue) || 0;
     const iss = parseFloat(issValue) || 0;
@@ -29,8 +27,7 @@ const AddInvoiceModal = ({ contractId, onClose, onInvoiceAdded }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
-    // Validações
+
     if (!issueDate || !invoiceNumber || !grossValue || !paymentDate) {
       toast.error('Por favor, preencha todos os campos obrigatórios.');
       return;
@@ -54,7 +51,7 @@ const AddInvoiceModal = ({ contractId, onClose, onInvoiceAdded }) => {
     formData.append('paymentDate', paymentDate);
     formData.append('contractId', contractId);
     formData.append('Status', 1);
-    
+
     if (attachment) {
       formData.append('attachment', attachment);
     }
@@ -71,7 +68,7 @@ const AddInvoiceModal = ({ contractId, onClose, onInvoiceAdded }) => {
     .catch(err => {
       const errorMessage = err.response?.data?.message || 'Falha ao adicionar a nota fiscal. Tente novamente.';
       toast.error(errorMessage);
-      setSubmitting(false);      
+      setSubmitting(false);
     });
   };
 
@@ -79,13 +76,13 @@ const AddInvoiceModal = ({ contractId, onClose, onInvoiceAdded }) => {
     <div style={overlayStyle}>
       <div style={modalStyle}>
         <h2 style={headerStyle}>📋 Nova Nota Fiscal</h2>
-        
+
         <form onSubmit={handleSubmit}>
-          
+
           {/* Seção superior - Informações da NF */}
           <div style={sectionStyle}>
             <h3 style={sectionHeaderStyle}>ℹ️ Dados da Nota Fiscal</h3>
-            
+
             <div style={gridStyle}>
               <div>
                 <label style={labelStyle}>Data Emissão *</label>
@@ -97,7 +94,7 @@ const AddInvoiceModal = ({ contractId, onClose, onInvoiceAdded }) => {
                   style={inputStyle}
                 />
               </div>
-              
+
               <div>
                 <label style={labelStyle}>Número da NF *</label>
                 <input
@@ -115,7 +112,7 @@ const AddInvoiceModal = ({ contractId, onClose, onInvoiceAdded }) => {
           {/* Seção valores financeiros */}
           <div style={sectionStyle}>
             <h3 style={sectionHeaderStyle}>💰 Valores Financeiros</h3>
-            
+
             <div style={gridStyle}>
               <div>
                 <label style={labelStyle}>Valor Bruto *</label>
@@ -129,7 +126,7 @@ const AddInvoiceModal = ({ contractId, onClose, onInvoiceAdded }) => {
                   style={inputStyle}
                 />
               </div>
-              
+
               <div>
                 <label style={labelStyle}>Valor ISS</label>
                 <input
@@ -141,7 +138,7 @@ const AddInvoiceModal = ({ contractId, onClose, onInvoiceAdded }) => {
                   style={inputStyle}
                 />
               </div>
-              
+
               <div>
                 <label style={labelStyle}>Valor INSS</label>
                 <input
@@ -153,7 +150,7 @@ const AddInvoiceModal = ({ contractId, onClose, onInvoiceAdded }) => {
                   style={inputStyle}
                 />
               </div>
-              
+
               {/* Valor líquido calculado automaticamente */}
               <div>
                 <label style={labelStyle}>Valor Líquido</label>
@@ -174,7 +171,7 @@ const AddInvoiceModal = ({ contractId, onClose, onInvoiceAdded }) => {
           {/* Seção inferior - Pagamento e Anexo */}
           <div style={sectionStyle}>
             <h3 style={sectionHeaderStyle}>📅 Pagamento e Anexo</h3>
-            
+
             <div style={gridStyle}>
               <div>
                 <label style={labelStyle}>Data Pagamento *</label>
@@ -186,7 +183,7 @@ const AddInvoiceModal = ({ contractId, onClose, onInvoiceAdded }) => {
                   style={inputStyle}
                 />
               </div>
-              
+
               <div>
                 <label style={labelStyle}>Anexar Arquivo</label>
                 <input
@@ -198,7 +195,7 @@ const AddInvoiceModal = ({ contractId, onClose, onInvoiceAdded }) => {
               </div>
             </div>
           </div>
-          
+
           {error && <p style={errorStyle}>{error}</p>}
 
           <div style={buttonContainerStyle}>

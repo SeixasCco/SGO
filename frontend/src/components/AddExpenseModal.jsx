@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import DynamicExpenseForm from './DynamicExpenseForm'; 
+import DynamicExpenseForm from './DynamicExpenseForm';
 
 const AddExpenseModal = ({ onClose, onExpenseAdded, projectId, contractId }) => {
     const [costCenters, setCostCenters] = useState([]);
     const [selectedCostCenterId, setSelectedCostCenterId] = useState('');
     const [submitting, setSubmitting] = useState(false);
 
-    useEffect(() => {        
+    useEffect(() => {
         axios.get('http://localhost:5145/api/costcenters')
             .then(response => setCostCenters(response.data || []))
             .catch(err => toast.error('Não foi possível carregar os centros de custo.'));
@@ -16,14 +16,13 @@ const AddExpenseModal = ({ onClose, onExpenseAdded, projectId, contractId }) => 
 
     const handleSubmit = async (formData) => {
         setSubmitting(true);
-        
+
         let attachmentPath = null;
-        
-        // Upload do anexo se existir
+
         if (formData.attachment) {
             const uploadData = new FormData();
             uploadData.append('file', formData.attachment);
-            
+
             try {
                 const uploadResponse = await axios.post('http://localhost:5145/api/attachments/upload', uploadData);
                 attachmentPath = uploadResponse.data.filePath;
@@ -34,7 +33,7 @@ const AddExpenseModal = ({ onClose, onExpenseAdded, projectId, contractId }) => 
                 return;
             }
         }
-        
+
         const finalData = {
             description: formData.description,
             amount: formData.amount,
@@ -48,7 +47,7 @@ const AddExpenseModal = ({ onClose, onExpenseAdded, projectId, contractId }) => 
         };
 
         console.log('Dados finais:', finalData);
-        
+
         try {
             await axios.post('http://localhost:5145/api/projectexpenses', finalData);
             toast.success('Despesa lançada com sucesso!');
@@ -85,16 +84,16 @@ const AddExpenseModal = ({ onClose, onExpenseAdded, projectId, contractId }) => 
                 overflow: 'auto',
                 boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
             }}>
-                <div style={{ 
-                    display: 'flex', 
-                    justifyContent: 'space-between', 
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
                     alignItems: 'center',
                     marginBottom: '20px'
                 }}>
                     <h2 style={{ margin: 0 }}>
                         Lançar Nova Despesa {projectId ? '(Obra)' : '(Matriz)'}
                     </h2>
-                    <button 
+                    <button
                         onClick={onClose}
                         style={{
                             background: 'none',
@@ -109,18 +108,18 @@ const AddExpenseModal = ({ onClose, onExpenseAdded, projectId, contractId }) => 
                 </div>
 
                 <div style={{ margin: '20px 0' }}>
-                    <label style={{ 
-                        display: 'block', 
-                        marginBottom: '8px', 
-                        fontWeight: 'bold' 
+                    <label style={{
+                        display: 'block',
+                        marginBottom: '8px',
+                        fontWeight: 'bold'
                     }}>
                         1. Selecione o Centro de Custo *
                     </label>
                     <select
                         value={selectedCostCenterId}
                         onChange={(e) => setSelectedCostCenterId(e.target.value)}
-                        style={{ 
-                            width: '100%', 
+                        style={{
+                            width: '100%',
                             padding: '10px',
                             border: '1px solid #ddd',
                             borderRadius: '4px'

@@ -43,8 +43,8 @@ const AttachmentPreviewModal = ({ attachmentPath, invoiceNumber, onClose }) => {
 
                     {isImage && (
                         <div style={previewContainerStyle}>
-                            <img 
-                                src={attachmentUrl} 
+                            <img
+                                src={attachmentUrl}
                                 alt={`Anexo da NF ${invoiceNumber}`}
                                 style={imageStyle}
                                 onError={(e) => {
@@ -92,11 +92,10 @@ const AttachmentPreviewModal = ({ attachmentPath, invoiceNumber, onClose }) => {
                     )}
                 </div>
             </div>
-        </div>
+       </div>
     );
 };
 
-// Estilos
 const overlayStyle = {
     position: 'fixed',
     top: 0,

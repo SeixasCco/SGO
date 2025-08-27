@@ -1,5 +1,3 @@
-// ✅ ARQUIVO: /frontend/src/pages/ExpenseCharts.jsx
-
 import React from 'react';
 
 const ExpenseCharts = ({ reportData, summary }) => {
@@ -10,17 +8,13 @@ const ExpenseCharts = ({ reportData, summary }) => {
         }).format(value || 0);
     };
 
-    // Preparar dados para gráficos
     const prepareChartData = () => {
         if (!reportData || reportData.length === 0) return { byProject: [], byMonth: [], byCostCenter: [] };
-
-        // Agrupar por projeto
         const byProject = Object.entries(summary.byProject || {})
             .map(([name, value]) => ({ name, value }))
             .sort((a, b) => b.value - a.value)
-            .slice(0, 6); // Top 6 projetos
+            .slice(0, 6);
 
-        // Agrupar por mês
         const byMonth = reportData.reduce((acc, item) => {
             const month = new Date(item.date).toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' });
             acc[month] = (acc[month] || 0) + item.amount;
@@ -31,7 +25,6 @@ const ExpenseCharts = ({ reportData, summary }) => {
             .map(([month, value]) => ({ month, value }))
             .sort((a, b) => new Date('01 ' + a.month) - new Date('01 ' + b.month));
 
-        // Agrupar por centro de custo
         const byCostCenter = reportData.reduce((acc, item) => {
             const center = item.costCenterName || 'Sem Centro de Custo';
             acc[center] = (acc[center] || 0) + item.amount;
@@ -48,7 +41,6 @@ const ExpenseCharts = ({ reportData, summary }) => {
 
     const chartData = prepareChartData();
 
-    // Componente de Barra Horizontal
     const HorizontalBarChart = ({ data, title, color }) => {
         if (!data || data.length === 0) return null;
 
@@ -73,7 +65,7 @@ const ExpenseCharts = ({ reportData, summary }) => {
                 }}>
                     📊 {title}
                 </h3>
-                
+
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                     {data.map((item, index) => (
                         <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -85,7 +77,7 @@ const ExpenseCharts = ({ reportData, summary }) => {
                             }}>
                                 {item.name || item.month}
                             </div>
-                            
+
                             <div style={{ flex: 1, position: 'relative' }}>
                                 <div style={{
                                     height: '24px',
@@ -116,7 +108,7 @@ const ExpenseCharts = ({ reportData, summary }) => {
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <div style={{
                                 minWidth: '100px',
                                 textAlign: 'right',
@@ -133,7 +125,7 @@ const ExpenseCharts = ({ reportData, summary }) => {
         );
     };
 
-    // Componente de Gráfico de Pizza Simplificado
+
     const PieChart = ({ data, title }) => {
         if (!data || data.length === 0) return null;
 
@@ -164,7 +156,7 @@ const ExpenseCharts = ({ reportData, summary }) => {
                     {data.map((item, index) => {
                         const percentage = ((item.value / total) * 100).toFixed(1);
                         const color = colors[index % colors.length];
-                        
+
                         return (
                             <div key={index} style={{
                                 display: 'flex',
@@ -190,7 +182,7 @@ const ExpenseCharts = ({ reportData, summary }) => {
                                         {item.name}
                                     </span>
                                 </div>
-                                
+
                                 <div style={{ textAlign: 'right' }}>
                                     <div style={{
                                         fontSize: '0.9rem',
@@ -214,7 +206,6 @@ const ExpenseCharts = ({ reportData, summary }) => {
         );
     };
 
-    // Componente de Linha do Tempo (Timeline simplificada)
     const TimelineChart = ({ data, title }) => {
         if (!data || data.length === 0) return null;
 
@@ -261,10 +252,10 @@ const ExpenseCharts = ({ reportData, summary }) => {
                     }}>
                         {data.map((item, index) => {
                             const height = (item.value / maxValue) * 140;
-                            const shortValue = item.value >= 1000 
-                                ? `${(item.value / 1000).toFixed(0)}k` 
+                            const shortValue = item.value >= 1000
+                                ? `${(item.value / 1000).toFixed(0)}k`
                                 : formatCurrency(item.value).replace('R$ ', '');
-                            
+
                             return (
                                 <div key={index} style={{
                                     display: 'flex',
@@ -297,7 +288,7 @@ const ExpenseCharts = ({ reportData, summary }) => {
                                             R$ {shortValue}
                                         </div>
                                     </div>
-                                    
+
                                     {/* Label do mês */}
                                     <div style={{
                                         fontSize: '0.75rem',
@@ -330,9 +321,9 @@ const ExpenseCharts = ({ reportData, summary }) => {
         }}>
             {/* Linha 1: Timeline de gastos mensais */}
             {chartData.byMonth.length > 0 && (
-                <TimelineChart 
-                    data={chartData.byMonth} 
-                    title="Evolução Mensal de Gastos" 
+                <TimelineChart
+                    data={chartData.byMonth}
+                    title="Evolução Mensal de Gastos"
                 />
             )}
 
@@ -343,7 +334,7 @@ const ExpenseCharts = ({ reportData, summary }) => {
                 gap: '24px'
             }}>
                 {chartData.byProject.length > 0 && (
-                    <HorizontalBarChart 
+                    <HorizontalBarChart
                         data={chartData.byProject}
                         title="Top Obras por Gastos"
                         color="#10b981"
@@ -351,7 +342,7 @@ const ExpenseCharts = ({ reportData, summary }) => {
                 )}
 
                 {chartData.byCostCenter.length > 0 && (
-                    <PieChart 
+                    <PieChart
                         data={chartData.byCostCenter}
                         title="Distribuição por Centro de Custo"
                     />

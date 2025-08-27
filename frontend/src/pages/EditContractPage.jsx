@@ -190,7 +190,7 @@ const EditContractPage = () => {
         </p>
       </div>
 
-      {/* ✅ INFORMAÇÕES DA OBRA */}
+      {/*  INFORMAÇÕES DA OBRA */}
       {projectInfo && (
         <div style={{
           backgroundColor: '#eff6ff',
@@ -237,7 +237,7 @@ const EditContractPage = () => {
         </div>
       )}
 
-      {/* ✅ FORMULÁRIO DE EDIÇÃO MODERNIZADO */}
+      {/*  FORMULÁRIO DE EDIÇÃO MODERNIZADO */}
       <div style={{
         backgroundColor: 'white',
         borderRadius: '12px',
