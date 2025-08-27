@@ -313,7 +313,6 @@ public class ContractInvoicesController : ControllerBase
             _ => "application/octet-stream"
         };
 
-        // Para PDFs e imagens, exibir inline. Para outros, forçar download
         if (contentType.StartsWith("image/") || contentType == "application/pdf" || contentType == "text/plain")
         {
             Response.Headers.Append("Content-Disposition", $"inline; filename=\"{Path.GetFileName(fileName)}\"");
@@ -404,7 +403,7 @@ public class ContractInvoicesController : ControllerBase
             },
             Summary = new
             {
-                TotalInvoices = validInvoices.Count, 
+                TotalInvoices = validInvoices.Count,
                 TotalGrossValue = validInvoices.Sum(i => i.GrossValue),
                 TotalIssValue = validInvoices.Sum(i => i.IssValue),
                 TotalInssValue = validInvoices.Sum(i => i.InssValue),

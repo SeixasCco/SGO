@@ -1,4 +1,3 @@
-// Em SGO.Api/Dtos/ReportDto.cs
 namespace SGO.Api.Dtos;
 
 public class ExpenseReportFilterDto

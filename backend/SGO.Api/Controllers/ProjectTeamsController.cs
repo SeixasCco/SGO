@@ -1,4 +1,3 @@
-// Em SGO.Api/Controllers/ProjectTeamsController.cs
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SGO.Api.Dtos;
@@ -69,7 +68,7 @@ namespace SGO.Api.Controllers
             return Ok();
         }
 
-        // PUT: api/projects/{projectId}/team/{allocationId}/end       
+        // PUT: api/projects/{projectId}/team/{allocationId}/end
         [HttpPut("{allocationId}/end")]
         public async Task<IActionResult> EndTeamMemberAllocation(Guid projectId, Guid allocationId)
         {
@@ -86,7 +85,7 @@ namespace SGO.Api.Controllers
 
             return NoContent();
         }
-        
+
         [HttpDelete("{allocationId}")]
         public async Task<IActionResult> DeleteAllocation(Guid projectId, Guid allocationId)
         {

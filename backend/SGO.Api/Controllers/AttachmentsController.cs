@@ -1,10 +1,10 @@
-// Local: SGO.Api/Controllers/AttachmentsController.cs
+
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.IO;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.StaticFiles; // Adicione este using
+using Microsoft.AspNetCore.StaticFiles;
 
 namespace SGO.Api.Controllers
 {
@@ -29,7 +29,7 @@ namespace SGO.Api.Controllers
             {
                 Directory.CreateDirectory(uploadsFolderPath);
             }
-           
+
             var fileName = $"{DateTime.Now:yyyyMMdd_HHmmss}_{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
             var filePath = Path.Combine(uploadsFolderPath, fileName);
 
@@ -37,7 +37,7 @@ namespace SGO.Api.Controllers
             {
                 await file.CopyToAsync(stream);
             }
-           
+
             return Ok(new { filePath = fileName });
         }
 

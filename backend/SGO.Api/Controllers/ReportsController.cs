@@ -19,7 +19,6 @@ namespace SGO.Api.Controllers
         private readonly SgoDbContext _context;
         public ReportsController(SgoDbContext context) { _context = context; }
 
-        // Método privado para reutilizar a lógica de filtro
         private IQueryable<ProjectExpense> GetFilteredExpensesQuery(ExpenseReportFilterDto filters)
         {
             var query = _context.ProjectExpenses.AsQueryable();
@@ -30,13 +29,13 @@ namespace SGO.Api.Controllers
             if (filters.EndDate.HasValue)
                 query = query.Where(e => e.Date <= filters.EndDate.Value.ToUniversalTime());
 
-            if (filters.ProjectIds != null && filters.ProjectIds.Any())                
+            if (filters.ProjectIds != null && filters.ProjectIds.Any())
                 query = query.Where(e => e.ProjectId.HasValue && filters.ProjectIds.Contains(e.ProjectId.Value));
 
             return query;
         }
 
-        // GET: api/reports/expenses (Endpoint para a tela)
+        // GET: api/reports/expenses
         [HttpGet("expenses")]
         public async Task<ActionResult<ReportResultDto>> GetExpensesReport([FromQuery] ExpenseReportFilterDto filters)
         {
@@ -78,7 +77,7 @@ namespace SGO.Api.Controllers
             return Ok(result);
         }
 
-        // GET: api/reports/expenses/export (Endpoint para o Excel)
+        // GET: api/reports/expenses/export
         [HttpGet("expenses/excel")]
         public async Task<IActionResult> ExportExpensesReport([FromQuery] ExpenseReportFilterDto filters)
         {
@@ -96,7 +95,7 @@ namespace SGO.Api.Controllers
                 .Select(e => new
                 {
                     Data = e.Date.ToString("dd/MM/yyyy"),
-                    Obra = e.Project?.Name ?? "Despesa da Matriz", 
+                    Obra = e.Project?.Name ?? "Despesa da Matriz",
                     CentroDeCusto = e.CostCenter.Name,
                     Descricao = e.Description,
                     Valor = e.Amount,

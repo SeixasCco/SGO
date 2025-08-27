@@ -1,6 +1,5 @@
 namespace SGO.Api.Dtos
 {
-    // ✅ DTO PARA RETORNO DE FUNCIONÁRIO
     public class EmployeeDto
     {
         public Guid Id { get; set; }
@@ -12,7 +11,6 @@ namespace SGO.Api.Dtos
         public bool IsActive { get; set; }
     }
 
-    // ✅ DTO PARA CRIAÇÃO DE FUNCIONÁRIO
     public class CreateEmployeeDto
     {
         public string Name { get; set; } = string.Empty;
@@ -22,7 +20,6 @@ namespace SGO.Api.Dtos
         public DateTime? EndDate { get; set; }
     }
 
-    // ✅ DTO PARA ATUALIZAÇÃO DE FUNCIONÁRIO
     public class UpdateEmployeeDto
     {
         public string Name { get; set; } = string.Empty;
@@ -33,7 +30,7 @@ namespace SGO.Api.Dtos
         public DateTime? EndDate { get; set; }
         public bool IsActive { get; set; }
     }
-    
+
     public class AddTeamMemberDto
     {
         public DateTime StartDate { get; set; }

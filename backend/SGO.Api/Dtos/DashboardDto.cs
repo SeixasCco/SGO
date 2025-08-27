@@ -1,6 +1,4 @@
 namespace SGO.Api.Dtos;
-
-//  DTO PRINCIPAL - RESUMO GERAL
 public class DashboardSummaryDto
 {
     // Métricas de Projetos
@@ -66,7 +64,7 @@ public class TopProjectDto
 //  ATIVIDADES RECENTES EXPANDIDAS
 public class RecentActivityDto
 {
-    public string ActivityType { get; set; } = string.Empty; 
+    public string ActivityType { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public DateTime ActivityDate { get; set; }
     public decimal? Amount { get; set; }
@@ -78,7 +76,7 @@ public class RecentActivityDto
 // ALERTAS DO DASHBOARD
 public class DashboardAlertDto
 {
-    public string Type { get; set; } = string.Empty; 
+    public string Type { get; set; } = string.Empty;
     public string Title { get; set; } = string.Empty;
     public string Message { get; set; } = string.Empty;
     public string Icon { get; set; } = string.Empty;
