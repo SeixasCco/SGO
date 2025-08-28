@@ -1,34 +1,45 @@
 import React, { useState, useEffect } from 'react';
 import { expenseFormMap } from '../config/expenseFormMap';
 
-const DynamicExpenseForm = ({ costCenterId, onSubmit, onCancel, initialData = {}, submitting = false }) => {   
+import FormGroup from './common/FormGroup';
+import StyledInput from './common/StyledInput';
+
+const StyledTextarea = (props) => (
+    <textarea className="form-textarea" {...props} />
+);
+
+const DynamicExpenseForm = ({ costCenterId, onSubmit, onCancel, initialData = {}, submitting = false }) => {
     const [commonData, setCommonData] = useState({
         description: initialData.description || '',
         amount: initialData.amount || '',
         date: initialData.date || new Date().toISOString().split('T')[0],
-        observations: initialData.observations || '',       
+        observations: initialData.observations || '',
         attachment: null
     });
 
-    const [detailsData, setDetailsData] = useState(initialData.detailsJson ? JSON.parse(initialData.detailsJson) : {});      
-    const specificFields = expenseFormMap[costCenterId] || [];
-   
-    useEffect(() => {
+    const [detailsData, setDetailsData] = useState(() => {
         const initialDetails = {};
         const fieldsForCostCenter = expenseFormMap[costCenterId] || [];
         fieldsForCostCenter.forEach(field => {
-            initialDetails[field.name] = ''; 
+            initialDetails[field.name] = initialData.details?.[field.name] || '';
+        });
+        return initialDetails;
+    });
+
+    const specificFields = expenseFormMap[costCenterId] || [];
+
+    useEffect(() => {        
+        const initialDetails = {};
+        const fieldsForCostCenter = expenseFormMap[costCenterId] || [];
+        fieldsForCostCenter.forEach(field => {
+            initialDetails[field.name] = '';
         });
         setDetailsData(initialDetails);
     }, [costCenterId]);
 
     const handleCommonChange = (e) => {
         const { name, value, type, files } = e.target;
-        if (type === 'file') {
-            setCommonData(prev => ({ ...prev, [name]: files[0] }));
-        } else {
-            setCommonData(prev => ({ ...prev, [name]: value }));
-        }
+        setCommonData(prev => ({ ...prev, [name]: type === 'file' ? files[0] : value }));
     };
 
     const handleDetailsChange = (e) => {
@@ -45,135 +56,98 @@ const DynamicExpenseForm = ({ costCenterId, onSubmit, onCancel, initialData = {}
         };
         onSubmit(fullExpenseData);
     };
-    
-    const inputStyle = { 
-        width: '100%', 
-        padding: '12px', 
-        marginBottom: '10px',
-        border: '1px solid #ddd',
-        borderRadius: '4px',
-        boxSizing: 'border-box'
-    };
-    const labelStyle = { 
-        display: 'block', 
-        marginBottom: '6px', 
-        fontWeight: 'bold',
-        color: '#333'
-    };
 
     return (
         <form onSubmit={handleSubmit}>
-            <fieldset style={{ border: '1px solid #ddd', padding: '16px', borderRadius: '8px', marginBottom: '16px' }}>
-                <legend style={{ fontWeight: 'bold', color: '#333' }}>2. Informações Gerais</legend>
-                
-                <label style={labelStyle}>Descrição *</label>
-                <input 
-                    name="description" 
-                    type="text" 
-                    value={commonData.description} 
-                    onChange={handleCommonChange} 
-                    required 
-                    style={inputStyle}
-                    placeholder="Descreva a despesa..."
-                />
-                
-                <label style={labelStyle}>Data da Despesa *</label>
-                <input 
-                    name="date" 
-                    type="date" 
-                    value={commonData.date} 
-                    onChange={handleCommonChange} 
-                    required 
-                    style={inputStyle} 
-                />
-                
-                <label style={labelStyle}>Valor (R$) *</label>
-                <input 
-                    name="amount" 
-                    type="number" 
-                    step="0.01" 
-                    value={commonData.amount} 
-                    onChange={handleCommonChange} 
-                    placeholder="0.00" 
-                    required 
-                    style={inputStyle} 
-                />
-            </fieldset>
+            <div className="form-section">
+                <div className="form-grid">
+                    <FormGroup label="Descrição *">
+                        <StyledInput
+                            name="description"
+                            type="text"
+                            value={commonData.description}
+                            onChange={handleCommonChange}
+                            required
+                            placeholder="Descreva a despesa..."
+                        />
+                    </FormGroup>
+                    <FormGroup label="Data da Despesa *">
+                        <StyledInput
+                            name="date"
+                            type="date"
+                            value={commonData.date}
+                            onChange={handleCommonChange}
+                            required
+                        />
+                    </FormGroup>
+                    <FormGroup label="Valor (R$) *">
+                        <StyledInput
+                            name="amount"
+                            type="number"
+                            step="0.01"
+                            value={commonData.amount}
+                            onChange={handleCommonChange}
+                            placeholder="0.00"
+                            required
+                        />
+                    </FormGroup>
+                </div>
+            </div>
 
             {specificFields.length > 0 && (
-                <fieldset style={{ border: '1px solid #ddd', padding: '16px', borderRadius: '8px', marginBottom: '16px' }}>
-                    <legend style={{ fontWeight: 'bold', color: '#333' }}>3. Detalhes Específicos</legend>
-                    {specificFields.map(field => (
-                        <div key={field.name}>
-                            <label style={labelStyle}>{field.label}</label>
-                            <input
-                                type={field.type}
-                                name={field.name}
-                                value={detailsData[field.name] || ''}
-                                onChange={handleDetailsChange}
-                                placeholder={field.placeholder}
-                                style={inputStyle}
-                            />
-                        </div>
-                    ))}
-                </fieldset>
+                <div className="form-section">
+                    <h3 className="section-divider" style={{marginTop: 0, fontSize: '1rem'}}>Detalhes Específicos</h3>
+                    <div className="form-grid">
+                        {specificFields.map(field => (
+                            <FormGroup key={field.name} label={field.label}>
+                                <StyledInput
+                                    type={field.type}
+                                    name={field.name}
+                                    value={detailsData[field.name] || ''}
+                                    onChange={handleDetailsChange}
+                                    placeholder={field.placeholder}
+                                />
+                            </FormGroup>
+                        ))}
+                    </div>
+                </div>
             )}
 
-            <fieldset style={{ border: '1px solid #ddd', padding: '16px', borderRadius: '8px', marginBottom: '16px' }}>
-                <legend style={{ fontWeight: 'bold', color: '#333' }}>4. Informações Adicionais</legend>
-                
-                <label style={labelStyle}>Observações</label>
-                <textarea 
-                    name="observations" 
-                    value={commonData.observations} 
-                    onChange={handleCommonChange} 
-                    style={{...inputStyle, height: '80px'}} 
-                    placeholder="Observações adicionais..."
-                />               
-                
-                <label style={labelStyle}>Anexo (Nota Fiscal, Comprovante)</label>
-                <input 
-                    name="attachment" 
-                    type="file" 
-                    onChange={handleCommonChange} 
-                    style={inputStyle}
-                    accept=".pdf,.jpg,.jpeg,.png,.gif,.doc,.docx"
-                />
-                {commonData.attachment && (
-                    <div style={{ fontSize: '0.9rem', color: '#666', marginTop: '4px' }}>
-                        Arquivo selecionado: {commonData.attachment.name}
+            <div className="form-section">
+                 <div className="form-grid">
+                    <div style={{gridColumn: '1 / -1'}}>
+                        <FormGroup label="Observações">
+                            <StyledTextarea
+                                name="observations"
+                                value={commonData.observations}
+                                onChange={handleCommonChange}
+                                placeholder="Observações adicionais..."
+                            />
+                        </FormGroup>
                     </div>
-                )}
-            </fieldset>
+                    <div style={{gridColumn: '1 / -1'}}>
+                         <FormGroup label="Anexo (Nota Fiscal, Comprovante)">
+                            <StyledInput
+                                name="attachment"
+                                type="file"
+                                onChange={handleCommonChange}
+                                accept=".pdf,.jpg,.jpeg,.png,.gif,.doc,.docx"
+                            />
+                             {commonData.attachment && (
+                                <div className="form-help-text" style={{marginTop: '8px'}}>
+                                    Arquivo selecionado: {commonData.attachment.name}
+                                </div>
+                            )}
+                        </FormGroup>
+                    </div>
+                </div>
+            </div>
             
-            <div style={{ marginTop: '24px', textAlign: 'right' }}>
-                <button 
-                    type="button" 
-                    onClick={onCancel}
-                    disabled={submitting}
-                    style={{
-                        padding: '10px 20px',
-                        marginRight: '12px',
-                        border: '1px solid #ddd',
-                        borderRadius: '4px',
-                        background: '#f5f5f5',
-                        cursor: submitting ? 'not-allowed' : 'pointer'
-                    }}
-                >
+            <div className="modal-footer" style={{ borderTop: 'none', paddingTop: 0 }}>
+                <button type="button" onClick={onCancel} disabled={submitting} className="form-button-secondary">
                     Cancelar
                 </button>
-                <button 
-                    type="submit"
-                    disabled={submitting}
-                    style={{
-                        padding: '10px 20px',
-                        border: 'none',
-                        borderRadius: '4px',
-                        background: submitting ? '#ccc' : '#007bff',
-                        color: 'white',
-                        cursor: submitting ? 'not-allowed' : 'pointer'
-                    }}
-                >
+                <button type="submit" disabled={submitting} className="form-button">
                     {submitting ? 'Salvando...' : 'Salvar Despesa'}
                 </button>
             </div>

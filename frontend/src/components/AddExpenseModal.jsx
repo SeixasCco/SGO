@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+
 import DynamicExpenseForm from './DynamicExpenseForm';
+import FormGroup from './common/FormGroup';
 
 const AddExpenseModal = ({ onClose, onExpenseAdded, projectId, contractId }) => {
     const [costCenters, setCostCenters] = useState([]);
@@ -18,15 +20,12 @@ const AddExpenseModal = ({ onClose, onExpenseAdded, projectId, contractId }) => 
         setSubmitting(true);
 
         let attachmentPath = null;
-
         if (formData.attachment) {
             const uploadData = new FormData();
             uploadData.append('file', formData.attachment);
-
             try {
                 const uploadResponse = await axios.post('http://localhost:5145/api/attachments/upload', uploadData);
                 attachmentPath = uploadResponse.data.filePath;
-                console.log('Anexo enviado:', attachmentPath);
             } catch (err) {
                 toast.error('Falha ao enviar o anexo.');
                 setSubmitting(false);
@@ -35,111 +34,63 @@ const AddExpenseModal = ({ onClose, onExpenseAdded, projectId, contractId }) => 
         }
 
         const finalData = {
-            description: formData.description,
-            amount: formData.amount,
-            date: formData.date,
-            observations: formData.observations,
-            details: formData.details,
+            ...formData,
             costCenterId: selectedCostCenterId,
             projectId: projectId || null,
             contractId: contractId || null,
             attachmentPath: attachmentPath
         };
+        
+        const promise = axios.post('http://localhost:5145/api/projectexpenses', finalData);
 
-        console.log('Dados finais:', finalData);
-
-        try {
-            await axios.post('http://localhost:5145/api/projectexpenses', finalData);
-            toast.success('Despesa lançada com sucesso!');
-            onExpenseAdded();
-        } catch (err) {
-            const message = err.response?.data?.message || "Falha ao lançar despesa.";
-            toast.error(message);
-            console.error('Erro:', err);
-        } finally {
-            setSubmitting(false);
-        }
+        toast.promise(promise, {
+            loading: 'Lançando despesa...',
+            success: () => {
+                onExpenseAdded(); 
+                return 'Despesa lançada com sucesso!';
+            },
+            error: (err) => err.response?.data?.message || "Falha ao lançar despesa."
+        }).finally(() => setSubmitting(false));
     };
 
     return (
-        <div style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            zIndex: 1000
-        }}>
-            <div style={{
-                backgroundColor: 'white',
-                borderRadius: '12px',
-                padding: '32px',
-                width: '90%',
-                maxWidth: '600px',
-                maxHeight: '90vh',
-                overflow: 'auto',
-                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-            }}>
-                <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginBottom: '20px'
-                }}>
-                    <h2 style={{ margin: 0 }}>
-                        Lançar Nova Despesa {projectId ? '(Obra)' : '(Matriz)'}
+        <div className="modal-overlay">
+            <div className="modal-container">
+                <div className="modal-header">
+                    <h2 className="modal-title">
+                        💸 Lançar Nova Despesa {projectId ? '(Obra)' : '(Matriz)'}
                     </h2>
-                    <button
-                        onClick={onClose}
-                        style={{
-                            background: 'none',
-                            border: 'none',
-                            fontSize: '24px',
-                            cursor: 'pointer',
-                            color: '#666'
-                        }}
-                    >
-                        ×
-                    </button>
+                    <button onClick={onClose} className="modal-close-button">×</button>
                 </div>
 
-                <div style={{ margin: '20px 0' }}>
-                    <label style={{
-                        display: 'block',
-                        marginBottom: '8px',
-                        fontWeight: 'bold'
-                    }}>
-                        1. Selecione o Centro de Custo *
-                    </label>
-                    <select
-                        value={selectedCostCenterId}
-                        onChange={(e) => setSelectedCostCenterId(e.target.value)}
-                        style={{
-                            width: '100%',
-                            padding: '10px',
-                            border: '1px solid #ddd',
-                            borderRadius: '4px'
-                        }}
-                    >
-                        <option value="">Selecione...</option>
-                        {costCenters.map(cc => (
-                            <option key={cc.id} value={cc.id}>{cc.name}</option>
-                        ))}
-                    </select>
-                </div>
+                <div className="modal-body">
+                    <div className="form-section">
+                        <FormGroup label="1. Selecione o Centro de Custo *">
+                            <select
+                                value={selectedCostCenterId}
+                                onChange={(e) => setSelectedCostCenterId(e.target.value)}
+                                className="form-select"
+                            >
+                                <option value="">Selecione...</option>
+                                {costCenters.map(cc => (
+                                    <option key={cc.id} value={cc.id}>{cc.name}</option>
+                                ))}
+                            </select>
+                        </FormGroup>
+                    </div>
 
-                {selectedCostCenterId && (
-                    <DynamicExpenseForm
-                        costCenterId={selectedCostCenterId}
-                        onSubmit={handleSubmit}
-                        onCancel={onClose}
-                        submitting={submitting}
-                    />
-                )}
+                    {selectedCostCenterId && (
+                        <>
+                            <h3 className="section-divider" style={{marginTop: 0}}>2. Preencha os Dados da Despesa</h3>
+                            <DynamicExpenseForm
+                                costCenterId={selectedCostCenterId}
+                                onSubmit={handleSubmit}
+                                onCancel={onClose}
+                                submitting={submitting}
+                            />
+                        </>
+                    )}
+                </div>
             </div>
         </div>
     );

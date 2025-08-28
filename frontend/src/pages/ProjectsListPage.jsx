@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 
 import AddWorkForm from '../components/AddWorkForm';
 import ProjectCard from '../components/common/ProjectCard'; 
+import ProjectFilters from '../components/ProjectFilters';
 
 const ProjectsListPage = () => {
     const navigate = useNavigate();
@@ -72,6 +73,7 @@ const ProjectsListPage = () => {
             </div>
 
             <div className="page-content">
+                 { <ProjectFilters onFilter={fetchProjects} /> }
                 {isFormVisible && (
                     <div className="card" style={{marginBottom: '32px'}}>
                         <AddWorkForm onWorkAdded={handleWorkAdded} />
