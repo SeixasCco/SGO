@@ -8,6 +8,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Ganss.Xss;
+
 
 namespace SGO.Api.Controllers
 {
@@ -17,10 +19,12 @@ namespace SGO.Api.Controllers
     public class ContractsController : ControllerBase
     {
         private readonly SgoDbContext _context;
+        private readonly IHtmlSanitizer _sanitizer;
 
         public ContractsController(SgoDbContext context)
         {
             _context = context;
+            _sanitizer = new HtmlSanitizer();
         }
 
         // GET: api/contracts/byproject/{projectId}
@@ -60,12 +64,13 @@ namespace SGO.Api.Controllers
             {
                 Id = Guid.NewGuid(),
                 ProjectId = contractDto.ProjectId,
-                ContractNumber = contractDto.ContractNumber.Trim(),
-                Title = contractDto.Title,
+
+                ContractNumber = _sanitizer.Sanitize(contractDto.ContractNumber.Trim()),
+                Title = _sanitizer.Sanitize(contractDto.Title),
                 TotalValue = contractDto.TotalValue,
                 StartDate = contractDto.StartDate.ToUniversalTime(),
                 EndDate = contractDto.EndDate?.ToUniversalTime(),
-                Status = ContractStatus.Active
+                Status = ContractStatus.Active               
             };
             _context.Contracts.Add(newContract);
             await _context.SaveChangesAsync();
@@ -82,8 +87,8 @@ namespace SGO.Api.Controllers
                 return NotFound();
             }
 
-            contract.ContractNumber = contractDto.ContractNumber;
-            contract.Title = contractDto.Title;
+            contract.ContractNumber = _sanitizer.Sanitize(contractDto.ContractNumber);
+            contract.Title =  _sanitizer.Sanitize(contractDto.Title);
             contract.TotalValue = contractDto.TotalValue;
             contract.StartDate = contractDto.StartDate.ToUniversalTime();
             contract.EndDate = contractDto.EndDate?.ToUniversalTime();

@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Ganss.Xss; 
 
 namespace SGO.Api.Controllers
 {
@@ -17,7 +18,12 @@ namespace SGO.Api.Controllers
     public class ProjectsController : ControllerBase
     {
         private readonly SgoDbContext _context;
-        public ProjectsController(SgoDbContext context) { _context = context; }
+        private readonly IHtmlSanitizer _sanitizer;
+        public ProjectsController(SgoDbContext context)
+        {
+            _context = context;
+            _sanitizer = new HtmlSanitizer(); 
+        }
 
         // GET: api/projects
         [HttpGet]
@@ -219,16 +225,18 @@ namespace SGO.Api.Controllers
             var project = new Project
             {
                 Id = Guid.NewGuid(),
-                Cnpj = projectDto.Cnpj,
-                Address = projectDto.Address,
-                Description = projectDto.Description,
-                CNO = projectDto.CNO,
-                Name = projectDto.Name,
-                Contractor = projectDto.Contractor,
-                ServiceTaker = projectDto.ServiceTaker,
-                Responsible = projectDto.Responsible,
-                City = projectDto.City,
-                State = projectDto.State,
+
+                Cnpj = _sanitizer.Sanitize(projectDto.Cnpj),
+                Address = _sanitizer.Sanitize(projectDto.Address),
+                Description = _sanitizer.Sanitize(projectDto.Description),
+                CNO = _sanitizer.Sanitize(projectDto.CNO),
+                Name = _sanitizer.Sanitize(projectDto.Name),
+                Contractor = _sanitizer.Sanitize(projectDto.Contractor),
+                ServiceTaker = _sanitizer.Sanitize(projectDto.ServiceTaker),
+                Responsible = _sanitizer.Sanitize(projectDto.Responsible),
+                City = _sanitizer.Sanitize(projectDto.City),
+                State = _sanitizer.Sanitize(projectDto.State),
+
                 StartDate = projectDto.StartDate.ToUniversalTime(),
                 EndDate = projectDto.EndDate?.ToUniversalTime(),
                 Status = ProjectStatus.Active
@@ -248,19 +256,19 @@ namespace SGO.Api.Controllers
             if (project == null)
             {
                 return NotFound();
-            }
+            }            
 
-            project.Name = projectDto.Name;
-            project.Contractor = projectDto.Contractor;
-            project.CNO = projectDto.Cnpj;
-            project.CNO = projectDto.CNO;
-            project.Responsible = projectDto.Responsible;
+            project.Name = _sanitizer.Sanitize(projectDto.Name);
+            project.Contractor =  _sanitizer.Sanitize(projectDto.Contractor);
+            project.CNO = _sanitizer.Sanitize(projectDto.CNO);
+            project.Cnpj =  _sanitizer.Sanitize(projectDto.Cnpj);
+            project.Responsible = _sanitizer.Sanitize(projectDto.Responsible);          
+            project.City = projectDto.City; _sanitizer.Sanitize(projectDto.City);
+            project.State = projectDto.State; _sanitizer.Sanitize(projectDto.State);
+            project.Address = projectDto.Address; _sanitizer.Sanitize(projectDto.Address);
+            project.Description = projectDto.Description; _sanitizer.Sanitize(projectDto.Description);
             project.StartDate = projectDto.StartDate.ToUniversalTime();
             project.EndDate = projectDto.EndDate?.ToUniversalTime();
-            project.City = projectDto.City;
-            project.State = projectDto.State;
-            project.Address = projectDto.Address;
-            project.Description = projectDto.Description;
             project.Status = (ProjectStatus)projectDto.Status;
 
             try

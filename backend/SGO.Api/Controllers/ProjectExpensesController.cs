@@ -7,6 +7,7 @@ using SGO.Infrastructure;
 using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Ganss.Xss;
 
 namespace SGO.Api.Controllers
 {
@@ -16,10 +17,12 @@ namespace SGO.Api.Controllers
     public class ProjectExpensesController : ControllerBase
     {
         private readonly SgoDbContext _context;
+        private readonly IHtmlSanitizer _sanitizer;
 
         public ProjectExpensesController(SgoDbContext context)
         {
-            _context = context;
+             _context = context;
+            _sanitizer = new HtmlSanitizer();
         }
 
         // GET: api/projectexpenses/{id}
@@ -56,13 +59,13 @@ namespace SGO.Api.Controllers
                 ProjectId = expenseDto.ProjectId,
                 ContractId = expenseDto.ContractId,
                 CompanyId = expenseDto.CompanyId,
-                Description = expenseDto.Description,
+                Description = _sanitizer.Sanitize(expenseDto.Description),
                 Amount = expenseDto.Amount,
                 Date = expenseDto.Date.ToUniversalTime(),
                 CostCenterId = expenseDto.CostCenterId,
-                Observations = expenseDto.Observations,
-                SupplierName = expenseDto.SupplierName,
-                InvoiceNumber = expenseDto.InvoiceNumber,
+                Observations = !string.IsNullOrEmpty(expenseDto.Observations) ? _sanitizer.Sanitize(expenseDto.Observations) : null, 
+                SupplierName = !string.IsNullOrEmpty(expenseDto.SupplierName) ? _sanitizer.Sanitize(expenseDto.SupplierName) : null,
+                InvoiceNumber = !string.IsNullOrEmpty(expenseDto.InvoiceNumber) ? _sanitizer.Sanitize(expenseDto.InvoiceNumber) : null,
                 AttachmentPath = expenseDto.AttachmentPath,
                 IsAutomaticallyCalculated = false,
 
@@ -105,7 +108,7 @@ namespace SGO.Api.Controllers
                 return NotFound();
             }
 
-            expense.Description = expenseDto.Description;
+            expense.Description = _sanitizer.Sanitize(expenseDto.Description);;
             expense.Amount = expenseDto.Amount;
             expense.Date = expenseDto.Date.ToUniversalTime();
 

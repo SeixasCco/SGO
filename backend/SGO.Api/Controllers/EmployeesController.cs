@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Ganss.Xss;
 
 namespace SGO.Api.Controllers
 {
@@ -17,7 +18,12 @@ namespace SGO.Api.Controllers
     public class EmployeesController : ControllerBase
     {
         private readonly SgoDbContext _context;
-        public EmployeesController(SgoDbContext context) { _context = context; }
+        private readonly IHtmlSanitizer _sanitizer;
+        public EmployeesController(SgoDbContext context)
+        {
+            _context = context;
+            _sanitizer = new HtmlSanitizer();
+        }
 
         // GET: api/employees?companyId={companyId}
         [HttpGet]
@@ -91,8 +97,8 @@ namespace SGO.Api.Controllers
             var employee = new Employee
             {
                 Id = Guid.NewGuid(),
-                Name = employeeDto.Name,
-                Position = employeeDto.Position,
+                Name = _sanitizer.Sanitize(employeeDto.Name), 
+                Position = _sanitizer.Sanitize(employeeDto.Position), 
                 Salary = employeeDto.Salary,
                 StartDate = employeeDto.StartDate.ToUniversalTime(),
                 EndDate = employeeDto.EndDate?.ToUniversalTime(),
@@ -122,8 +128,8 @@ namespace SGO.Api.Controllers
             var employee = await _context.Employees.FindAsync(id);
             if (employee == null) return NotFound();
 
-            employee.Name = employeeDto.Name;
-            employee.Position = employeeDto.Position;
+            employee.Name = _sanitizer.Sanitize(employeeDto.Name); 
+            employee.Position = _sanitizer.Sanitize(employeeDto.Position);
             employee.Salary = employeeDto.Salary;
             employee.StartDate = employeeDto.StartDate.ToUniversalTime();
             employee.EndDate = employeeDto.EndDate?.ToUniversalTime();
