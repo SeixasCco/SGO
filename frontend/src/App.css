@@ -755,118 +755,241 @@ body {
     border: 1px solid #ccc;
     box-shadow: none;
   }
+}
 
-  /* --- ESTILOS DA NAVEGAÇÃO PRINCIPAL --- */
+.main-nav {
+  background-color: white;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 0 48px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
 
-  .main-nav {
-    background-color: white;
-    border-bottom: 1px solid #e2e8f0;
-    padding: 0 48px;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-  }
+.main-nav-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 80px;
+}
 
-  .main-nav-content {
-    max-width: 1400px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: 80px;
-  }
+/* Logo e Nome do Sistema */
+.nav-brand-link {
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
 
-  /* Logo e Nome do Sistema */
-  .nav-brand-link {
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
+.nav-brand-icon {
+  background-color: #3b82f6;
+  border-radius: 12px;
+  padding: 12px;
+  font-size: 1.5rem;
+}
 
-  .nav-brand-icon {
-    background-color: #3b82f6;
-    border-radius: 12px;
-    padding: 12px;
-    font-size: 1.5rem;
-  }
+.nav-brand-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0f172a;
+}
 
-  .nav-brand-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #0f172a;
-  }
+.nav-brand-subtitle {
+  font-size: 0.75rem;
+  color: #64748b;
+  font-weight: 500;
+}
 
-  .nav-brand-subtitle {
-    font-size: 0.75rem;
-    color: #64748b;
-    font-weight: 500;
-  }
+/* Grupo Central: Navegação + Seletor de Empresa */
+.nav-center-group {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
 
-  /* Grupo Central: Navegação + Seletor de Empresa */
-  .nav-center-group {
-    display: flex;
-    align-items: center;
-    gap: 32px;
-  }
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 
-  .nav-links {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
+.nav-link {
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  color: #64748b;
+  border: 2px solid transparent;
+}
 
-  .nav-link {
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 20px;
-    border-radius: 10px;
-    font-size: 1rem;
-    font-weight: 600;
-    transition: all 0.2s ease;
-    color: #64748b;
-    border: 2px solid transparent;
-  }
+.nav-link.active {
+  background-color: #eff6ff;
+  color: #3b82f6;
+  border: 2px solid #bfdbfe;
+}
 
-  .nav-link.active {
-    background-color: #eff6ff;
-    color: #3b82f6;
-    border: 2px solid #bfdbfe;
-  }
+/* Informações do Usuário */
+.nav-user-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
 
-  /* Informações do Usuário */
-  .nav-user-info {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
+.user-info-text {
+  font-size: 0.875rem;
+  color: #64748b;
+  text-align: right;
+}
 
-  .user-info-text {
-    font-size: 0.875rem;
-    color: #64748b;
-    text-align: right;
-  }
+.user-info-text .name {
+  font-weight: 500;
+}
 
-  .user-info-text .name {
-    font-weight: 500;
-  }
+.user-info-text .date {
+  font-size: 0.75rem;
+}
 
-  .user-info-text .date {
-    font-size: 0.75rem;
-  }
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  background-color: #e0e7ff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  border: 2px solid #c7d2fe;
+}
 
-  .user-avatar {
-    width: 40px;
-    height: 40px;
-    background-color: #e0e7ff;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.2rem;
-    border: 2px solid #c7d2fe;
-  }
+/* --- ESTILOS PARA A PÁGINA DE FUNCIONÁRIOS --- */
+
+.employee-form-grid,
+.filters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  align-items: end;
+}
+
+.employee-list {
+  display: grid;
+  gap: 16px;
+}
+
+.employee-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 24px;
+  transition: all 0.2s ease;
+  background-color: #ffffff;
+  display: grid;
+  grid-template-columns: auto 1fr 1fr 1fr auto;
+  align-items: center;
+  gap: 24px;
+}
+
+.employee-card:hover {
+  background-color: #f8fafc;
+  border-color: #c7d2fe;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.08);
+}
+
+.employee-card-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.employee-card-avatar {
+  width: 56px;
+  height: 56px;
+  background-color: #e0e7ff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  border: 2px solid #c7d2fe;
+  flex-shrink: 0;
+}
+
+.employee-card-name {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 4px 0;
+}
+
+.employee-card-position {
+  font-size: 1rem;
+  color: #6366f1;
+  font-weight: 500;
+  margin: 0;
+}
+
+.employee-card-detail {
+  text-align: center;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid;
+}
+
+.employee-card-detail-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.employee-card-detail-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.employee-card-salary {
+  background-color: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+.employee-card-salary .employee-card-detail-label {
+  color: #15803d;
+}
+
+.employee-card-salary .employee-card-detail-value {
+  color: #166534;
+}
+
+.employee-card-startdate {
+  background-color: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.employee-card-startdate .employee-card-detail-label {
+  color: #1d4ed8;
+}
+
+.employee-card-startdate .employee-card-detail-value {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1e40af;
+}
+
+.employee-card-status {
+  text-align: center;
+}
+
+.employee-card-actions {
+  display: flex;
+  gap: 8px;
 }

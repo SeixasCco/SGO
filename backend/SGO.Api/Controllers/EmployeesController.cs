@@ -27,7 +27,7 @@ namespace SGO.Api.Controllers
             }
 
             return await _context.Employees
-                .Where(e => e.CompanyId == companyId) // Filtro por empresa
+                .Where(e => e.CompanyId == companyId) 
                 .Select(e => new EmployeeDto
                 {
                     Id = e.Id,
@@ -69,26 +69,26 @@ namespace SGO.Api.Controllers
             {
                 return BadRequest("O ID da empresa é obrigatório.");
             }
-            
+
             var assignedEmployeeIds = await _context.ProjectEmployees
-                                                    .Where(pe => pe.EndDate == null)
-                                                    .Select(pe => pe.EmployeeId)
-                                                    .Distinct()
-                                                    .ToListAsync();
+                .Where(pe => pe.EndDate == null)
+                .Select(pe => pe.EmployeeId)
+                .Distinct()
+                .ToListAsync();
 
             return await _context.Employees
-                               .Where(e => e.CompanyId == companyId && e.IsActive && !assignedEmployeeIds.Contains(e.Id)) // Filtro por empresa
-                               .Select(e => new EmployeeDto
-                               {
-                                   Id = e.Id,
-                                   Name = e.Name,
-                                   Position = e.Position,
-                                   Salary = e.Salary,
-                                   StartDate = e.StartDate,
-                                   EndDate = e.EndDate,
-                                   IsActive = e.IsActive
-                               })
-                               .ToListAsync();
+                .Where(e => e.CompanyId == companyId && e.IsActive && !assignedEmployeeIds.Contains(e.Id)) // <-- FILTRO CORRIGIDO
+                .Select(e => new EmployeeDto
+                {
+                    Id = e.Id,
+                    Name = e.Name,
+                    Position = e.Position,
+                    Salary = e.Salary,
+                    StartDate = e.StartDate,
+                    EndDate = e.EndDate,
+                    IsActive = e.IsActive
+                })
+                .ToListAsync();
         }
 
         // POST: api/employees
@@ -104,7 +104,7 @@ namespace SGO.Api.Controllers
                 StartDate = employeeDto.StartDate.ToUniversalTime(),
                 EndDate = employeeDto.EndDate?.ToUniversalTime(),
                 IsActive = true,
-                CompanyId = employeeDto.CompanyId // Recebe o CompanyId do frontend
+                CompanyId = employeeDto.CompanyId
             };
             _context.Employees.Add(employee);
             await _context.SaveChangesAsync();

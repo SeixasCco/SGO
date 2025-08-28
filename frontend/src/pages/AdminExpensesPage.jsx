@@ -64,6 +64,7 @@ const AdminExpensesPage = () => {
     const fetchMatrixExpenses = useCallback(() => {        
         if (!selectedCompany) {
             setLoading(false);
+            setExpenses([]);
             return;
         }
         setLoading(true);       
