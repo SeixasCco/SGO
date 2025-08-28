@@ -100,8 +100,7 @@ const AdminExpensesPage = () => {
 
     const handleExpenseAdded = () => {
         setIsExpenseModalOpen(false);
-        fetchMatrixExpenses();
-        toast.success('Despesa da matriz lançada com sucesso!');
+        fetchMatrixExpenses();       
     };
 
     const handleDeleteExpense = (expenseId) => {

@@ -52,8 +52,9 @@ namespace SGO.Api.Controllers
         }
 
         [HttpGet("{fileName}")]
+        [AllowAnonymous]
         public IActionResult GetAttachment(string fileName)
-        {            
+        {
             var filePath = Path.Combine(_env.ContentRootPath, "Attachments", fileName);
 
             if (!System.IO.File.Exists(filePath))
