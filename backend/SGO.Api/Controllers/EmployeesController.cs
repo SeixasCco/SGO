@@ -17,19 +17,25 @@ namespace SGO.Api.Controllers
         private readonly SgoDbContext _context;
         public EmployeesController(SgoDbContext context) { _context = context; }
 
-        // GET: api/employees
+        // GET: api/employees?companyId={companyId}
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<EmployeeDto>>> GetEmployees()
+        public async Task<ActionResult<IEnumerable<EmployeeDto>>> GetEmployees([FromQuery] Guid companyId)
         {
+            if (companyId == Guid.Empty)
+            {
+                return BadRequest("O ID da empresa é obrigatório.");
+            }
+
             return await _context.Employees
+                .Where(e => e.CompanyId == companyId) // Filtro por empresa
                 .Select(e => new EmployeeDto
                 {
                     Id = e.Id,
                     Name = e.Name,
                     Position = e.Position,
-                    Salary = e.Salary,      
+                    Salary = e.Salary,
                     StartDate = e.StartDate,
-                    EndDate = e.EndDate,             
+                    EndDate = e.EndDate,
                     IsActive = e.IsActive
                 })
                 .ToListAsync();
@@ -47,34 +53,39 @@ namespace SGO.Api.Controllers
                 Id = employee.Id,
                 Name = employee.Name,
                 Position = employee.Position,
-                Salary = employee.Salary,   
+                Salary = employee.Salary,
                 StartDate = employee.StartDate.ToUniversalTime(),
-                EndDate = employee.EndDate?.ToUniversalTime(),            
+                EndDate = employee.EndDate?.ToUniversalTime(),
                 IsActive = employee.IsActive
             };
             return Ok(employeeDto);
         }
 
-        // GET: api/employees/available
+        // GET: api/employees/available?companyId={companyId}
         [HttpGet("available")]
-        public async Task<ActionResult<IEnumerable<EmployeeDto>>> GetAvailableEmployees()
-        {          
+        public async Task<ActionResult<IEnumerable<EmployeeDto>>> GetAvailableEmployees([FromQuery] Guid companyId)
+        {
+            if (companyId == Guid.Empty)
+            {
+                return BadRequest("O ID da empresa é obrigatório.");
+            }
+            
             var assignedEmployeeIds = await _context.ProjectEmployees
-                                                    .Where(pe => pe.EndDate == null) 
+                                                    .Where(pe => pe.EndDate == null)
                                                     .Select(pe => pe.EmployeeId)
                                                     .Distinct()
                                                     .ToListAsync();
 
             return await _context.Employees
-                               .Where(e => e.IsActive && !assignedEmployeeIds.Contains(e.Id))
-                               .Select(e => new EmployeeDto 
+                               .Where(e => e.CompanyId == companyId && e.IsActive && !assignedEmployeeIds.Contains(e.Id)) // Filtro por empresa
+                               .Select(e => new EmployeeDto
                                {
                                    Id = e.Id,
                                    Name = e.Name,
                                    Position = e.Position,
-                                   Salary = e.Salary,       
+                                   Salary = e.Salary,
                                    StartDate = e.StartDate,
-                                   EndDate = e.EndDate,                           
+                                   EndDate = e.EndDate,
                                    IsActive = e.IsActive
                                })
                                .ToListAsync();
@@ -84,12 +95,6 @@ namespace SGO.Api.Controllers
         [HttpPost]
         public async Task<ActionResult<EmployeeDto>> CreateEmployee(CreateEmployeeDto employeeDto)
         {
-              var company = await _context.Companies.FirstOrDefaultAsync();
-                if (company == null)
-                {                    
-                    return StatusCode(500, "Nenhuma empresa matriz está cadastrada no sistema.");
-                }
-
             var employee = new Employee
             {
                 Id = Guid.NewGuid(),
@@ -99,14 +104,14 @@ namespace SGO.Api.Controllers
                 StartDate = employeeDto.StartDate.ToUniversalTime(),
                 EndDate = employeeDto.EndDate?.ToUniversalTime(),
                 IsActive = true,
-                CompanyId = company.Id 
+                CompanyId = employeeDto.CompanyId // Recebe o CompanyId do frontend
             };
             _context.Employees.Add(employee);
             await _context.SaveChangesAsync();
 
-            var resultDto = new EmployeeDto 
-            { 
-                Id = employee.Id, 
+            var resultDto = new EmployeeDto
+            {
+                Id = employee.Id,
                 Name = employee.Name,
                 Position = employee.Position,
                 Salary = employee.Salary,
@@ -126,9 +131,9 @@ namespace SGO.Api.Controllers
 
             employee.Name = employeeDto.Name;
             employee.Position = employeeDto.Position;
-            employee.Salary = employeeDto.Salary;   
+            employee.Salary = employeeDto.Salary;
             employee.StartDate = employeeDto.StartDate.ToUniversalTime();
-            employee.EndDate = employeeDto.EndDate?.ToUniversalTime();       
+            employee.EndDate = employeeDto.EndDate?.ToUniversalTime();
             employee.IsActive = employeeDto.IsActive;
 
             await _context.SaveChangesAsync();
@@ -140,16 +145,16 @@ namespace SGO.Api.Controllers
         public async Task<IActionResult> DeleteEmployee(Guid id)
         {
             var employee = await _context.Employees.FindAsync(id);
-            if (employee == null) return NotFound();            
-          
+            if (employee == null) return NotFound();
+
             var hasActiveAllocations = await _context.ProjectEmployees
                 .AnyAsync(pe => pe.EmployeeId == id && pe.EndDate == null);
-            
+
             if (hasActiveAllocations)
             {
                 return BadRequest("Não é possível deletar funcionário com alocações ativas.");
             }
-            
+
             _context.Employees.Remove(employee);
             await _context.SaveChangesAsync();
             return NoContent();

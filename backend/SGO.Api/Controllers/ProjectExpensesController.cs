@@ -53,6 +53,7 @@ namespace SGO.Api.Controllers
                 Id = Guid.NewGuid(),
                 ProjectId = expenseDto.ProjectId,
                 ContractId = expenseDto.ContractId,
+                CompanyId = expenseDto.CompanyId, 
                 Description = expenseDto.Description,
                 Amount = expenseDto.Amount,
                 Date = expenseDto.Date.ToUniversalTime(),

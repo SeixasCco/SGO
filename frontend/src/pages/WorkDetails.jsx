@@ -86,15 +86,19 @@ const WorkDetails = () => {
 
     const handleDeleteContract = (contractId) => {
         if (window.confirm("Tem certeza que deseja deletar este contrato?")) {
-            axios.delete(`http://localhost:5145/api/contracts/${contractId}`)
-                .then(() => {
-                    toast.success("Contrato deletado com sucesso!");
+            const promise = axios.delete(`http://localhost:5145/api/contracts/${contractId}`);
+            toast.promise(promise, {
+                loading: 'Deletando contrato...',
+                success: () => {
                     fetchContracts();
                     fetchProjectDetails();
-                })
-                .catch(error => toast.error("Erro ao deletar contrato."));
+                    return "Contrato deletado com sucesso!";
+                },
+                error: (err) => err.response?.data || "Erro ao deletar contrato. Verifique as dependências."
+            });
         }
     };
+
 
     const handleDeleteExpense = (expenseId) => {
         if (window.confirm("Tem certeza que deseja deletar esta despesa?")) {
@@ -131,7 +135,7 @@ const WorkDetails = () => {
                 projectName={`${project.contractor} - ${project.name}`}
                 onContractAdded={handleContractAdded}
             />
-            
+
             {isExpenseModalOpen && (
                 <AddExpenseModal
                     onClose={() => setIsExpenseModalOpen(false)}
@@ -173,19 +177,19 @@ const WorkDetails = () => {
                 </div>
 
                 <div className="form-grid">
-                    <InfoCard 
+                    <InfoCard
                         title="CNO"
                         value={project.cno}
                         icon="📄"
                         colorClass="info-card-blue"
                     />
-                    <InfoCard 
+                    <InfoCard
                         title="RESPONSÁVEL"
                         value={project.responsible}
                         icon="👤"
                         colorClass="info-card-green"
                     />
-                    <InfoCard 
+                    <InfoCard
                         title="PERÍODO"
                         value={`${new Date(project.startDate).toLocaleDateString('pt-BR')} - ${project.endDate ? new Date(project.endDate).toLocaleDateString('pt-BR') : 'Em andamento'}`}
                         icon="📅"
@@ -217,19 +221,19 @@ const WorkDetails = () => {
                 {/* TAB: VISÃO GERAL */}
                 {activeTab === 'overview' && (
                     <div className="form-grid">
-                        <InfoCard 
+                        <InfoCard
                             title="📄 Contratos"
                             value={formatCurrency(contracts.reduce((sum, contract) => sum + contract.totalValue, 0))}
                             subtitle={`em ${contracts.length} contrato(s) ativo(s)`}
                             colorClass="info-card-blue"
                         />
-                        <InfoCard 
+                        <InfoCard
                             title="👥 Equipe"
                             value={allocations.filter(alloc => !alloc.endDate).length}
                             subtitle="Funcionários Ativos"
                             colorClass="info-card-green"
                         />
-                        <InfoCard 
+                        <InfoCard
                             title="💰 Despesas"
                             value={formatCurrency(project.expenses?.reduce((sum, expense) => sum + expense.amount, 0) || 0)}
                             subtitle="Total Gasto"
@@ -297,14 +301,14 @@ const WorkDetails = () => {
                     <div className="section-container">
                         <div className="section-header">
                             <h2 className="section-title">💰 Despesas Lançadas</h2>
-                            <button 
-                                onClick={() => setIsExpenseModalOpen(true)} 
+                            <button
+                                onClick={() => setIsExpenseModalOpen(true)}
                                 className="form-button"
                             >
                                 ➕ Nova Despesa
                             </button>
                         </div>
-                        
+
                         <div className="section-body">
                             {!project.expenses || project.expenses.length === 0 ? (
                                 <div className="empty-state">

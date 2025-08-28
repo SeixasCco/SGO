@@ -96,11 +96,20 @@ namespace SGO.Api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteContract(Guid id)
         {
-            var contract = await _context.Contracts.FindAsync(id);
+            var contract = await _context.Contracts
+                                 .Include(c => c.Invoices)
+                                 .FirstOrDefaultAsync(c => c.Id == id);
+
             if (contract == null)
             {
                 return NotFound();
             }
+            
+            if (contract.Invoices.Any())
+            {
+                return BadRequest("Este contrato não pode ser excluído pois possui notas fiscais lançadas.");
+            }
+
             _context.Contracts.Remove(contract);
             await _context.SaveChangesAsync();
             return NoContent();

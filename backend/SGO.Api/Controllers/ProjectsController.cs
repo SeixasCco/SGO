@@ -68,11 +68,11 @@ namespace SGO.Api.Controllers
                 var laborCost = data.Allocations
                     .Where(a => a.StartDate > DateTime.MinValue)
                     .Sum(a => (a.Salary / 30m) * (decimal)(((a.EndDate?.Date ?? DateTime.UtcNow.Date) - a.StartDate.Date).TotalDays + 1));
-                
+
                 var manualExpensesValue = data.Expenses
                     .Where(e => !e.IsAutomaticallyCalculated)
                     .Sum(e => (decimal?)e.Amount) ?? 0;
-                
+
                 var totalExpenses = manualExpensesValue + Math.Round(laborCost, 2);
 
                 return new ProjectSummaryDto
@@ -136,7 +136,7 @@ namespace SGO.Api.Controllers
                 .Sum(pe => (pe.Employee.Salary / 30m) * (decimal)(((pe.EndDate?.Date ?? DateTime.UtcNow.Date) - pe.StartDate.Date).TotalDays + 1));
 
             var automatedExpense = project.Expenses
-                .FirstOrDefault(e => e.IsAutomaticallyCalculated);         
+                .FirstOrDefault(e => e.IsAutomaticallyCalculated);
 
             if (laborCost > 0)
             {
@@ -279,15 +279,28 @@ namespace SGO.Api.Controllers
 
             return NoContent();
         }
-
+       
         // DELETE: api/projects/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProject(Guid id)
         {
-            var project = await _context.Projects.FindAsync(id);
+            var project = await _context.Projects
+                                        .Include(p => p.Contracts) 
+                                        .Include(p => p.ProjectEmployees) 
+                                        .FirstOrDefaultAsync(p => p.Id == id);
             if (project == null)
             {
                 return NotFound();
+            }
+            
+            if (project.Contracts.Any())
+            {
+                return BadRequest("Esta obra não pode ser excluída pois possui contratos vinculados.");
+            }
+
+            if (project.ProjectEmployees.Any(pe => pe.EndDate == null))
+            {
+                return BadRequest("Esta obra não pode ser excluída pois possui funcionários alocados ativamente.");
             }
 
             _context.Projects.Remove(project);

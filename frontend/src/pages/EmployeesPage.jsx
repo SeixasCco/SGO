@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { useCompany } from '../context/CompanyContext';
 
 const EmployeesPage = () => {
   const [employees, setEmployees] = useState([]);
+  const { selectedCompany } = useCompany();
   const [filteredEmployees, setFilteredEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submittingForm, setSubmittingForm] = useState(false);
@@ -28,9 +30,13 @@ const EmployeesPage = () => {
     status: 'all'
   });
 
-  const fetchEmployees = () => {
-    setLoading(true);
-    axios.get('http://localhost:5145/api/employees')
+  const fetchEmployees = useCallback(() => {    
+    if (!selectedCompany) {
+      setLoading(false);
+      return;
+    }
+    setLoading(true);    
+    axios.get(`http://localhost:5145/api/employees`, { params: { companyId: selectedCompany.id } })
       .then(response => {
         setEmployees(response.data || []);
         setFilteredEmployees(response.data || []);
@@ -41,7 +47,7 @@ const EmployeesPage = () => {
       .finally(() => {
         setLoading(false);
       });
-  };
+  }, [selectedCompany]);
 
   useEffect(() => {
     let filtered = employees;
@@ -128,7 +134,8 @@ const EmployeesPage = () => {
 
     const employeeDto = {
       ...formData,
-      salary: parseFloat(formData.salary)
+      salary: parseFloat(formData.salary),
+      companyId: selectedCompany.id 
     };
 
     axios.post('http://localhost:5145/api/employees', employeeDto)
@@ -200,6 +207,16 @@ const EmployeesPage = () => {
 
   if (loading) return <div>Carregando funcionários...</div>;
   if (error) return <div style={{ color: '#ef4444' }}>{error}</div>;
+
+  if (!selectedCompany) {
+    return (
+        <div className="card empty-state">
+            <div className="empty-state-icon">🏢</div>
+            <h3>Nenhuma Empresa Selecionada</h3>
+            <p>Por favor, selecione uma empresa na barra de navegação ou cadastre uma nova em "Gestão de Empresas".</p>
+        </div>
+    );
+  }
 
   return (
     <div>

@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import AddExpenseModal from '../components/AddExpenseModal';
 import FormGroup from '../components/common/FormGroup';
 import StyledInput from '../components/common/StyledInput';
+import { useCompany } from '../context/CompanyContext';
 
 const AdminExpenseRow = ({ expense, formatCurrency, onDelete }) => (
     <div className="expense-row-card">
@@ -42,6 +43,7 @@ const AdminExpenseRow = ({ expense, formatCurrency, onDelete }) => (
 
 const AdminExpensesPage = () => {
     const [expenses, setExpenses] = useState([]);
+    const { selectedCompany } = useCompany();
     const [filteredExpenses, setFilteredExpenses] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -59,9 +61,13 @@ const AdminExpensesPage = () => {
             .catch(err => console.error('Erro ao carregar centros de custo:', err));
     }, []);
 
-    const fetchMatrixExpenses = useCallback(() => {
-        setLoading(true);
-        axios.get('http://localhost:5145/api/projectexpenses/administrative')
+    const fetchMatrixExpenses = useCallback(() => {        
+        if (!selectedCompany) {
+            setLoading(false);
+            return;
+        }
+        setLoading(true);       
+        axios.get('http://localhost:5145/api/projectexpenses/administrative', { params: { companyId: selectedCompany.id } })
             .then(response => {
                 setExpenses(response.data || []);
                 setFilteredExpenses(response.data || []);
@@ -70,7 +76,7 @@ const AdminExpensesPage = () => {
                 setError("Erro ao carregar despesas da matriz.");
             })
             .finally(() => setLoading(false));
-    }, []);
+    }, [selectedCompany]);
 
     useEffect(() => {
         let filtered = expenses;
@@ -129,6 +135,7 @@ const AdminExpensesPage = () => {
                     onExpenseAdded={handleExpenseAdded}
                     projectId={null}
                     contractId={null}
+                    companyId={selectedCompany.id}
                 />
             )}
 
@@ -165,7 +172,7 @@ const AdminExpensesPage = () => {
                     </div>
                 </div>
             </div>
-            
+
             <div className="section-body">
                 {filteredExpenses.length === 0 ? (
                     <div className="empty-state">

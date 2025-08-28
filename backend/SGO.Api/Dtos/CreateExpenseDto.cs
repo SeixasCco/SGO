@@ -8,6 +8,7 @@ namespace SGO.Api.Dtos
     {
         public Guid? ProjectId { get; set; }
         public Guid? ContractId { get; set; }
+        public Guid CompanyId { get; set; }
         public string Description { get; set; } = default!;
         [Range(0, double.MaxValue, ErrorMessage = "O valor da despesa não pode ser negativo.")]
         public decimal Amount { get; set; }

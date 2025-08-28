@@ -1,7 +1,7 @@
 namespace SGO.Api.Dtos
 {
     public class EmployeeDto
-    {
+    {        
         public Guid Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public string Position { get; set; } = string.Empty;
@@ -13,15 +13,17 @@ namespace SGO.Api.Dtos
 
     public class CreateEmployeeDto
     {
+        public Guid CompanyId { get; set; }
         public string Name { get; set; } = string.Empty;
         public string Position { get; set; } = string.Empty;
         public decimal Salary { get; set; }
         public DateTime StartDate { get; set; }
-        public DateTime? EndDate { get; set; }
+        public DateTime? EndDate { get; set; }       
     }
 
     public class UpdateEmployeeDto
     {
+        public Guid CompanyId { get; set; }
         public string Name { get; set; } = string.Empty;
         public string Position { get; set; } = string.Empty;
         public decimal Salary { get; set; }

@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 import DynamicExpenseForm from './DynamicExpenseForm';
 import FormGroup from './common/FormGroup';
 
-const AddExpenseModal = ({ onClose, onExpenseAdded, projectId, contractId }) => {
+const AddExpenseModal = ({ onClose, onExpenseAdded, projectId, contractId, companyId  }) => {
     const [costCenters, setCostCenters] = useState([]);
     const [selectedCostCenterId, setSelectedCostCenterId] = useState('');
     const [submitting, setSubmitting] = useState(false);
@@ -38,7 +38,8 @@ const AddExpenseModal = ({ onClose, onExpenseAdded, projectId, contractId }) => 
             costCenterId: selectedCostCenterId,
             projectId: projectId || null,
             contractId: contractId || null,
-            attachmentPath: attachmentPath
+            attachmentPath: attachmentPath,
+            companyId: companyId
         };
         
         const promise = axios.post('http://localhost:5145/api/projectexpenses', finalData);

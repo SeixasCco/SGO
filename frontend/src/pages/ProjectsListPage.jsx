@@ -47,7 +47,7 @@ const ProjectsListPage = () => {
                     fetchProjects();
                     return 'Obra deletada com sucesso!';
                 },
-                error: 'Falha ao deletar a obra.'
+                error: (err) => err.response?.data || 'Falha ao deletar a obra. Verifique as dependências.'
             });
         }
     };

@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
-// Importando o novo componente de card
 import ContractCard from './common/ContractCard';
 
 const ContractsManager = ({ projectId, onContractAdded, contracts, loading, fetchContracts }) => {
@@ -16,7 +15,7 @@ const ContractsManager = ({ projectId, onContractAdded, contracts, loading, fetc
                     fetchContracts(); 
                     return "Contrato deletado com sucesso!";
                 },
-                error: "Erro ao deletar contrato."
+                 error: (err) => err.response?.data || "Erro ao deletar contrato. Verifique as dependências."
             });
         }
     };

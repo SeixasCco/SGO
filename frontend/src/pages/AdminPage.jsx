@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import EmployeesPage from './EmployeesPage';
 import AdminExpensesPage from './AdminExpensesPage';
-import CompanyProfilePage from './CompanyProfilePage';
+import CompanyManager from '../components/CompanyManager';
+
 
 const AdminPage = () => {
     const [activeTab, setActiveTab] = useState('employees');
@@ -9,7 +10,7 @@ const AdminPage = () => {
     const tabs = [
         { id: 'employees', label: '👥 Gestão de Funcionários' },
         { id: 'expenses', label: '💰 Despesas da Matriz' },
-        { id: 'company', label: '🏢 Dados da Matriz' }
+        { id: 'company', label: '🏢 Gestão de Empresas' } 
     ];
 
     return (
@@ -44,7 +45,7 @@ const AdminPage = () => {
                 <div className="tab-content-full">
                     {activeTab === 'employees' && <EmployeesPage />}
                     {activeTab === 'expenses' && <AdminExpensesPage />}
-                    {activeTab === 'company' && <CompanyProfilePage />}
+                    {activeTab === 'company' && <CompanyManager />}
                 </div>
             </div>
             
