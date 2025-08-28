@@ -53,7 +53,7 @@ namespace SGO.Api.Controllers
                 Id = Guid.NewGuid(),
                 ProjectId = expenseDto.ProjectId,
                 ContractId = expenseDto.ContractId,
-                CompanyId = expenseDto.CompanyId, 
+                CompanyId = expenseDto.CompanyId,
                 Description = expenseDto.Description,
                 Amount = expenseDto.Amount,
                 Date = expenseDto.Date.ToUniversalTime(),
@@ -61,7 +61,7 @@ namespace SGO.Api.Controllers
                 Observations = expenseDto.Observations,
                 SupplierName = expenseDto.SupplierName,
                 InvoiceNumber = expenseDto.InvoiceNumber,
-                AttachmentPath = expenseDto.AttachmentPath,                      
+                AttachmentPath = expenseDto.AttachmentPath,
                 IsAutomaticallyCalculated = false,
 
                 DetailsJson = expenseDto.Details != null ? JsonSerializer.Serialize(expenseDto.Details) : null
@@ -135,10 +135,15 @@ namespace SGO.Api.Controllers
         }
 
         [HttpGet("administrative")]
-        public async Task<ActionResult<IEnumerable<ExpenseListItemDto>>> GetAdminExpenses()
+        public async Task<ActionResult<IEnumerable<ExpenseListItemDto>>> GetAdminExpenses([FromQuery] Guid companyId)
         {
+            if (companyId == Guid.Empty)
+            {
+                return BadRequest("O ID da empresa é obrigatório.");
+            }
+
             var expenses = await _context.ProjectExpenses
-                .Where(e => e.ProjectId == null)
+                .Where(e => e.ProjectId == null && e.CompanyId == companyId) 
                 .Include(e => e.CostCenter)
                 .OrderByDescending(e => e.Date)
                 .Select(e => new ExpenseListItemDto
@@ -155,6 +160,5 @@ namespace SGO.Api.Controllers
 
             return Ok(expenses);
         }
-
     }
 }
