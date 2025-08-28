@@ -9,11 +9,11 @@ const ExpenseRow = ({ expense, onDelete, formatCurrency }) => (
                 📅 {new Date(expense.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}
             </div>
         </div>
-        
+
         <div className="expense-cost-center">{expense.costCenterName}</div>
-        
+
         <div className="expense-amount">{formatCurrency(expense.amount)}</div>
-        
+
         <div className="expense-attachment">
             {expense.attachmentPath && (
                 <a
@@ -26,16 +26,15 @@ const ExpenseRow = ({ expense, onDelete, formatCurrency }) => (
                 </a>
             )}
         </div>
-        
+
+        // Em frontend/src/components/common/ExpenseRow.jsx
         <div className="expense-actions">
-            {!expense.isAutomaticallyCalculated && (
+            {!expense.isAutomaticallyCalculated && ( 
                 <>
                     <Link to={`/expense/edit/${expense.id}`}>
-                        <button className="action-button action-button-edit">
-                            ✏️
-                        </button>
+                        <button className="action-button action-button-edit">✏️</button>
                     </Link>
-                    <button 
+                    <button
                         className="action-button action-button-delete"
                         onClick={() => onDelete(expense.id)}
                     >
