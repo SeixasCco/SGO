@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SGO.Api.Dtos;
@@ -12,6 +13,7 @@ namespace SGO.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class ProjectsController : ControllerBase
     {
         private readonly SgoDbContext _context;
@@ -279,20 +281,20 @@ namespace SGO.Api.Controllers
 
             return NoContent();
         }
-       
+
         // DELETE: api/projects/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProject(Guid id)
         {
             var project = await _context.Projects
-                                        .Include(p => p.Contracts) 
-                                        .Include(p => p.ProjectEmployees) 
+                                        .Include(p => p.Contracts)
+                                        .Include(p => p.ProjectEmployees)
                                         .FirstOrDefaultAsync(p => p.Id == id);
             if (project == null)
             {
                 return NotFound();
             }
-            
+
             if (project.Contracts.Any())
             {
                 return BadRequest("Esta obra não pode ser excluída pois possui contratos vinculados.");

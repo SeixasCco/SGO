@@ -6,11 +6,13 @@ using SGO.Core;
 using SGO.Infrastructure;
 using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace SGO.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class ProjectExpensesController : ControllerBase
     {
         private readonly SgoDbContext _context;
@@ -143,7 +145,7 @@ namespace SGO.Api.Controllers
             }
 
             var expenses = await _context.ProjectExpenses
-                .Where(e => e.ProjectId == null && e.CompanyId == companyId) 
+                .Where(e => e.ProjectId == null && e.CompanyId == companyId)
                 .Include(e => e.CostCenter)
                 .OrderByDescending(e => e.Date)
                 .Select(e => new ExpenseListItemDto

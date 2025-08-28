@@ -5,11 +5,13 @@ using SGO.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace SGO.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class CompaniesController : ControllerBase
     {
         private readonly SgoDbContext _context;
@@ -22,7 +24,7 @@ namespace SGO.Api.Controllers
         // GET: api/companies
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Company>>> GetCompanies()
-        {           
+        {
             return await _context.Companies.ToListAsync();
         }
 
@@ -41,9 +43,9 @@ namespace SGO.Api.Controllers
         // POST: api/companies
         [HttpPost]
         public async Task<ActionResult<Company>> CreateCompany([FromBody] Company companyData)
-        {            
-            companyData.Id = Guid.NewGuid(); 
-            
+        {
+            companyData.Id = Guid.NewGuid();
+
             _context.Companies.Add(companyData);
             await _context.SaveChangesAsync();
 
@@ -86,12 +88,12 @@ namespace SGO.Api.Controllers
             {
                 return NotFound();
             }
-            
+
             if (company.Employees.Any())
             {
                 return BadRequest("Não é possível excluir uma empresa que possui funcionários cadastrados.");
             }
-          
+
 
             _context.Companies.Remove(company);
             await _context.SaveChangesAsync();

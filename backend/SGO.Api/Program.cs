@@ -1,7 +1,35 @@
 using Microsoft.EntityFrameworkCore;
 using SGO.Infrastructure;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+
+
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{   
+    var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("Chave JWT não configurada em appsettings.json");
+
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+    };
+});
+
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -20,7 +48,7 @@ builder.Services.AddCors(options =>
 var connectionString = builder.Configuration.GetConnectionString("SgoDbConnection");
 
 builder.Services.AddDbContext<SgoDbContext>(options =>
-    options.UseNpgsql(connectionString,        
+    options.UseNpgsql(connectionString,
         o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery))
 );
 

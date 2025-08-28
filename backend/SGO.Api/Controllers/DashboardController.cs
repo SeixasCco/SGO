@@ -6,11 +6,13 @@ using SGO.Infrastructure;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace SGO.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class DashboardController : ControllerBase
     {
         private readonly SgoDbContext _context;

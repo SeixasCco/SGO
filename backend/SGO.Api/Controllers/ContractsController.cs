@@ -7,11 +7,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace SGO.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class ContractsController : ControllerBase
     {
         private readonly SgoDbContext _context;
@@ -109,7 +111,7 @@ namespace SGO.Api.Controllers
             if (contract.Invoices.Any())
             {
                 return BadRequest("Este contrato não pode ser excluído pois possui notas fiscais lançadas.");
-            }            
+            }
 
             _context.Contracts.Remove(contract);
             await _context.SaveChangesAsync();

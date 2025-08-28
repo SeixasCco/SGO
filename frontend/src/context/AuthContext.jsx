@@ -1,4 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import axios from 'axios'; 
 
 const AuthContext = createContext();
 
@@ -13,40 +14,40 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
-  
-    const DEFAULT_CREDENTIALS = {
-        username: 'admin',
-        password: 'sgo2025'
-    };
 
-    useEffect(() => {       
+    useEffect(() => {
         const token = localStorage.getItem('sgo_auth_token');
         if (token) {
-            setIsAuthenticated(true);
+            setIsAuthenticated(true);          
+            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         }
         setIsLoading(false);
     }, []);
 
-    const login = (username, password) => {
-        return new Promise((resolve, reject) => {           
-            setTimeout(() => {
-                if (username === DEFAULT_CREDENTIALS.username && password === DEFAULT_CREDENTIALS.password) {                  
-                    const token = btoa(`${username}:${Date.now()}`);
-                    localStorage.setItem('sgo_auth_token', token);
-                    setIsAuthenticated(true);
-                    resolve({ success: true });
-                } else {
-                    reject({ message: 'Usuário ou senha inválidos' });
-                }
-            }, 1000);
-        });
+    const login = async (username, password) => {
+        try {          
+            const response = await axios.post('http://localhost:5145/api/auth/login', {
+                username,
+                password
+            });
+
+            const { accessToken } = response.data;         
+            localStorage.setItem('sgo_auth_token', accessToken);           
+            axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+
+            setIsAuthenticated(true);
+            return { success: true };
+        } catch (error) {           
+            throw new Error(error.response?.data || 'Erro de rede ao tentar fazer login.');
+        }
     };
 
     const logout = () => {
         localStorage.removeItem('sgo_auth_token');
-        localStorage.removeItem('selectedCompanyId'); 
+        localStorage.removeItem('selectedCompanyId');    
+        delete axios.defaults.headers.common['Authorization'];
         setIsAuthenticated(false);
-        window.location.href = '/login'; 
+        window.location.href = '/login';
     };
 
     const value = {

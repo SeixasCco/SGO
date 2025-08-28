@@ -7,11 +7,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace SGO.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class EmployeesController : ControllerBase
     {
         private readonly SgoDbContext _context;
@@ -59,20 +61,20 @@ namespace SGO.Api.Controllers
                 IsActive = employee.IsActive
             };
             return Ok(employeeDto);
-        }       
-       
+        }
+
         // GET: api/employees/available
         [HttpGet("available")]
         public async Task<ActionResult<IEnumerable<EmployeeDto>>> GetAvailableEmployees()
-        {           
+        {
             var assignedEmployeeIds = await _context.ProjectEmployees
                                                     .Where(pe => pe.EndDate == null)
                                                     .Select(pe => pe.EmployeeId)
                                                     .Distinct()
                                                     .ToListAsync();
-            
+
             return await _context.Employees
-                                 .Where(e => e.IsActive && !assignedEmployeeIds.Contains(e.Id)) 
+                                 .Where(e => e.IsActive && !assignedEmployeeIds.Contains(e.Id))
                                  .Select(e => new EmployeeDto
                                  {
                                      Id = e.Id,
