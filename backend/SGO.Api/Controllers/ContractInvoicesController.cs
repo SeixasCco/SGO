@@ -151,6 +151,7 @@ public class ContractInvoicesController : ControllerBase
             NetValue = invoice.NetValue,
             PaymentDate = invoice.PaymentDate,
             AttachmentPath = invoice.AttachmentPath,
+            Status = invoice.Status,
             ContractId = invoice.ContractId
         };
 

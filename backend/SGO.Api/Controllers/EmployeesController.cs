@@ -27,7 +27,7 @@ namespace SGO.Api.Controllers
             }
 
             return await _context.Employees
-                .Where(e => e.CompanyId == companyId) 
+                .Where(e => e.CompanyId == companyId)
                 .Select(e => new EmployeeDto
                 {
                     Id = e.Id,
@@ -59,36 +59,27 @@ namespace SGO.Api.Controllers
                 IsActive = employee.IsActive
             };
             return Ok(employeeDto);
-        }
-
-        // GET: api/employees/available?companyId={companyId}
+        }       
+       
+        // GET: api/employees/available
         [HttpGet("available")]
-        public async Task<ActionResult<IEnumerable<EmployeeDto>>> GetAvailableEmployees([FromQuery] Guid companyId)
-        {
-            if (companyId == Guid.Empty)
-            {
-                return BadRequest("O ID da empresa é obrigatório.");
-            }
-
+        public async Task<ActionResult<IEnumerable<EmployeeDto>>> GetAvailableEmployees()
+        {           
             var assignedEmployeeIds = await _context.ProjectEmployees
-                .Where(pe => pe.EndDate == null)
-                .Select(pe => pe.EmployeeId)
-                .Distinct()
-                .ToListAsync();
-
+                                                    .Where(pe => pe.EndDate == null)
+                                                    .Select(pe => pe.EmployeeId)
+                                                    .Distinct()
+                                                    .ToListAsync();
+            
             return await _context.Employees
-                .Where(e => e.CompanyId == companyId && e.IsActive && !assignedEmployeeIds.Contains(e.Id)) // <-- FILTRO CORRIGIDO
-                .Select(e => new EmployeeDto
-                {
-                    Id = e.Id,
-                    Name = e.Name,
-                    Position = e.Position,
-                    Salary = e.Salary,
-                    StartDate = e.StartDate,
-                    EndDate = e.EndDate,
-                    IsActive = e.IsActive
-                })
-                .ToListAsync();
+                                 .Where(e => e.IsActive && !assignedEmployeeIds.Contains(e.Id)) 
+                                 .Select(e => new EmployeeDto
+                                 {
+                                     Id = e.Id,
+                                     Name = e.Name,
+                                     Position = e.Position
+                                 })
+                                 .ToListAsync();
         }
 
         // POST: api/employees

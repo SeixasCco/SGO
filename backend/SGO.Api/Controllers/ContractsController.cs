@@ -98,17 +98,18 @@ namespace SGO.Api.Controllers
         {
             var contract = await _context.Contracts
                                  .Include(c => c.Invoices)
+                                 .Include(c => c.Expenses)
                                  .FirstOrDefaultAsync(c => c.Id == id);
 
             if (contract == null)
             {
                 return NotFound();
             }
-            
+
             if (contract.Invoices.Any())
             {
                 return BadRequest("Este contrato não pode ser excluído pois possui notas fiscais lançadas.");
-            }
+            }            
 
             _context.Contracts.Remove(contract);
             await _context.SaveChangesAsync();

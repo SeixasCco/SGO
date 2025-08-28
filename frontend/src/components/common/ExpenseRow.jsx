@@ -26,8 +26,7 @@ const ExpenseRow = ({ expense, onDelete, formatCurrency }) => (
                 </a>
             )}
         </div>
-
-        // Em frontend/src/components/common/ExpenseRow.jsx
+       
         <div className="expense-actions">
             {!expense.isAutomaticallyCalculated && ( 
                 <>
