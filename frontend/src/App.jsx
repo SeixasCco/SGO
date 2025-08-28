@@ -1,5 +1,7 @@
+// frontend/src/App.jsx - Versão atualizada com usuário no canto direito
+
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, useLocation, Outlet } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, useLocation, Outlet, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 
 import HomePage from './pages/HomePage';
@@ -11,9 +13,13 @@ import EditContractPage from './pages/EditContractPage';
 import EditExpensePage from './pages/EditExpensePage';
 import ReportsPage from './pages/ReportsPage';
 import AdminPage from './pages/AdminPage';
+import LoginPage from './pages/LoginPage';
 
+import { AuthProvider } from './context/AuthContext';
 import { CompanyProvider } from './context/CompanyContext';
+import ProtectedRoute from './components/ProtectedRoute';
 import CompanySwitcher from './components/common/CompanySwitcher';
+import LogoutButton from './components/common/LogoutButton';
 
 import './App.css';
 
@@ -35,8 +41,7 @@ const ModernNavigation = () => {
   return (
     <nav className="main-nav">
       <div className="main-nav-content">
-
-        {/* LOGO/BRAND */}
+        {/* LOGO/BRAND - Esquerda */}
         <Link to="/" className="nav-brand-link">
           <div className="nav-brand-icon">🏗️</div>
           <div>
@@ -45,27 +50,47 @@ const ModernNavigation = () => {
           </div>
         </Link>
         
-        {/* Agrupamento Central: Navegação e Switcher */}
-        <div className="nav-center-group">
-            <div className="nav-links">
-              {navItems.map((item) => (
-                <Link key={item.path} to={item.path} className={`nav-link ${isActive(item.path) ? 'active' : ''}`}>
-                  <span style={{ fontSize: '1.1rem' }}>{item.icon}</span>
-                  {item.label}
-                </Link>
-              ))}
-            </div>
-            
-            <CompanySwitcher />
+        {/* NAVEGAÇÃO CENTRAL */}
+        <div className="nav-links-center">
+          {navItems.map((item) => (
+            <Link 
+              key={item.path} 
+              to={item.path} 
+              className={`nav-link ${isActive(item.path) ? 'active' : ''}`}
+            >
+              <span style={{ fontSize: '1.1rem' }}>{item.icon}</span>
+              {item.label}
+            </Link>
+          ))}
         </div>
 
-        {/* INFORMAÇÕES DO USUÁRIO/SISTEMA */}
-        <div className="nav-user-info">
-          <div className="user-info-text">
-            <div className="name">Sistema Online</div>
-            <div className="date">{new Date().toLocaleDateString('pt-BR')}</div>
+        {/* GRUPO DIREITO: Empresa + Usuário + Logout */}
+        <div className="nav-right-group">
+          {/* Seletor de Empresa */}
+          <CompanySwitcher />
+          
+          {/* Status "Operando em:" */}
+          <div className="operating-status">
+            <span style={{ 
+              fontSize: '0.8rem', 
+              color: '#64748b',
+              fontWeight: '500' 
+            }}>
+              Operando em:
+            </span>
           </div>
-          <div className="user-avatar">👤</div>
+
+          {/* Informações do Usuário */}
+          <div className="nav-user-section">
+            <div className="user-info-text">
+              <div className="name">Administrador</div>
+              <div className="date">{new Date().toLocaleDateString('pt-BR')}</div>
+            </div>
+            <div className="user-avatar">👤</div>
+          </div>
+
+          {/* Botão de Logout */}
+          <LogoutButton />
         </div>
       </div>
     </nav>
@@ -97,9 +122,19 @@ function App() {
         }}
       />
       <Router>
-        <CompanyProvider>
+        <AuthProvider>
           <Routes>
-            <Route path="/" element={<AppLayout />}>
+            {/* Rota de Login (não protegida) */}
+            <Route path="/login" element={<LoginPage />} />
+            
+            {/* Rotas Protegidas */}
+            <Route path="/" element={
+              <ProtectedRoute>
+                <CompanyProvider>
+                  <AppLayout />
+                </CompanyProvider>
+              </ProtectedRoute>
+            }>
               <Route index element={<HomePage />} />
               <Route path="projects" element={<ProjectsListPage />} />
               <Route path="project/:id" element={<WorkDetails />} />
@@ -110,9 +145,12 @@ function App() {
               <Route path="expense/edit/:id" element={<EditExpensePage />} />
               <Route path="reports" element={<ReportsPage />} />
             </Route>
+
+            {/* Rota padrão - redireciona para login */}
+            <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
-        </CompanyProvider>
-      </Router >
+        </AuthProvider>
+      </Router>
     </>
   );
 }
