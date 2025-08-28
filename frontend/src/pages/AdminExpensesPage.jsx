@@ -2,7 +2,43 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
+
 import AddExpenseModal from '../components/AddExpenseModal';
+import FormGroup from '../components/common/FormGroup';
+import StyledInput from '../components/common/StyledInput';
+
+const AdminExpenseRow = ({ expense, formatCurrency, onDelete }) => (
+    <div className="expense-row-card">
+        <div className="expense-info">
+            <div className="expense-description">{expense.description}</div>
+            <div className="expense-date">
+                📅 {new Date(expense.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}
+            </div>
+        </div>
+        <div className="expense-cost-center">{expense.costCenterName}</div>
+        <div className="expense-amount">{formatCurrency(expense.amount)}</div>
+        <div className="expense-attachment">
+            {expense.attachmentPath && (
+                <a
+                    href={`http://localhost:5145/api/attachments/${expense.attachmentPath.replace('/uploads/', '')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="attachment-link"
+                >
+                    📎 Anexo
+                </a>
+            )}
+        </div>
+        <div className="expense-actions">
+            <Link to={`/expense/edit/${expense.id}`}>
+                <button className="action-button-edit">✏️</button>
+            </Link>
+            <button onClick={() => onDelete(expense.id)} className="action-button-delete">
+                🗑️
+            </button>
+        </div>
+    </div>
+);
 
 const AdminExpensesPage = () => {
     const [expenses, setExpenses] = useState([]);
@@ -10,7 +46,6 @@ const AdminExpensesPage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
-
     const [costCenters, setCostCenters] = useState([]);
     const [filters, setFilters] = useState({
         startDate: '',
@@ -32,35 +67,22 @@ const AdminExpensesPage = () => {
                 setFilteredExpenses(response.data || []);
             })
             .catch(error => {
-                console.error("Erro ao buscar despesas da matriz:", error);
                 setError("Erro ao carregar despesas da matriz.");
             })
-            .finally(() => {
-                setLoading(false);
-            });
+            .finally(() => setLoading(false));
     }, []);
 
     useEffect(() => {
         let filtered = expenses;
-
         if (filters.startDate) {
-            filtered = filtered.filter(expense =>
-                new Date(expense.date) >= new Date(filters.startDate)
-            );
+            filtered = filtered.filter(exp => new Date(exp.date) >= new Date(filters.startDate));
         }
-
         if (filters.endDate) {
-            filtered = filtered.filter(expense =>
-                new Date(expense.date) <= new Date(filters.endDate)
-            );
+            filtered = filtered.filter(exp => new Date(exp.date) <= new Date(filters.endDate));
         }
-
         if (filters.costCenterId) {
-            filtered = filtered.filter(expense =>
-                expense.costCenterId === filters.costCenterId
-            );
+            filtered = filtered.filter(exp => exp.costCenterId === filters.costCenterId);
         }
-
         setFilteredExpenses(filtered);
     }, [expenses, filters]);
 
@@ -82,47 +104,25 @@ const AdminExpensesPage = () => {
                     toast.success("Despesa deletada com sucesso!");
                     fetchMatrixExpenses();
                 })
-                .catch(error => {
-                    console.error("Erro ao deletar despesa:", error);
-                    toast.error("Falha ao deletar a despesa.");
-                });
+                .catch(() => toast.error("Falha ao deletar a despesa."));
         }
     };
 
     const handleFilterChange = (filterName, value) => {
-        setFilters(prev => ({
-            ...prev,
-            [filterName]: value
-        }));
+        setFilters(prev => ({ ...prev, [filterName]: value }));
     };
 
     const clearFilters = () => {
-        setFilters({
-            startDate: '',
-            endDate: '',
-            costCenterId: ''
-        });
+        setFilters({ startDate: '', endDate: '', costCenterId: '' });
     };
 
-    const formatCurrency = (value) => {
-        return new Intl.NumberFormat('pt-BR', {
-            style: 'currency',
-            currency: 'BRL'
-        }).format(value);
-    };
+    const formatCurrency = (value) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
 
-    if (loading) return <div>Carregando despesas...</div>;
-    if (error) return <div style={{ color: '#ef4444' }}>{error}</div>;
+    if (loading) return <div className="loading-state">Carregando despesas...</div>;
+    if (error) return <div className="form-error-message">{error}</div>;
 
     return (
-        <div style={{
-            backgroundColor: 'white',
-            borderRadius: '12px',
-            border: '1px solid #e2e8f0',
-            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
-            overflow: 'hidden'
-        }}>
-            {/* Modal de Nova Despesa */}
+        <div className="card">
             {isExpenseModalOpen && (
                 <AddExpenseModal
                     onClose={() => setIsExpenseModalOpen(false)}
@@ -132,320 +132,60 @@ const AdminExpensesPage = () => {
                 />
             )}
 
-            {/* Header da Seção */}
-            <div style={{
-                padding: '24px 32px',
-                borderBottom: '1px solid #f1f5f9',
-                backgroundColor: '#f8fafc',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center'
-            }}>
-                <h2 style={{
-                    fontSize: '1.5rem',
-                    fontWeight: '600',
-                    color: '#1e293b',
-                    margin: '0',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px'
-                }}>
-                    Despesas da Matriz
-                    <span style={{
-                        backgroundColor: '#e0e7ff',
-                        color: '#3730a3',
-                        padding: '4px 12px',
-                        borderRadius: '20px',
-                        fontSize: '0.875rem',
-                        fontWeight: '700'
-                    }}>
-                        {filteredExpenses.length}
-                    </span>
+            <div className="section-header">
+                <h2 className="section-title">
+                    🏢 Despesas da Matriz
+                    <span className="count-badge">{filteredExpenses.length}</span>
                 </h2>
-
-                <button
-                    onClick={() => setIsExpenseModalOpen(true)}
-                    style={{
-                        backgroundColor: '#10b981',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '8px',
-                        padding: '12px 20px',
-                        fontSize: '0.875rem',
-                        fontWeight: '600',
-                        cursor: 'pointer',
-                        transition: 'background-color 0.2s ease',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px'
-                    }}
-                    onMouseEnter={(e) => e.target.style.backgroundColor = '#059669'}
-                    onMouseLeave={(e) => e.target.style.backgroundColor = '#10b981'}
-                >
+                <button onClick={() => setIsExpenseModalOpen(true)} className="form-button">
                     + Nova Despesa
                 </button>
             </div>
 
-            {/* Seção de Filtros */}
-            <div style={{
-                padding: '24px 32px',
-                backgroundColor: '#fafbfc',
-                borderBottom: '1px solid #f1f5f9'
-            }}>
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                    gap: '16px',
-                    alignItems: 'end'
-                }}>
-                    <div>
-                        <label style={{
-                            display: 'block',
-                            fontSize: '0.875rem',
-                            fontWeight: '500',
-                            color: '#374151',
-                            marginBottom: '6px'
-                        }}>
-                            Data Inicial
-                        </label>
-                        <input
-                            type="date"
-                            value={filters.startDate}
-                            onChange={(e) => handleFilterChange('startDate', e.target.value)}
-                            style={{
-                                width: '100%',
-                                padding: '8px 12px',
-                                border: '1px solid #d1d5db',
-                                borderRadius: '6px',
-                                fontSize: '0.875rem',
-                                boxSizing: 'border-box'
-                            }}
-                        />
-                    </div>
-
-                    <div>
-                        <label style={{
-                            display: 'block',
-                            fontSize: '0.875rem',
-                            fontWeight: '500',
-                            color: '#374151',
-                            marginBottom: '6px'
-                        }}>
-                            Data Final
-                        </label>
-                        <input
-                            type="date"
-                            value={filters.endDate}
-                            onChange={(e) => handleFilterChange('endDate', e.target.value)}
-                            style={{
-                                width: '100%',
-                                padding: '8px 12px',
-                                border: '1px solid #d1d5db',
-                                borderRadius: '6px',
-                                fontSize: '0.875rem',
-                                boxSizing: 'border-box'
-                            }}
-                        />
-                    </div>
-
-                    <div>
-                        <label style={{
-                            display: 'block',
-                            fontSize: '0.875rem',
-                            fontWeight: '500',
-                            color: '#374151',
-                            marginBottom: '6px'
-                        }}>
-                            Centro de Custo
-                        </label>
-                        <select
-                            value={filters.costCenterId}
-                            onChange={(e) => handleFilterChange('costCenterId', e.target.value)}
-                            style={{
-                                width: '100%',
-                                padding: '8px 12px',
-                                border: '1px solid #d1d5db',
-                                borderRadius: '6px',
-                                fontSize: '0.875rem',
-                                boxSizing: 'border-box'
-                            }}
-                        >
+            <div className="filters-section">
+                <div className="form-grid">
+                    <FormGroup label="Data Inicial">
+                        <StyledInput type="date" value={filters.startDate} onChange={(e) => handleFilterChange('startDate', e.target.value)} />
+                    </FormGroup>
+                    <FormGroup label="Data Final">
+                        <StyledInput type="date" value={filters.endDate} onChange={(e) => handleFilterChange('endDate', e.target.value)} />
+                    </FormGroup>
+                    <FormGroup label="Centro de Custo">
+                        <select value={filters.costCenterId} onChange={(e) => handleFilterChange('costCenterId', e.target.value)} className="form-select">
                             <option value="">Todos os centros</option>
                             {costCenters.map(cc => (
                                 <option key={cc.id} value={cc.id}>{cc.name}</option>
                             ))}
                         </select>
-                    </div>
-
-                    <div>
-                        <button
-                            onClick={clearFilters}
-                            style={{
-                                backgroundColor: '#6b7280',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '6px',
-                                padding: '8px 16px',
-                                fontSize: '0.875rem',
-                                cursor: 'pointer',
-                                transition: 'background-color 0.2s ease'
-                            }}
-                            onMouseEnter={(e) => e.target.style.backgroundColor = '#4b5563'}
-                            onMouseLeave={(e) => e.target.style.backgroundColor = '#6b7280'}
-                        >
+                    </FormGroup>
+                    <div style={{ alignSelf: 'flex-end' }}>
+                        <button onClick={clearFilters} className="form-button-secondary">
                             Limpar Filtros
                         </button>
                     </div>
                 </div>
             </div>
-
-            {/* Lista de Despesas */}
-            <div style={{ padding: '32px' }}>
+            
+            <div className="section-body">
                 {filteredExpenses.length === 0 ? (
-                    <div style={{
-                        textAlign: 'center',
-                        padding: '48px',
-                        color: '#64748b'
-                    }}>
-                        <div style={{ fontSize: '3rem', marginBottom: '16px' }}>💰</div>
-                        <h3 style={{ fontSize: '1.2rem', marginBottom: '8px' }}>
+                    <div className="empty-state">
+                        <div className="empty-state-icon">💰</div>
+                        <h3 className="empty-state-title">
                             {expenses.length === 0 ? 'Nenhuma despesa cadastrada' : 'Nenhuma despesa encontrada'}
                         </h3>
-                        <p style={{ margin: '0' }}>
-                            {expenses.length === 0
-                                ? 'Comece adicionando a primeira despesa da matriz.'
-                                : 'Tente ajustar os filtros para encontrar as despesas desejadas.'
-                            }
+                        <p className="empty-state-description">
+                            {expenses.length === 0 ? 'Comece adicionando a primeira despesa da matriz.' : 'Tente ajustar os filtros para encontrar as despesas.'}
                         </p>
                     </div>
                 ) : (
-                    <div style={{ display: 'grid', gap: '12px' }}>
+                    <div className="expenses-list">
                         {filteredExpenses.map(expense => (
-                            <div key={expense.id} style={{
-                                border: '1px solid #e2e8f0',
-                                borderRadius: '12px',
-                                padding: '16px',
-                                transition: 'all 0.2s ease',
-                                backgroundColor: '#fafafa',
-                                display: 'grid',
-                                gridTemplateColumns: '2fr 1fr 1fr auto auto',
-                                alignItems: 'center',
-                                gap: '16px'
-                            }}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.backgroundColor = '#f8fafc';
-                                    e.currentTarget.style.borderColor = '#c7d2fe';
-                                    e.currentTarget.style.transform = 'translateY(-2px)';
-                                    e.currentTarget.style.boxShadow = '0 4px 12px 0 rgba(0, 0, 0, 0.1)';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.backgroundColor = '#fafafa';
-                                    e.currentTarget.style.borderColor = '#e2e8f0';
-                                    e.currentTarget.style.transform = 'translateY(0)';
-                                    e.currentTarget.style.boxShadow = 'none';
-                                }}
-                            >
-                                {/* Coluna 1: Descrição e Data */}
-                                <div>
-                                    <div style={{
-                                        fontWeight: '600',
-                                        color: '#1e2d3b',
-                                        marginBottom: '2px',
-                                        fontSize: '1rem'
-                                    }}>
-                                        {expense.description}
-                                    </div>
-                                    <div style={{
-                                        fontSize: '0.8rem',
-                                        color: '#64748b'
-                                    }}>
-                                        {new Date(expense.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}
-                                    </div>
-                                </div>
-
-                                {/* Coluna 2: Centro de Custo */}
-                                <div style={{
-                                    fontSize: '0.85rem',
-                                    color: '#475569',
-                                    fontWeight: '500'
-                                }}>
-                                    {expense.costCenterName}
-                                </div>
-
-                                {/* Coluna 3: Valor */}
-                                <div style={{
-                                    fontWeight: '700',
-                                    color: '#dc2626',
-                                    fontSize: '1rem'
-                                }}>
-                                    {formatCurrency(expense.amount)}
-                                </div>
-
-                                {/* Coluna 4: Anexo */}
-                                <div>
-                                    {expense.attachmentPath ? (
-                                        <a
-                                            href={`http://localhost:5145/api/attachments/${expense.attachmentPath.replace('/uploads/', '')}`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            style={{
-                                                color: '#3b82f6',
-                                                textDecoration: 'none',
-                                                fontSize: '0.8rem',
-                                                fontWeight: '500',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '4px',
-                                                padding: '4px 8px',
-                                                borderRadius: '4px',
-                                                border: '1px solid #bfdbfe',
-                                                backgroundColor: '#eff6ff'
-                                            }}
-                                            onMouseEnter={(e) => {
-                                                e.target.style.backgroundColor = '#dbeafe';
-                                                e.target.style.borderColor = '#93c5fd';
-                                            }}
-                                            onMouseLeave={(e) => {
-                                                e.target.style.backgroundColor = '#eff6ff';
-                                                e.target.style.borderColor = '#bfdbfe';
-                                            }}
-                                        >
-                                            Anexo
-                                        </a>
-                                    ) : null}
-                                </div>
-
-                                {/* Coluna 5: Ações */}
-                                <div style={{ display: 'flex', gap: '8px' }}>
-                                    <Link to={`/expense/edit/${expense.id}`}>
-                                        <button style={{
-                                            backgroundColor: '#3b82f6',
-                                            color: 'white',
-                                            border: 'none',
-                                            borderRadius: '4px',
-                                            padding: '6px 12px',
-                                            fontSize: '0.75rem',
-                                            cursor: 'pointer'
-                                        }}>
-                                            ✏️
-                                        </button>
-                                    </Link>
-                                    <button
-                                        onClick={() => handleDeleteExpense(expense.id)}
-                                        style={{
-                                            backgroundColor: '#ef4444',
-                                            color: 'white',
-                                            border: 'none',
-                                            borderRadius: '4px',
-                                            padding: '6px 12px',
-                                            fontSize: '0.75rem',
-                                            cursor: 'pointer'
-                                        }}
-                                    >
-                                        🗑️
-                                    </button>
-                                </div>
-                            </div>
+                            <AdminExpenseRow
+                                key={expense.id}
+                                expense={expense}
+                                formatCurrency={formatCurrency}
+                                onDelete={handleDeleteExpense}
+                            />
                         ))}
                     </div>
                 )}

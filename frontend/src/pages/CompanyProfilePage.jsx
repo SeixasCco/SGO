@@ -1,22 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import toast from 'react-hot-toast';
+import toast from 'react-hot-toast'; 
+
+import FormGroup from '../components/common/FormGroup';
+import StyledInput from '../components/common/StyledInput';
 
 const CompanyProfilePage = () => {
     const [formData, setFormData] = useState({ id: null, name: '', cnpj: '' });
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {        
+    useEffect(() => {
         axios.get('http://localhost:5145/api/companies/main')
             .then(response => {
-                setFormData({
-                    id: response.data.id,
-                    name: response.data.name,
-                    cnpj: response.data.cnpj
-                });
+                if (response.data) {
+                    setFormData({
+                        id: response.data.id,
+                        name: response.data.name,
+                        cnpj: response.data.cnpj
+                    });
+                }
             })
-            .catch(error => {                
-                console.log("Nenhuma empresa cadastrada ainda. Pronto para criar a primeira.");
+            .catch(error => {
+                console.log("Nenhuma empresa matriz encontrada. O formulário está pronto para o primeiro cadastro.");
             })
             .finally(() => {
                 setLoading(false);
@@ -30,12 +35,12 @@ const CompanyProfilePage = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        const promise = axios.post('http://localhost:5145/api/companies', {
-            name: formData.name,
-            cnpj: formData.cnpj
-        });
 
-        toast.promise(promise, {
+        const apiCall = formData.id
+            ? axios.put(`http://localhost:5145/api/companies/${formData.id}`, formData)
+            : axios.post('http://localhost:5145/api/companies', { name: formData.name, cnpj: formData.cnpj });
+
+        toast.promise(apiCall, {
             loading: 'Salvando dados da empresa...',
             success: 'Dados salvos com sucesso!',
             error: 'Falha ao salvar os dados.'
@@ -43,39 +48,39 @@ const CompanyProfilePage = () => {
     };
     
     if (loading) {
-        return <p>Carregando...</p>;
+        return <div className="loading-state">Carregando...</div>;
     }
 
-    return (
-        <div style={{ maxWidth: '700px' }}>
+    return (       
+        <div className="card" style={{ maxWidth: '700px' }}> 
             <form onSubmit={handleSubmit}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                    <div>
-                        <label>Nome da Empresa (Matriz)</label>
-                        <input
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                    
+                    <FormGroup label="Nome da Empresa (Matriz)">
+                        <StyledInput
                             type="text"
                             name="name"
                             value={formData.name}
                             onChange={handleChange}
                             required
-                            style={{ width: '100%', padding: '12px', borderRadius: '8px',  backgroundColor: '#dcdedfff', color: '#1f2937',border: '1px solid #ccc', marginTop: '4px' }}
                         />
-                    </div>
-                    <div>
-                        <label>CNPJ da Matriz</label>
-                        <input
+                    </FormGroup>
+                    
+                    <FormGroup label="CNPJ da Matriz">
+                        <StyledInput
                             type="text"
                             name="cnpj"
                             value={formData.cnpj}
                             onChange={handleChange}
                             required
                             placeholder="XX.XXX.XXX/XXXX-XX"
-                            style={{ width: '100%', padding: '12px', borderRadius: '8px', backgroundColor: '#dcdedfff', color: '#1f2937',border: '1px solid #ccc', marginTop: '4px' }}
                         />
-                    </div>
+                    </FormGroup>
+                
                 </div>
-                <button type="submit" style={{ marginTop: '24px', padding: '12px 24px', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer' }}>
-                    Salvar Dados da Empresa
+                
+                <button type="submit" className="form-button" style={{ marginTop: '24px' }}>
+                    💾 Salvar Dados da Empresa
                 </button>
             </form>
         </div>

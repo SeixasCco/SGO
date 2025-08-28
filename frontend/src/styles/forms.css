@@ -261,7 +261,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .page-subtitle {
   font-size: 1.1rem;
   color: #64748b;
-  margin: 0;
+  margin: 0; 
 }
 
 .page-header-actions {
@@ -270,7 +270,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 .page-content {
-  max-width: 1400px;
+  width: 100%;
   margin: 0 auto;
   padding: 0 48px 48px;
 }
@@ -463,11 +463,10 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 /* ===== WORKDETAILS EXTENSIONS ===== */
 
-/* Page Layout */
 .page-container {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 48px;
+  width: 100%; 
+  min-height: 100vh;
+  background-color: #f1f5f9;
 }
 
 /* Breadcrumb */
@@ -515,13 +514,13 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   display: flex;
   align-items: center;
   gap: 16px;
-  flex-wrap: wrap;
+  flex-wrap: wrap;  
 }
 
 .project-location {
   font-size: 1rem;
   color: #64748b;
-  font-weight: 500;
+  font-weight: 500;   
 }
 
 /* Status Badges */
@@ -531,6 +530,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   font-size: 0.875rem;
   font-weight: 600;
   border: 1px solid;
+  margin-left:25px; 
 }
 
 .status-planning {
@@ -661,22 +661,24 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 /* Tabs Navigation */
 .tabs-navigation {
-  display: flex;
-  gap: 8px;
-  border-bottom: 1px solid #e2e8f0;
-  margin-bottom: 0;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 48px;
+    display: flex;
+    gap: 8px;
 }
 
 .tab-button {
-  padding: 12px 20px;
-  border: none;
-  background-color: transparent;
-  color: #64748b;
-  border-radius: 8px 8px 0 0;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
+    padding: 16px 24px;
+    border: none;
+    border-bottom: 3px solid transparent; 
+    background-color: transparent;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    color: #64748b;
+    transition: all 0.2s ease;
+    margin-bottom: -1px;
 }
 
 .tab-button:hover {
@@ -685,8 +687,12 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 .tab-button-active {
-  background-color: #3b82f6;
-  color: white;
+    color: #3b82f6;
+    border-bottom-color: #3b82f6;
+}
+
+.tab-content-full {
+    width: 100%;
 }
 
 .tab-button-active:hover {
@@ -1056,6 +1062,807 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   .project-meta {
     flex-direction: column;
     align-items: flex-start;
-    gap: 8px;
+    gap: 8px;    
   }
+}
+
+/* --- Seção de Filtros --- */
+.filters-section {
+    padding: 24px 32px;
+    background-color: #fafbfc;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+/* --- Lista de Despesas (Admin) --- */
+.expenses-list {
+    display: grid;
+    gap: 12px;
+}
+
+.expense-row-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px;
+    transition: all 0.2s ease;
+    background-color: #ffffff;
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr auto auto;
+    align-items: center;
+    gap: 16px;
+}
+
+.expense-row-card:hover {
+    background-color: #f8fafc;
+    border-color: #c7d2fe;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.08);
+}
+
+.expense-info {
+    flex: 1;
+}
+
+.expense-description {
+    font-weight: 600;
+    color: #1e2d3b;
+    margin-bottom: 2px;
+    font-size: 1rem;
+}
+
+.expense-date {
+    font-size: 0.8rem;
+    color: #64748b;
+}
+
+.expense-cost-center {
+    font-size: 0.85rem;
+    color: #475569;
+    font-weight: 500;
+}
+
+.expense-amount {
+    font-weight: 700;
+    color: #dc2626;
+    font-size: 1rem;
+}
+
+.expense-attachment {
+    display: flex;
+    justify-content: center;
+}
+
+.attachment-link {
+    color: #3b82f6;
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: 1px solid #bfdbfe;
+    background-color: #eff6ff;
+    transition: all 0.2s ease;
+}
+
+.attachment-link:hover {
+    background-color: #dbeafe;
+    border-color: #93c5fd;
+}
+
+.expense-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.action-button-edit, .action-button-delete {
+    border: none;
+    border-radius: 6px;
+    padding: 8px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    color: white;
+    line-height: 1;
+}
+
+.action-button-edit {
+    background-color: #3b82f6;
+}
+.action-button-edit:hover {
+    background-color: #2563eb;
+}
+
+.action-button-delete {
+    background-color: #ef4444;
+}
+.action-button-delete:hover {
+    background-color: #dc2626;
+}
+
+/* --- Cabeçalho de Contrato (Página de Edição) --- */
+.contract-header-display {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 32px;
+    padding: 24px;
+    background-color: #f0fdf4;
+    border-radius: 12px;
+    border: 1px solid #bbf7d0;
+}
+
+.contract-header-icon {
+    width: 80px;
+    height: 80px;
+    background-color: #10b981;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    color: white;
+    flex-shrink: 0;
+}
+
+.contract-header-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #166534;
+    margin: 0 0 8px 0;
+}
+
+.contract-header-subtitle {
+    font-size: 1rem;
+    color: #15803d;
+    margin: 0 0 12px 0;
+    font-weight: 500;
+}
+
+/* --- Divisor de Seção --- */
+.section-divider {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-top: 32px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #f1f5f9;
+}
+
+/* --- Cabeçalho de Funcionário (Página de Edição) --- */
+.employee-header-display {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 32px;
+    padding: 24px;
+    background-color: #f8fafc;
+    border-radius: 12px;
+    border: 1px solid #f1f5f9;
+}
+
+.employee-header-avatar {
+    width: 80px;
+    height: 80px;
+    background-color: #e0e7ff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    color: #4338ca;
+    flex-shrink: 0;
+    border: 3px solid #c7d2fe;
+}
+
+.employee-header-name {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0 0 8px 0;
+}
+
+.employee-header-position {
+    font-size: 1.1rem;
+    color: #6366f1;
+    font-weight: 500;
+    margin: 0 0 12px 0;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+.status-dot.active { background-color: #10b981; }
+.status-dot.inactive { background-color: #f59e0b; }
+
+.badge .status-dot {
+    display: inline-block;
+}
+
+/* --- Estilos para Checkbox --- */
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #374151;
+    cursor: pointer;
+    background-color: #f8fafc;
+    border: 1px solid #f1f5f9;
+    border-radius: 8px;
+    padding: 16px;
+    margin-top: 24px;
+}
+
+.form-checkbox {
+    width: 18px;
+    height: 18px;
+    accent-color: #3b82f6;
+}
+
+/* --- Cabeçalho de Despesa (Página de Edição) --- */
+.expense-header-display {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 32px;
+    padding: 24px;
+    background-color: #fefce8;
+    border-radius: 12px;
+    border: 1px solid #fde047;
+}
+
+.expense-header-icon {
+    width: 80px;
+    height: 80px;
+    background-color: #f59e0b;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    color: white;
+    flex-shrink: 0;
+}
+
+.expense-header-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #854d0e;
+    margin: 0 0 12px 0;
+}
+
+.expense-header-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+/* --- Variações de Cor para Badges --- */
+.badge.info {
+  background-color: #e0e7ff;
+  color: #3730a3;
+}
+.badge.warning {
+  background-color: #fff7ed;
+  color: #9a3412;
+}
+.badge.purple {
+  background-color: #f3e8ff;
+  color: #7c3aed;
+}
+
+/* --- Cabeçalho de Obra (Página de Edição) --- */
+.work-header-display {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 32px;
+    padding: 24px;
+    background-color: #f8fafc;
+    border-radius: 12px;
+    border: 1px solid #f1f5f9;
+}
+
+.work-header-icon {
+    width: 80px;
+    height: 80px;
+    background-color: #e0e7ff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    color: #4338ca;
+    flex-shrink: 0;
+    border: 3px solid #c7d2fe;
+}
+
+.work-header-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0 0 8px 0;
+}
+
+.work-header-subtitle {
+    font-size: 1rem;
+    color: #64748b;
+    margin: 0 0 8px 0;
+}
+
+.work-header-cno {
+    font-size: 0.875rem;
+    color: #6366f1;
+    font-weight: 500;
+}
+
+/* --- StatusBadge para Ativo/Inativo --- */
+.status-badge.status-inactive {
+    background-color: #fefce8;
+    color: #a16207;
+    border-color: #fde047;
+}
+
+/* --- Lista de Alocações (Detalhes do Funcionário) --- */
+.allocations-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.allocation-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    background-color: #f8fafc;
+    border: 1px solid #f1f5f9;
+    border-radius: 8px;
+}
+
+.allocation-project-name a {
+    font-weight: 600;
+    color: #3b82f6;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.allocation-project-name a:hover {
+    color: #2563eb;
+    text-decoration: underline;
+}
+
+.allocation-dates {
+    display: flex;
+    gap: 24px;
+    font-size: 0.9rem;
+    color: #64748b;
+}
+
+/* --- Layout dos Gráficos --- */
+.charts-grid-container {
+    display: grid;
+    gap: 32px;
+    margin-top: 32px;
+}
+
+.charts-grid-double {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 32px;
+}
+
+/* --- Gráfico de Barras Horizontais --- */
+.bar-chart-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.bar-chart-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.bar-chart-label {
+    min-width: 140px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #374151;
+}
+
+.bar-chart-bar-bg {
+    flex: 1;
+    height: 24px;
+    background-color: #f1f5f9;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.bar-chart-bar-fill {
+    height: 100%;
+    border-radius: 12px;
+    transition: width 1s ease-out;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 8px;
+}
+
+.bar-chart-percentage {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
+.bar-chart-value {
+    min-width: 100px;
+    text-align: right;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #059669;
+}
+
+/* --- Gráfico de Pizza (Legenda) --- */
+.pie-chart-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.pie-chart-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px;
+    background-color: #fafbfc;
+    border-radius: 8px;
+    border: 1px solid #f1f5f9;
+}
+
+.pie-chart-legend {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.pie-chart-color-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.pie-chart-name {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #374151;
+}
+
+.pie-chart-details {
+    text-align: right;
+}
+
+.pie-chart-value {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #059669;
+}
+
+.pie-chart-percentage {
+    font-size: 0.75rem;
+    color: #64748b;
+}
+
+/* --- Gráfico de Linha do Tempo --- */
+.timeline-chart-container {
+    position: relative;
+    height: 200px;
+    padding: 20px 0;
+}
+
+.timeline-chart-baseline {
+    position: absolute;
+    bottom: 40px; /* Ajustado para dar espaço ao label */
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: #e2e8f0;
+}
+
+.timeline-chart-bars {
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-end;
+    height: 100%;
+    gap: 8px;
+}
+
+.timeline-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    gap: 8px;
+    padding-bottom: 22px; /* Espaço para o label */
+    position: relative;
+}
+
+.timeline-bar {
+    width: 100%;
+    max-width: 40px;
+    background-color: #3b82f6;
+    border-radius: 4px 4px 0 0;
+    position: relative;
+    transition: height 1s ease-out;
+}
+
+.timeline-value-label {
+    position: absolute;
+    top: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #3b82f6;
+    white-space: nowrap;
+}
+
+.timeline-month-label {
+    font-size: 0.75rem;
+    color: #64748b;
+    font-weight: 500;
+    text-align: center;
+    white-space: nowrap;
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%) rotate(-45deg);
+    transform-origin: center;
+}
+
+/* --- Lista de Obras --- */
+.project-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.project-card {
+    display: grid;
+    grid-template-columns: 2fr 1.5fr auto;
+    gap: 24px;
+    align-items: center;
+    background-color: white;
+    border-radius: 12px;
+    padding: 24px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+}
+
+.project-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    border-color: #c7d2fe;
+}
+
+.project-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.project-card-title {
+    margin: 0;
+    font-size: 1.25rem;
+    color: #1e293b;
+}
+
+.project-card-meta {
+    display: flex;
+    gap: 16px;
+    font-size: 0.875rem;
+    color: #64748b;
+}
+
+.project-card-metrics {
+    display: flex;
+    gap: 16px;
+    justify-content: space-around;
+}
+
+.metric-block {
+    text-align: center;
+    padding: 12px;
+    border-radius: 8px;
+    background-color: #f8fafc;
+    border: 1px solid #f1f5f9;
+    min-width: 120px;
+}
+
+.metric-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #64748b;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.metric-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.project-card-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+/* --- Layout do Dashboard --- */
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.dashboard-main-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    gap: 32px;
+    align-items: start;
+}
+
+/* --- Componente: SummaryCard --- */
+.summary-card {
+    background-color: white;
+    border-radius: 12px;
+    padding: 24px;
+    border: 1px solid #e2e8f0;
+    text-align: center;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+}
+
+.summary-card-icon {
+    font-size: 2rem;
+    line-height: 1;
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 16px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.summary-card-icon.blue { background-color: #eff6ff; color: #3b82f6; }
+.summary-card-icon.green { background-color: #f0fdf4; color: #10b981; }
+.summary-card-icon.yellow { background-color: #fefce8; color: #f59e0b; }
+.summary-card-icon.red { background-color: #fef2f2; color: #ef4444; }
+.summary-card-icon.purple { background-color: #f5f3ff; color: #8b5cf6; }
+
+.summary-card-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 4px;
+}
+
+.summary-card-label {
+    font-size: 0.9rem;
+    color: #64748b;
+}
+
+/* --- Lista de Top Projetos --- */
+.top-projects-list, .recent-activity-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.top-project-item, .recent-activity-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+.top-projects-list .top-project-item:last-child,
+.recent-activity-list .recent-activity-item:last-child {
+    border-bottom: none;
+}
+
+.project-link {
+    text-decoration: none;
+    color: #3b82f6;
+    font-weight: 500;
+}
+.project-sub-info, .activity-project {
+    font-size: 0.8rem;
+    color: #64748b;
+}
+
+.project-values {
+    display: flex;
+    gap: 24px;
+    text-align: right;
+    font-size: 0.9rem;
+}
+.value-contracts { color: #3b82f6; font-weight: 500; }
+.value-expenses { color: #f59e0b; font-weight: 500; }
+.value-profit { font-weight: 700; }
+.value-profit.positive { color: #10b981; }
+.value-profit.negative { color: #ef4444; }
+
+
+/* --- Lista de Atividades Recentes --- */
+.activity-description {
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: #1e293b;
+}
+
+.activity-details {
+    text-align: right;
+}
+
+.activity-amount {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #f59e0b;
+}
+
+.activity-date {
+    font-size: 0.75rem;
+    color: #94a3b8;
+}
+
+/* --- Seções dentro de um formulário --- */
+.form-section {
+    margin-bottom: 24px;
+    padding: 20px;
+    background-color: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #f1f5f9;
+}
+
+/* Input de apenas leitura (para valor líquido) */
+.form-input.read-only {
+    background-color: #f0f9ff;
+    color: #0c4a6e;
+    font-weight: 600;
+    cursor: default;
+}
+
+/* --- Seções dentro de um formulário --- */
+.form-section {
+    margin-bottom: 24px;
+    padding: 20px;
+    background-color: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #f1f5f9;
+}
+
+/* Input de apenas leitura (para valor líquido) */
+.form-input.read-only {
+    background-color: #f0f9ff;
+    color: #0c4a6e;
+    font-weight: 600;
+    cursor: default;
 }

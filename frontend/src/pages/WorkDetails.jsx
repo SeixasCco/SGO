@@ -3,15 +3,18 @@ import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
+// Componentes comuns
 import StatusBadge from '../components/common/StatusBadge';
 import InfoCard from '../components/common/InfoCard';
 import ContractCard from '../components/common/ContractCard';
 import ExpenseRow from '../components/common/ExpenseRow';
 
+// Componentes específicos
 import AddContractModal from '../components/AddContractModal';
 import TeamManager from '../components/TeamManager';
 import AddExpenseModal from '../components/AddExpenseModal';
 
+// Estilos
 import "../styles/forms.css";
 
 const WorkDetails = () => {

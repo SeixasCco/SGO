@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import toast from 'react-hot-toast';
 
 const EmployeesPage = () => {
   const [employees, setEmployees] = useState([]);
@@ -35,8 +36,7 @@ const EmployeesPage = () => {
         setFilteredEmployees(response.data || []);
       })
       .catch(error => {
-        setError("Erro ao carregar funcionários.");
-        console.error("Erro ao buscar funcionários:", error);
+        setError("Erro ao carregar funcionários.");       
       })
       .finally(() => {
         setLoading(false);
@@ -152,16 +152,16 @@ const EmployeesPage = () => {
       });
   };
 
-  const handleDeleteEmployee = (employeeId) => {
-    if (window.confirm("Tem certeza que deseja deletar este funcionário?")) {
-      axios.delete(`http://localhost:5145/api/employees/${employeeId}`)
+  const handleDeleteEmployee = (id) => {
+    if (window.confirm('Tem certeza que deseja deletar este funcionário?')) {
+      axios.delete(`http://localhost:5145/api/employees/${id}`)
         .then(() => {
-          alert("Funcionário deletado com sucesso!");
-          fetchEmployees();
+          toast.success('Funcionário deletado com sucesso!');
+          setEmployees(prev => prev.filter(emp => emp.id !== id));
         })
         .catch(error => {
-          alert("Erro ao deletar funcionário.");
-          console.error(error);
+          const errorMessage = error.response?.data || 'Erro ao deletar funcionário.';          
+          toast.error(errorMessage);
         });
     }
   };

@@ -1,60 +1,53 @@
 import React, { useState } from 'react';
-import EmployeesPage from './EmployeesPage'; 
-import AdminExpensesPage from './AdminExpensesPage'; 
+import EmployeesPage from './EmployeesPage';
+import AdminExpensesPage from './AdminExpensesPage';
 import CompanyProfilePage from './CompanyProfilePage';
+
 const AdminPage = () => {
     const [activeTab, setActiveTab] = useState('employees');
 
-    const tabButtonStyle = (isActive) => ({
-        padding: '12px 24px',
-        border: 'none',
-        borderBottom: isActive ? '3px solid #3b82f6' : '3px solid transparent',
-        backgroundColor: 'transparent',
-        fontSize: '1rem',
-        fontWeight: '600',
-        cursor: 'pointer',
-        color: isActive ? '#3b82f6' : '#64748b',
-        transition: 'all 0.2s ease'
-    });
+    const tabs = [
+        { id: 'employees', label: '👥 Gestão de Funcionários' },
+        { id: 'expenses', label: '💰 Despesas da Matriz' },
+        { id: 'company', label: '🏢 Dados da Matriz' }
+    ];
 
     return (
-        <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '48px' }}>
-            {/* Header da Página Administrativa */}
-            <div style={{ marginBottom: '32px' }}>
-                <h1 style={{ fontSize: '2.5rem', fontWeight: '700', color: '#0f172a' }}>
-                    🗂️ Módulo Administrativo
-                </h1>
-                <p style={{ fontSize: '1.1rem', color: '#64748b', margin: 0 }}>
-                    Gestão de funcionários e despesas da matriz.
-                </p>
+        <div className="page-container">
+            {/* Header da Página */}
+            <div className="page-header">
+                <div className="page-header-content">
+                    <div>
+                        <h1 className="page-title">🗂️ Módulo Administrativo</h1>
+                        <p className="page-subtitle">
+                            Gestão centralizada de funcionários, despesas e dados da empresa.
+                        </p>
+                    </div>
+                </div>
             </div>
-
-            {/* Navegação por Sub-abas */}
-            <div style={{ borderBottom: '1px solid #e2e8f0', marginBottom: '32px' }}>
-                <button 
-                    style={tabButtonStyle(activeTab === 'employees')} 
-                    onClick={() => setActiveTab('employees')}
-                >
-                    👥 Gestão de Funcionários
-                </button>
-                <button 
-                    style={tabButtonStyle(activeTab === 'expenses')} 
-                    onClick={() => setActiveTab('expenses')}
-                >
-                    💰 Despesas da Matriz
-                </button>               
-                <button style={tabButtonStyle(activeTab === 'company')} 
-                    onClick={() => setActiveTab('company')}>
-                    🏢 Dados da Matriz
-                </button>
+           
+            <div className="tabs-navigation-container">
+                <div className="tabs-navigation">
+                    {tabs.map((tab) => (
+                        <button
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id)}
+                            className={`tab-button ${activeTab === tab.id ? 'tab-button-active' : ''}`}
+                        >
+                            {tab.label}
+                        </button>
+                    ))}
+                </div>
             </div>
-
-            {/* Conteúdo da Aba Ativa */}
-            <div>
-                {activeTab === 'employees' && <EmployeesPage />}
-                {activeTab === 'expenses' && <AdminExpensesPage />}
-                {activeTab === 'company' && <CompanyProfilePage />}
+           
+            <div className="page-content" style={{ paddingTop: '32px' }}>
+                <div className="tab-content-full">
+                    {activeTab === 'employees' && <EmployeesPage />}
+                    {activeTab === 'expenses' && <AdminExpensesPage />}
+                    {activeTab === 'company' && <CompanyProfilePage />}
+                </div>
             </div>
+            
         </div>
     );
 };
