@@ -24,7 +24,7 @@ const AddExpenseForm = ({ projectId, contractId, onExpenseAdded }) => {
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {    
+  useEffect(() => {
     const fetchCostCenters = async () => {
       try {
         const response = await axios.get('http://localhost:5145/api/costcenters');
@@ -61,7 +61,8 @@ const AddExpenseForm = ({ projectId, contractId, onExpenseAdded }) => {
         const uploadResponse = await axios.post('http://localhost:5145/api/attachments/upload', uploadData);
         attachmentPath = uploadResponse.data.filePath;
       } catch (err) {
-        setError('Falha ao enviar o anexo. Tente novamente.');
+        const errorMessage = err.response?.data ?? 'Falha ao enviar o anexo. Tente novamente.';
+        toast.error(errorMessage);
         setSubmitting(false);
         return;
       }
@@ -77,7 +78,7 @@ const AddExpenseForm = ({ projectId, contractId, onExpenseAdded }) => {
 
     try {
       await axios.post('http://localhost:5145/api/projectexpenses', newExpense);
-      toast.success('Despesa lançada com sucesso!');      
+      toast.success('Despesa lançada com sucesso!');
       setFormData({
         description: '',
         amount: '',
@@ -149,7 +150,7 @@ const AddExpenseForm = ({ projectId, contractId, onExpenseAdded }) => {
               onChange={handleChange}
               required
               disabled={loadingCostCenters}
-              className="form-select" 
+              className="form-select"
             >
               <option value="">
                 {loadingCostCenters ? 'Carregando...' : 'Selecione um centro de custo'}
@@ -165,9 +166,9 @@ const AddExpenseForm = ({ projectId, contractId, onExpenseAdded }) => {
           {/* Anexo */}
           <FormGroup label="Anexo (Nota Fiscal)" helpText="📎 PDF, Imagens ou Documentos (opcional)">
             <StyledInput
-                type="file"
-                onChange={handleFileChange}
-                accept=".pdf,.jpg,.jpeg,.png,.gif,.doc,.docx"
+              type="file"
+              onChange={handleFileChange}
+              accept=".pdf,.jpg,.jpeg,.png,.gif,.doc,.docx"
             />
           </FormGroup>
         </div>
@@ -178,7 +179,7 @@ const AddExpenseForm = ({ projectId, contractId, onExpenseAdded }) => {
 
         {/* Botão de Envio */}
         <StyledButton submitting={submitting}>
-            💾 Salvar Despesa
+          💾 Salvar Despesa
         </StyledButton>
       </form>
     </div>

@@ -27,7 +27,8 @@ const AddExpenseModal = ({ onClose, onExpenseAdded, projectId, contractId, compa
                 const uploadResponse = await axios.post('http://localhost:5145/api/attachments/upload', uploadData);
                 attachmentPath = uploadResponse.data.filePath;
             } catch (err) {
-                toast.error('Falha ao enviar o anexo.');
+                const errorMessage = err.response?.data ?? 'Falha ao enviar o anexo. Tente novamente.';
+                toast.error(errorMessage);
                 setSubmitting(false);
                 return;
             }

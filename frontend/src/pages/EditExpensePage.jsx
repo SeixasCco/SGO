@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 
 import FormGroup from '../components/common/FormGroup';
 import StyledInput from '../components/common/StyledInput';
+import { expenseFormMap } from '../config/expenseFormMap';
 
 const EditExpensePage = () => {
     const { id } = useParams();
@@ -15,6 +16,10 @@ const EditExpensePage = () => {
     const [error, setError] = useState('');
     const [submitting, setSubmitting] = useState(false);
 
+    // ADICIONADO: Declaração dos states para os campos dinâmicos
+    const [specificFields, setSpecificFields] = useState([]);
+    const [detailsData, setDetailsData] = useState({});
+
     const fetchExpenseData = useCallback(() => {
         setLoading(true);
         axios.get(`http://localhost:5145/api/projectexpenses/${id}`)
@@ -22,6 +27,15 @@ const EditExpensePage = () => {
                 const expense = response.data;
                 expense.date = new Date(expense.date).toISOString().split('T')[0];
                 setFormData(expense);
+
+                if (expense.costCenterId) {
+                    const fields = expenseFormMap[expense.costCenterId] || [];
+                    setSpecificFields(fields);
+
+                    if (expense.detailsJson) {
+                        setDetailsData(JSON.parse(expense.detailsJson));
+                    }
+                }
                 if (expense.projectId) {
                     return axios.get(`http://localhost:5145/api/projects/${expense.projectId}`);
                 }
@@ -42,16 +56,25 @@ const EditExpensePage = () => {
         fetchExpenseData();
     }, [fetchExpenseData]);
 
-    const handleChange = (e) => {
+    const handleCommonChange = (e) => {
         const { name, value } = e.target;
         setFormData(prevState => ({ ...prevState, [name]: value }));
+    };
+
+    const handleDetailsChange = (e) => {
+        const { name, value } = e.target;
+        setDetailsData(prev => ({ ...prev, [name]: value }));
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
         setSubmitting(true);
 
-        const expenseDto = { ...formData, amount: parseFloat(formData.amount) };
+        const expenseDto = {
+            ...formData,
+            amount: parseFloat(formData.amount),
+            detailsJson: JSON.stringify(detailsData)
+        };
 
         const promise = axios.put(`http://localhost:5145/api/projectexpenses/${id}`, expenseDto);
 
@@ -93,7 +116,7 @@ const EditExpensePage = () => {
             <div className="page-content">
                 {projectInfo && (
                     <div className="info-card info-card-green" style={{ marginBottom: '32px' }}>
-                        <h3 className="info-card-title" style={{ fontSize: '1.1rem' }}>🏗️ Informações da Obra</h3>
+                        <h3 className="info-card-title" style={{fontSize: '1.1rem'}}>🏗️ Informações da Obra</h3>
                         <div className="form-grid">
                              <div>
                                 <span className="info-card-label">Nome:</span>
@@ -124,20 +147,39 @@ const EditExpensePage = () => {
                         <div className="form-grid">
                             <div style={{ gridColumn: '1 / -1' }}>
                                 <FormGroup label="Descrição da Despesa">
-                                    <StyledInput type="text" name="description" value={formData.description} onChange={handleChange} required />
+                                    <StyledInput type="text" name="description" value={formData.description} onChange={handleCommonChange} required />
                                 </FormGroup>
                             </div>
                             <FormGroup label="Valor (R$)">
-                                <StyledInput type="number" step="0.01" name="amount" value={formData.amount} min="0" onChange={handleChange} required />
+                                <StyledInput type="number" step="0.01" name="amount" value={formData.amount} min="0" onChange={handleCommonChange} required />
                             </FormGroup>
                             <FormGroup label="Data da Despesa">
-                                <StyledInput type="date" name="date" value={formData.date} onChange={handleChange} required />
+                                <StyledInput type="date" name="date" value={formData.date} onChange={handleCommonChange} required />
                             </FormGroup>
                             <FormGroup label="Centro de Custo">
                                  <StyledInput type="text" value={formData.costCenter?.name || 'Não informado'} disabled />
                             </FormGroup>
                         </div>
                         
+                        {specificFields.length > 0 && (
+                            <div className="form-section" style={{ padding: '20px', marginTop: '24px' }}>
+                                <h3 className="section-divider" style={{marginTop: 0, fontSize: '1rem'}}>Detalhes Específicos</h3>
+                                <div className="form-grid">
+                                    {specificFields.map(field => (
+                                        <FormGroup key={field.name} label={field.label}>
+                                            <StyledInput
+                                                type={field.type}
+                                                name={field.name}
+                                                value={detailsData[field.name] || ''}
+                                                onChange={handleDetailsChange}
+                                                placeholder={field.placeholder}
+                                            />
+                                        </FormGroup>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
                         {formData.attachmentPath && (
                             <div className="info-card info-card-blue" style={{ marginTop: '24px' }}>
                                 <h4 className="info-card-title" style={{fontSize: '1rem'}}>📎 Anexo da Despesa</h4>

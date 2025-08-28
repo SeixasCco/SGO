@@ -11,7 +11,7 @@ using System.Text;
 namespace SGO.Api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/[controller]")]   
     public class AuthController : ControllerBase
     {
         private readonly SgoDbContext _context;

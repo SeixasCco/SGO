@@ -115,6 +115,18 @@ public class ContractInvoicesController : ControllerBase
 
         if (dto.Attachment != null && dto.Attachment.Length > 0)
         {
+            const long maxFileSize = 5 * 1024 * 1024; // 5 MB
+            if (dto.Attachment.Length > maxFileSize)
+            {
+                return BadRequest("O arquivo é muito grande. O tamanho máximo permitido é de 5 MB.");
+            }
+           
+            var allowedMimeTypes = new[] { "image/jpeg", "image/png", "application/pdf" };
+            if (!allowedMimeTypes.Contains(dto.Attachment.ContentType.ToLower()))
+            {
+                return BadRequest("Tipo de arquivo inválido. Apenas JPG, PNG e PDF são permitidos.");
+            }
+
             try
             {
                 var fileName = $"{DateTime.Now:yyyyMMdd_HHmmss}_{dto.InvoiceNumber}_{dto.Attachment.FileName}";
@@ -151,7 +163,6 @@ public class ContractInvoicesController : ControllerBase
             NetValue = invoice.NetValue,
             PaymentDate = invoice.PaymentDate,
             AttachmentPath = invoice.AttachmentPath,
-            Status = invoice.Status,
             ContractId = invoice.ContractId
         };
 
@@ -206,6 +217,18 @@ public class ContractInvoicesController : ControllerBase
 
         if (dto.Attachment != null && dto.Attachment.Length > 0)
         {
+            const long maxFileSize = 5 * 1024 * 1024; // 5 MB
+            if (dto.Attachment.Length > maxFileSize)
+            {
+                return BadRequest("O arquivo é muito grande. O tamanho máximo permitido é de 5 MB.");
+            }
+          
+            var allowedMimeTypes = new[] { "image/jpeg", "image/png", "application/pdf" };
+            if (!allowedMimeTypes.Contains(dto.Attachment.ContentType.ToLower()))
+            {
+                return BadRequest("Tipo de arquivo inválido. Apenas JPG, PNG e PDF são permitidos.");
+            }
+
             try
             {
                 if (!string.IsNullOrEmpty(invoice.AttachmentPath))

@@ -1,15 +1,12 @@
-
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.IO;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.StaticFiles;
 
 namespace SGO.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize] 
     public class AttachmentsController : ControllerBase
     {
         private readonly IWebHostEnvironment _env;
@@ -24,26 +21,39 @@ namespace SGO.Api.Controllers
             if (file == null || file.Length == 0)
                 return BadRequest("Nenhum arquivo enviado.");
 
+            const long maxFileSize = 5 * 1024 * 1024;
+            if (file.Length > maxFileSize)
+            {
+                return BadRequest("O arquivo é muito grande. O tamanho máximo permitido é de 5 MB.");
+            }
+           
+            var allowedMimeTypes = new[] { "image/jpeg", "image/png", "application/pdf", "image/webp", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document" };
+            if (!allowedMimeTypes.Contains(file.ContentType.ToLower()))
+            {
+                return BadRequest("Tipo de arquivo inválido. Apenas imagens, PDFs e documentos do Word são permitidos.");
+            }
+          
+
             var uploadsFolderPath = Path.Combine(_env.ContentRootPath, "uploads");
             if (!Directory.Exists(uploadsFolderPath))
             {
                 Directory.CreateDirectory(uploadsFolderPath);
             }
 
-            var fileName = $"{DateTime.Now:yyyyMMdd_HHmmss}_{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
+            var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
             var filePath = Path.Combine(uploadsFolderPath, fileName);
 
             using (var stream = new FileStream(filePath, FileMode.Create))
             {
                 await file.CopyToAsync(stream);
-            }
-
+            }            
+            
             return Ok(new { filePath = fileName });
         }
 
         [HttpGet("{fileName}")]
         public IActionResult GetAttachment(string fileName)
-        {
+        {            
             var filePath = Path.Combine(_env.ContentRootPath, "Attachments", fileName);
 
             if (!System.IO.File.Exists(filePath))
