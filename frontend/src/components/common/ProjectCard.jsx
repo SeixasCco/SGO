@@ -41,8 +41,7 @@ const ProjectCard = ({ project, onEdit, onDelete }) => {
                 </div>
             </div>
             <div className="project-card-actions">
-                <button onClick={(e) => onEdit(project.id, e)} className="action-button-edit">Editar</button>
-                <button onClick={(e) => onDelete(project.id, e)} className="action-button-delete">Deletar</button>
+                <button onClick={(e) => onEdit(project.id, e)} className="action-button-edit">Editar</button>               
             </div>
         </div>
     );
