@@ -16,7 +16,7 @@ const EditExpensePage = () => {
     const [error, setError] = useState('');
     const [submitting, setSubmitting] = useState(false);
 
-    // ADICIONADO: Declaração dos states para os campos dinâmicos
+    // Declaração dos states para os campos dinâmicos
     const [specificFields, setSpecificFields] = useState([]);
     const [detailsData, setDetailsData] = useState({});
 
@@ -70,22 +70,67 @@ const EditExpensePage = () => {
         e.preventDefault();
         setSubmitting(true);
 
+        // Validação dos dados antes de enviar
+        if (!formData.description?.trim()) {
+            toast.error('Descrição é obrigatória.');
+            setSubmitting(false);
+            return;
+        }
+
+        if (!formData.amount || parseFloat(formData.amount) <= 0) {
+            toast.error('Valor deve ser maior que zero.');
+            setSubmitting(false);
+            return;
+        }
+
+        // Construção do objeto para envio
         const expenseDto = {
-            ...formData,
+            id: formData.id,
+            description: formData.description.trim(),
             amount: parseFloat(formData.amount),
-            detailsJson: JSON.stringify(detailsData)
+            date: formData.date,
+            attachmentPath: formData.attachmentPath || null,
+            detailsJson: Object.keys(detailsData).length > 0 ? JSON.stringify(detailsData) : null
         };
 
-        const promise = axios.put(`http://localhost:5145/api/projectexpenses/${id}`, expenseDto);
+        // Adicionar projectId apenas se existir e for válido
+        if (formData.projectId && formData.projectId !== "00000000-0000-0000-0000-000000000000") {
+            expenseDto.projectId = formData.projectId;
+        }
+
+        // Adicionar contractId apenas se existir e for válido
+        if (formData.contractId && formData.contractId !== "00000000-0000-0000-0000-000000000000") {
+            expenseDto.contractId = formData.contractId;
+        }
+
+        // Adicionar costCenterId se existir
+        if (formData.costCenterId) {
+            expenseDto.costCenterId = formData.costCenterId;
+        }
+
+        console.log('Enviando dados:', expenseDto); // Debug
+
+        const promise = axios.put(`http://localhost:5145/api/projectexpenses/${id}`, expenseDto, {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
 
         toast.promise(promise, {
             loading: 'Atualizando despesa...',
             success: () => {
-                const destination = formData.projectId ? `/project/${formData.projectId}` : '/admin';
+                const destination = formData.projectId && formData.projectId !== "00000000-0000-0000-0000-000000000000" 
+                    ? `/project/${formData.projectId}` 
+                    : '/admin';
                 navigate(destination);
                 return 'Despesa atualizada com sucesso!';
             },
-            error: 'Falha ao atualizar a despesa.'
+            error: (err) => {
+                console.error('Erro ao atualizar despesa:', err.response?.data || err);
+                return err.response?.data?.errors 
+                    ? `Erro de validação: ${Object.values(err.response.data.errors).flat().join(', ')}`
+                    : 'Falha ao atualizar a despesa.';
+            }
         }).finally(() => setSubmitting(false));
     };
 
@@ -95,7 +140,9 @@ const EditExpensePage = () => {
     if (error) return <div className="error-state"><h3>{error}</h3></div>;
     if (!formData) return <div className="empty-state"><h3>Despesa não encontrada.</h3></div>;
 
-    const backLink = formData.projectId ? `/project/${formData.projectId}` : '/admin';
+    const backLink = formData.projectId && formData.projectId !== "00000000-0000-0000-0000-000000000000"
+        ? `/project/${formData.projectId}` 
+        : '/admin';
 
     return (
         <div className="page-container">
@@ -105,7 +152,7 @@ const EditExpensePage = () => {
                         <Link to={backLink} className="breadcrumb-link">
                             ← Voltar
                         </Link>
-                        <h1 className="page-title">✏️ Editando Despesa</h1>
+                        <h1 className="page-title">Editando Despesa</h1>
                         <p className="page-subtitle">
                             Atualize os dados da despesa <strong>{formData.description}</strong>
                         </p>
@@ -116,7 +163,7 @@ const EditExpensePage = () => {
             <div className="page-content">
                 {projectInfo && (
                     <div className="info-card info-card-green" style={{ marginBottom: '32px' }}>
-                        <h3 className="info-card-title" style={{fontSize: '1.1rem'}}>🏗️ Informações da Obra</h3>
+                        <h3 className="info-card-title" style={{fontSize: '1.1rem'}}>Informações da Obra</h3>
                         <div className="form-grid">
                              <div>
                                 <span className="info-card-label">Nome:</span>
@@ -136,9 +183,9 @@ const EditExpensePage = () => {
                          <div>
                             <h2 className="expense-header-title">{formData.description}</h2>
                             <div className="expense-header-badges">
-                                <span className="badge warning">💵 {formatCurrency(formData.amount)}</span>
-                                <span className="badge info">📅 {new Date(formData.date + 'T00:00:00').toLocaleDateString('pt-BR')}</span>
-                                <span className="badge purple">🏷️ {formData.costCenter?.name || 'N/A'}</span>
+                                <span className="badge warning">{formatCurrency(formData.amount)}</span>
+                                <span className="badge info">{new Date(formData.date + 'T00:00:00').toLocaleDateString('pt-BR')}</span>
+                                <span className="badge purple">{formData.costCenter?.name || 'N/A'}</span>
                             </div>
                         </div>
                     </div>
@@ -147,17 +194,41 @@ const EditExpensePage = () => {
                         <div className="form-grid">
                             <div style={{ gridColumn: '1 / -1' }}>
                                 <FormGroup label="Descrição da Despesa">
-                                    <StyledInput type="text" name="description" value={formData.description} onChange={handleCommonChange} required />
+                                    <StyledInput 
+                                        type="text" 
+                                        name="description" 
+                                        value={formData.description || ''} 
+                                        onChange={handleCommonChange} 
+                                        required 
+                                    />
                                 </FormGroup>
                             </div>
                             <FormGroup label="Valor (R$)">
-                                <StyledInput type="number" step="0.01" name="amount" value={formData.amount} min="0" onChange={handleCommonChange} required />
+                                <StyledInput 
+                                    type="number" 
+                                    step="0.01" 
+                                    name="amount" 
+                                    value={formData.amount || ''} 
+                                    min="0.01" 
+                                    onChange={handleCommonChange} 
+                                    required 
+                                />
                             </FormGroup>
                             <FormGroup label="Data da Despesa">
-                                <StyledInput type="date" name="date" value={formData.date} onChange={handleCommonChange} required />
+                                <StyledInput 
+                                    type="date" 
+                                    name="date" 
+                                    value={formData.date || ''} 
+                                    onChange={handleCommonChange} 
+                                    required 
+                                />
                             </FormGroup>
                             <FormGroup label="Centro de Custo">
-                                 <StyledInput type="text" value={formData.costCenter?.name || 'Não informado'} disabled />
+                                 <StyledInput 
+                                    type="text" 
+                                    value={formData.costCenter?.name || 'Não informado'} 
+                                    disabled 
+                                />
                             </FormGroup>
                         </div>
                         
@@ -182,9 +253,9 @@ const EditExpensePage = () => {
 
                         {formData.attachmentPath && (
                             <div className="info-card info-card-blue" style={{ marginTop: '24px' }}>
-                                <h4 className="info-card-title" style={{fontSize: '1rem'}}>📎 Anexo da Despesa</h4>
+                                <h4 className="info-card-title" style={{fontSize: '1rem'}}>Anexo da Despesa</h4>
                                 <a href={`http://localhost:5145${formData.attachmentPath}`} target="_blank" rel="noopener noreferrer" className="form-button">
-                                    👁️ Visualizar Anexo
+                                    Visualizar Anexo
                                 </a>
                             </div>
                         )}
@@ -194,7 +265,7 @@ const EditExpensePage = () => {
                                 Cancelar
                             </Link>
                             <button type="submit" disabled={submitting} className="form-button">
-                                {submitting ? '⏳ Salvando...' : '💾 Salvar Alterações'}
+                                {submitting ? 'Salvando...' : 'Salvar Alterações'}
                             </button>
                         </div>
                     </form>
