@@ -1,4 +1,5 @@
 namespace SGO.Api.Dtos;
+
 using System.ComponentModel.DataAnnotations;
 
 public class UpdateExpenseDto
@@ -12,6 +13,9 @@ public class UpdateExpenseDto
     [Range(0, double.MaxValue, ErrorMessage = "O valor da despesa não pode ser negativo.")]
     public decimal Amount { get; set; }
     public DateTime Date { get; set; }
-    public string? AttachmentPath { get; set; }    
-    
+    public string? AttachmentPath { get; set; }
+
+    public string? Observations { get; set; }
+    public string? DetailsJson { get; set; }
+
 }

@@ -8,6 +8,10 @@ import StyledInput from '../components/common/StyledInput';
 import { expenseFormMap } from '../config/expenseFormMap';
 import AttachmentPreviewModal from '../components/AttachmentPreviewModal';
 
+const StyledTextarea = (props) => (
+        <textarea className="form-textarea" {...props} />
+    );
+
 const EditExpensePage = () => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -19,11 +23,7 @@ const EditExpensePage = () => {
 
     const [specificFields, setSpecificFields] = useState([]);
     const [detailsData, setDetailsData] = useState({});
-    const [previewAttachmentPath, setPreviewAttachmentPath] = useState(null);
-
-    const StyledTextarea = (props) => (
-        <textarea className="form-textarea" {...props} />
-    );
+    const [previewAttachmentPath, setPreviewAttachmentPath] = useState(null);    
 
     const fetchExpenseData = useCallback(() => {
         setLoading(true);

@@ -145,7 +145,10 @@ const ReportsPage = () => {
     };
 
     const formatCurrency = (value) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value || 0);
-    const formatDate = (dateString) => dateString ? new Date(dateString).toLocaleDate - String('pt-BR', { timeZone: 'UTC' }) : 'N/A';
+    const formatDate = (dateString) => {
+        if (!dateString) return 'N/A';
+        return new Date(dateString).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+    };
 
     return (
         <div className="page-container">
@@ -188,7 +191,12 @@ const ReportsPage = () => {
                             <h2 style={{ margin: 0, fontSize: '1.5rem' }}>{reportData.companyName}</h2>
                             <p style={{ margin: 0, color: '#64748b' }}>CNPJ: {reportData.companyCnpj}</p>
                             <p style={{ margin: '4px 0', color: '#64748b' }}>
-                                Período de Apuração: <strong>{formatDate(reportData.filterStartDate)}</strong> a <strong>{formatDate(reportData.filterEndDate)}</strong>
+                                Período de Apuração:
+                                <strong>
+                                    {reportData.filterStartDate ? formatDate(reportData.filterStartDate) : ' Início'}
+                                </strong> a <strong>
+                                    {reportData.filterEndDate ? formatDate(reportData.filterEndDate) : ' Fim'}
+                                </strong>
                             </p>
                             <small style={{ color: '#9ca3af' }}>Relatório gerado em: {new Date(reportData.generatedAt).toLocaleString('pt-BR')}</small>
                         </div>
@@ -226,7 +234,7 @@ const ReportsPage = () => {
                                         <span style={{ fontWeight: 500 }}>{formatCurrency(value)}</span>
                                     </div>
                                 ))}
-                                
+
                                 <div style={{ fontSize: '1.2rem', fontWeight: 700, display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #cbd5e1', marginTop: '16px', paddingTop: '16px' }}>
                                     <span>TOTAL GERAL:</span>
                                     <span>{formatCurrency(reportData.summary.totalExpenses)}</span>
