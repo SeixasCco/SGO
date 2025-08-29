@@ -853,7 +853,8 @@ body {
 
 /* Status "Operando em:" */
 .operating-status {
-  display: none; /* Escondido por padrão, o CompanySwitcher já mostra isso */
+  display: none;
+  /* Escondido por padrão, o CompanySwitcher já mostra isso */
 }
 
 /* Seção do Usuário */
@@ -904,19 +905,19 @@ body {
   .main-nav {
     padding: 0 24px;
   }
-  
+
   .main-nav-content {
     gap: 16px;
   }
-  
+
   .nav-right-group {
     gap: 12px;
   }
-  
+
   .nav-links-center {
     gap: 4px;
   }
-  
+
   .nav-link {
     padding: 10px 16px;
     font-size: 0.9rem;
@@ -927,32 +928,32 @@ body {
   .main-nav {
     padding: 0 16px;
   }
-  
+
   .main-nav-content {
     grid-template-columns: auto auto;
     gap: 8px;
   }
-  
+
   /* Esconder navegação central em mobile */
   .nav-links-center {
     display: none;
   }
-  
+
   .nav-right-group {
     gap: 8px;
   }
-  
+
   /* Simplificar info do usuário em mobile */
   .user-info-text {
     display: none;
   }
-  
+
   .nav-user-section {
     padding: 8px;
     background-color: transparent;
     border: none;
   }
-  
+
   .user-avatar {
     width: 32px;
     height: 32px;
@@ -1086,8 +1087,13 @@ body {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Navegação com logout */
@@ -1130,17 +1136,17 @@ body {
   .nav-user-info {
     gap: 8px;
   }
-  
+
   .user-info-text {
-    display: none; 
+    display: none;
   }
-  
+
   .nav-center-group {
     gap: 16px;
   }
-  
+
   .nav-links {
-    display: none; 
+    display: none;
   }
 }
 
@@ -1154,14 +1160,642 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000; 
- 
+  z-index: 1000;
+
   transition: none !important;
   transform: none !important;
-  animation: none !important;  
+  animation: none !important;
 
   backface-visibility: hidden;
   perspective: 1000px;
   will-change: auto;
 }
 
+/* Estilos para relatório profissional */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.page-header-content h1 {
+  margin: 0 0 4px 0;
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.page-header-content p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.export-button {
+  background: #10b981;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.export-button:hover {
+  background: #059669;
+}
+
+/* Seção de filtros */
+.filters-section {
+  background: white;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+  margin-bottom: 24px;
+}
+
+.filters-section h3 {
+  margin: 0 0 20px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.date-range {
+  display: flex;
+  gap: 16px;
+}
+
+.filter-chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.filter-chip {
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  color: #374151;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filter-chip.active {
+  background: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+.generate-button {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 16px;
+}
+
+/* Cabeçalho da empresa */
+.report-header {
+  text-align: center;
+  padding: 24px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+  margin-bottom: 24px;
+}
+
+.company-info h2 {
+  margin: 0 0 8px 0;
+  color: #1f2937;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.company-info p {
+  margin: 0 0 12px 0;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.report-metadata {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+  color: #9ca3af;
+}
+
+.report-metadata span {
+  background: #f3f4f6;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+/* Resumo simplificado */
+.simple-summary {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+  margin-bottom: 24px;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.summary-item:last-child {
+  border-bottom: none;
+}
+
+.summary-label {
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.summary-value {
+  color: #1f2937;
+  font-weight: 600;
+}
+
+/* Estilos para relatório em formato A4 */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.page-header-content h1 {
+  margin: 0 0 8px 0;
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.page-header-content p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.export-button {
+  background: #10b981;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.export-button:hover {
+  background: #059669;
+}
+
+/* Seção de filtros */
+.filters-section {
+  background: white;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+  margin-bottom: 24px;
+}
+
+.filters-section h3 {
+  margin: 0 0 20px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.date-range {
+  display: flex;
+  gap: 16px;
+}
+
+.filter-chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.filter-chip {
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  color: #374151;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filter-chip.active {
+  background: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+.generate-button {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 16px;
+}
+
+/* Estilos para relatório em formato A4 */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.page-header-content {
+  flex: 1;
+}
+
+.page-header-content h1 {
+  margin: 0 0 12px 0;
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #1f2937;
+  line-height: 1.2;
+}
+
+.page-header-content p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  max-width: 400px;
+}
+
+.export-button {
+  background: #10b981;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.export-button:hover {
+  background: #059669;
+}
+
+/* Seção de filtros */
+.filters-section {
+  background: white;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+  margin-bottom: 24px;
+}
+
+.filters-section h3 {
+  margin: 0 0 20px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.date-range {
+  display: flex;
+  gap: 16px;
+}
+
+.filter-chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.filter-chip {
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  color: #374151;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filter-chip.active {
+  background: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+.generate-button {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 16px;
+}
+
+/* Relatório A4 */
+.a4-report {
+  background: white;
+  max-width: 794px;
+  /* Largura A4 em pixels (210mm) */
+  margin: 0 auto;
+  padding: 40px;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -1px rgb(0 0 0 / 0.06);
+  font-family: 'Times New Roman', serif;
+  line-height: 1.5;
+  color: #000;
+}
+
+/* Cabeçalho da empresa - estilo documento */
+.report-header-a4 {
+  text-align: center;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #000;
+}
+
+.report-header-a4 h2 {
+  margin: 0 0 8px 0;
+  font-size: 1.6rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.report-header-a4 p {
+  margin: 0 0 12px 0;
+  font-size: 1rem;
+  font-weight: normal;
+}
+
+.report-meta {
+  font-size: 0.9rem;
+  color: #666;
+  font-style: italic;
+}
+
+/* Resumo superior */
+.summary-header {
+  margin-bottom: 25px;
+  padding: 15px 0;
+  border-top: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+}
+
+.summary-line {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.summary-line:last-child {
+  margin-bottom: 0;
+}
+
+/* Título do período */
+.period-title {
+  margin-bottom: 20px;
+}
+
+.period-title h3 {
+  margin: 0 0 5px 0;
+  font-size: 1.2rem;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.period-title p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #666;
+  font-style: italic;
+}
+
+/* Dados das despesas */
+.expenses-data {
+  margin-bottom: 30px;
+}
+
+.expense-line {
+  margin-bottom: 15px;
+  border-bottom: 1px dotted #ccc;
+  padding-bottom: 10px;
+}
+
+.expense-line:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.expense-line-header {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 5px;
+}
+
+.expense-date {
+  min-width: 90px;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.expense-title {
+  flex: 1;
+  margin: 0 15px;
+  font-weight: normal;
+  font-size: 1rem;
+}
+
+.expense-title strong {
+  font-weight: bold;
+  color: #333;
+}
+
+.expense-amount {
+  min-width: 100px;
+  text-align: right;
+  font-weight: bold;
+  font-size: 1rem;
+  color: #d00;
+}
+
+.expense-details-line {
+  font-size: 0.85rem;
+  color: #666;
+  margin-left: 90px;
+  line-height: 1.4;
+}
+
+.expense-details-line strong {
+  color: #000;
+  font-weight: bold;
+  font-style: normal;
+}
+
+/* Rodapé do relatório */
+.report-footer-a4 {
+  border-top: 2px solid #000;
+  padding-top: 20px;
+}
+
+.report-footer-a4 h3 {
+  margin: 0 0 15px 0;
+  font-size: 1.2rem;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.total-line {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1.3rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  border-top: 2px solid #000;
+  border-bottom: 2px solid #000;
+  padding: 15px 0;
+  margin-top: 10px;
+}
+
+.total-line span:last-child {
+  color: #d00;
+}
+
+/* Estados de loading e erro */
+.empty-state,
+.error-state {
+  background: white;
+  padding: 40px;
+  text-align: center;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.empty-state-icon {
+  font-size: 3rem;
+  margin-bottom: 16px;
+}
+
+.empty-state h3,
+.error-state h3 {
+  margin: 0 0 8px 0;
+  color: #374151;
+}
+
+.empty-state p,
+.error-state p {
+  margin: 0;
+  color: #6b7280;
+}
+
+/* Responsividade */
+@media (max-width: 868px) {
+  .a4-report {
+    margin: 0 16px;
+    padding: 20px;
+    box-shadow: none;
+    border: 1px solid #e5e7eb;
+  }
+}
+
+@media (max-width: 600px) {
+  .page-header {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+  }
+
+  .date-range {
+    flex-direction: column;
+  }
+
+  .expense-line-header {
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .expense-date {
+    min-width: auto;
+  }
+
+  .expense-title {
+    margin: 0;
+  }
+
+  .expense-amount {
+    min-width: auto;
+    text-align: left;
+    font-size: 1.1rem;
+  }
+
+  .expense-details-line {
+    margin-left: 0;
+  }
+
+  .total-line {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+}
+
+/* Impressão */
+@media print {
+
+  .page-header,
+  .filters-section {
+    display: none !important;
+  }
+
+  .a4-report {
+    box-shadow: none;
+    margin: 0;
+    padding: 0;
+    max-width: none;
+  }
+
+  body {
+    -webkit-print-color-adjust: exact;
+    color-adjust: exact;
+  }
+}

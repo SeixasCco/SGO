@@ -10,6 +10,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using OfficeOpenXml;
 using Microsoft.AspNetCore.Authorization;
+using System.Text.Json;
 
 namespace SGO.Api.Controllers
 {
@@ -37,6 +38,88 @@ namespace SGO.Api.Controllers
             return query;
         }
 
+        private string FormatExpenseDetails(ProjectExpense expense)
+        {
+            var details = new List<string>();
+          
+            if (!string.IsNullOrEmpty(expense.DetailsJson))
+            {
+                try
+                {
+                    var jsonDetails = JsonSerializer.Deserialize<Dictionary<string, string>>(expense.DetailsJson);
+                    if (jsonDetails != null)
+                    {                       
+                        var costCenterName = expense.CostCenter?.Name?.ToLower() ?? "";
+
+                        if (costCenterName.Contains("diesel") || costCenterName.Contains("combustível"))
+                        {
+                            if (jsonDetails.ContainsKey("placaVeiculo") && !string.IsNullOrEmpty(jsonDetails["placaVeiculo"]))
+                                details.Add($"Veículo Placa: {jsonDetails["placaVeiculo"]}");
+                            if (jsonDetails.ContainsKey("kmVeiculo") && !string.IsNullOrEmpty(jsonDetails["kmVeiculo"]))
+                                details.Add($"KM: {jsonDetails["kmVeiculo"]}");
+                            if (jsonDetails.ContainsKey("funcionario") && !string.IsNullOrEmpty(jsonDetails["funcionario"]))
+                                details.Add($"Funcionário: {jsonDetails["funcionario"]}");
+                        }
+                        else if (costCenterName.Contains("hospedagem"))
+                        {
+                            if (jsonDetails.ContainsKey("razaoSocial") && !string.IsNullOrEmpty(jsonDetails["razaoSocial"]))
+                                details.Add($"Hotel: {jsonDetails["razaoSocial"]}");
+                            if (jsonDetails.ContainsKey("municipioUf") && !string.IsNullOrEmpty(jsonDetails["municipioUf"]))
+                                details.Add($"Local: {jsonDetails["municipioUf"]}");
+                            if (jsonDetails.ContainsKey("cnpj") && !string.IsNullOrEmpty(jsonDetails["cnpj"]))
+                                details.Add($"CNPJ: {jsonDetails["cnpj"]}");
+                            if (jsonDetails.ContainsKey("nrNf") && !string.IsNullOrEmpty(jsonDetails["nrNf"]))
+                                details.Add($"NF: {jsonDetails["nrNf"]}");
+                        }
+                        else if (costCenterName.Contains("folha"))
+                        {
+                            if (jsonDetails.ContainsKey("competencia") && !string.IsNullOrEmpty(jsonDetails["competencia"]))
+                                details.Add($"Competência: {jsonDetails["competencia"]}");
+                            if (jsonDetails.ContainsKey("funcionario") && !string.IsNullOrEmpty(jsonDetails["funcionario"]))
+                                details.Add($"Funcionário: {jsonDetails["funcionario"]}");
+                        }
+                        else
+                        {                           
+                            foreach (var kvp in jsonDetails)
+                            {
+                                if (!string.IsNullOrEmpty(kvp.Value))
+                                {
+                                    var fieldName = kvp.Key switch
+                                    {
+                                        "razaoSocial" => "Razão Social",
+                                        "cnpj" => "CNPJ",
+                                        "nrNf" => "NF",
+                                        "municipioUf" => "Município/UF",
+                                        "placaVeiculo" => "Placa",
+                                        "kmVeiculo" => "KM",
+                                        "funcionario" => "Funcionário",
+                                        "competencia" => "Competência",
+                                        _ => kvp.Key
+                                    };
+                                    details.Add($"{fieldName}: {kvp.Value}");
+                                }
+                            }
+                        }
+                    }
+                }
+                catch (JsonException)
+                {
+                    
+                }
+            }
+           
+            if (!string.IsNullOrEmpty(expense.SupplierName))
+                details.Add($"Fornecedor: {expense.SupplierName}");
+
+            if (!string.IsNullOrEmpty(expense.InvoiceNumber))
+                details.Add($"Nota Fiscal: {expense.InvoiceNumber}");
+           
+            if (!string.IsNullOrEmpty(expense.Observations))
+                details.Add($"Obs: {expense.Observations}");
+
+            return string.Join(" | ", details);
+        }
+
         // GET: api/reports/expenses
         [HttpGet("expenses")]
         public async Task<ActionResult<ReportResultDto>> GetExpensesReport([FromQuery] ExpenseReportFilterDto filters)
@@ -55,8 +138,14 @@ namespace SGO.Api.Controllers
                 ProjectName = e.Project?.Name ?? "Despesa da Matriz",
                 CostCenterName = e.CostCenter.Name,
                 Description = e.Description,
+                MainDescription = e.Description,
                 Amount = e.Amount,
-                AttachmentPath = !string.IsNullOrEmpty(e.AttachmentPath) ? $"http://localhost:5145{e.AttachmentPath}" : null
+                AttachmentPath = !string.IsNullOrEmpty(e.AttachmentPath) ? $"http://localhost:5145{e.AttachmentPath}" : null,
+                Observations = e.Observations,
+                SupplierName = e.SupplierName,
+                InvoiceNumber = e.InvoiceNumber,
+                DetailsJson = e.DetailsJson,
+                FormattedDetails = FormatExpenseDetails(e)
             }).ToList();
 
             var total = detailedList.Sum(item => item.Amount);
@@ -64,15 +153,27 @@ namespace SGO.Api.Controllers
                 .GroupBy(item => item.ProjectName)
                 .ToDictionary(g => g.Key, g => g.Sum(i => i.Amount));
 
+            var byCostCenterSummary = detailedList
+                .GroupBy(item => item.CostCenterName)
+                .ToDictionary(g => g.Key, g => g.Sum(i => i.Amount));
+            
+            var company = await _context.Companies.FirstOrDefaultAsync();
+
             var result = new ReportResultDto
             {
+                CompanyName = company?.Name ?? "Sistema SGO",
+                CompanyCnpj = company?.Cnpj ?? "",
+                FilterStartDate = filters.StartDate,
+                FilterEndDate = filters.EndDate,
+                GeneratedAt = DateTime.UtcNow,
                 DetailedExpenses = detailedList,
                 Summary = new ReportSummaryDto
                 {
                     TotalExpenses = total,
                     TotalRecords = detailedList.Count,
                     AverageExpense = detailedList.Count > 0 ? total / detailedList.Count : 0,
-                    ByProject = byProjectSummary
+                    ByProject = byProjectSummary,
+                    ByCostCenter = byCostCenterSummary
                 }
             };
 
@@ -100,6 +201,7 @@ namespace SGO.Api.Controllers
                      Obra = e.Project?.Name ?? "Despesa da Matriz",
                      CentroDeCusto = e.CostCenter.Name,
                      Descricao = e.Description,
+                     DetalhesFormatados = FormatExpenseDetails(e),
                      Valor = e.Amount,
                      Anexo = !string.IsNullOrEmpty(e.AttachmentPath) ? $"http://localhost:5145{e.AttachmentPath}" : ""
                  })
@@ -111,11 +213,11 @@ namespace SGO.Api.Controllers
                 worksheet.Cells.LoadFromCollection(expensesForExport, true);
 
                 worksheet.Cells[worksheet.Dimension.Address].AutoFitColumns();
-                worksheet.Column(5).Style.Numberformat.Format = "R$ #,##0.00";
+                worksheet.Column(6).Style.Numberformat.Format = "R$ #,##0.00"; // Coluna Valor
 
                 for (int i = 2; i <= expensesForExport.Count + 1; i++)
                 {
-                    var linkCell = worksheet.Cells[i, 6];
+                    var linkCell = worksheet.Cells[i, 7]; // Coluna Anexo
                     if (!string.IsNullOrEmpty(linkCell.Text))
                     {
                         linkCell.Hyperlink = new Uri(linkCell.Text);
@@ -133,6 +235,5 @@ namespace SGO.Api.Controllers
                 return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", excelName);
             }
         }
-
     }
 }
