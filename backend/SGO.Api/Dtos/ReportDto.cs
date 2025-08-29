@@ -2,9 +2,12 @@ namespace SGO.Api.Dtos;
 
 public class ExpenseReportFilterDto
 {
+    public string ReportType { get; set; } = "matriz";
+    public Guid? CompanyId { get; set; }
+    public Guid? ProjectId { get; set; }
+    public Guid? CostCenterId { get; set; }
     public DateTime? StartDate { get; set; }
     public DateTime? EndDate { get; set; }
-    public List<Guid>? ProjectIds { get; set; }
 }
 
 public class ExpenseReportItemDto
