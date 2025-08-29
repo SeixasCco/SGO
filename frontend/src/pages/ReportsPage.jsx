@@ -4,6 +4,8 @@ import { useCompany } from '../context/CompanyContext';
 import toast from 'react-hot-toast';
 import { useReactToPrint } from 'react-to-print';
 import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 const ReportsPage = () => {
     const { companies } = useCompany();
@@ -56,15 +58,11 @@ const ReportsPage = () => {
         setLoading(true);
         setError(null);
         setReportData(null);
-
         try {
             const params = { ...filters };
             for (const key in params) {
-                if (!params[key]) {
-                    delete params[key];
-                }
+                if (!params[key]) delete params[key];
             }
-            
             const response = await axios.get('http://localhost:5145/api/reports/expenses', { params });
             setReportData(response.data);
         } catch (error) {
@@ -79,6 +77,9 @@ const ReportsPage = () => {
     const filteredProjects = filters.companyId 
         ? projects.filter(p => p.companyId === filters.companyId) 
         : [];
+
+    const formatCurrency = (value) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value || 0);
+    const formatDate = (dateString) => dateString ? new Date(dateString).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : 'N/A';
 
     const handlePrint = useReactToPrint({
         content: () => reportComponentRef.current,
@@ -113,8 +114,72 @@ const ReportsPage = () => {
         XLSX.writeFile(workbook, `Relatorio_Despesas_${Date.now()}.xlsx`);
     };
 
-    const formatCurrency = (value) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value || 0);
-    const formatDate = (dateString) => dateString ? new Date(dateString).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : 'N/A';
+    const handleExportPdf = () => {
+        if (!reportData) return;
+        const doc = new jsPDF();
+        
+        doc.setFontSize(18);
+        doc.text(reportData.companyName, 14, 22);
+        doc.setFontSize(11);
+        doc.setTextColor(100);
+        doc.text(`CNPJ: ${reportData.companyCnpj}`, 14, 30);
+        const periodo = `Período: ${formatDate(reportData.filterStartDate)} a ${formatDate(reportData.filterEndDate)}`;
+        doc.text(periodo, 14, 36);
+
+        const tableColumn = ["Data", "Descrição", "Centro de Custo", "Valor"];
+        const tableRows = [];
+
+        reportData.detailedExpenses.forEach(item => {
+            const itemData = [
+                formatDate(item.date),
+                `${item.mainDescription}\n${item.formattedDetails || ''}`,
+                item.costCenterName,
+                formatCurrency(item.amount)
+            ];
+            tableRows.push(itemData);
+        });
+
+        autoTable(doc, {
+            head: [tableColumn],
+            body: tableRows,
+            startY: 50,
+            styles: { valign: 'middle' },
+            headStyles: { fillColor: [22, 160, 133] },
+            columnStyles: {
+                0: { cellWidth: 25 },
+                1: { cellWidth: 'auto' },
+                2: { cellWidth: 40 },
+                3: { cellWidth: 30, halign: 'right' }
+            },
+            didDrawPage: (data) => {               
+                doc.setFontSize(10);
+                doc.text('Página ' + doc.internal.getNumberOfPages(), data.settings.margin.left, doc.internal.pageSize.height - 10);
+            }
+        });
+        
+        const finalY = doc.lastAutoTable.finalY;
+        doc.setFontSize(12);
+        doc.text('Resumo do Período', 14, finalY + 15);
+
+        let summaryY = finalY + 22;
+        if (reportData.summary.byCostCenter) {
+            const summaryRows = Object.entries(reportData.summary.byCostCenter).map(([name, value]) => [name, formatCurrency(value)]);
+            summaryRows.push(['', '']); 
+            summaryRows.push([{ content: 'TOTAL GERAL:', styles: { fontStyle: 'bold' } }, { content: formatCurrency(reportData.summary.totalExpenses), styles: { fontStyle: 'bold' } }]);
+            
+            autoTable(doc, {
+                body: summaryRows,
+                startY: finalY + 20,
+                theme: 'plain',
+                columnStyles: {
+                    0: { halign: 'left' },
+                    1: { halign: 'right' }
+                }
+            });
+        }
+        
+        doc.save(`Relatorio_Despesas_${Date.now()}.pdf`);
+    };
 
     return (
         <div className="page-container">
@@ -123,6 +188,7 @@ const ReportsPage = () => {
                 {reportData && (
                     <div className='page-header-actions'>
                         <button onClick={handleExportExcel} className="form-button-secondary">📄 Exportar Excel</button>
+                        <button onClick={handleExportPdf} className="form-button-secondary">📄 Exportar PDF</button>
                         <button onClick={handlePrint} className="form-button">🖨️ Imprimir</button>
                     </div>
                 )}
@@ -142,7 +208,6 @@ const ReportsPage = () => {
                                     <option value="geral">Visão Geral (Todas as Empresas)</option>
                                 </select>
                             </div>
-
                             {['matriz', 'obra', 'consolidado'].includes(filters.reportType) && (
                                 <div className="form-group">
                                     <label className="form-label">Selecione a Empresa</label>
@@ -152,7 +217,6 @@ const ReportsPage = () => {
                                     </select>
                                 </div>
                             )}
-
                             {filters.reportType === 'obra' && (
                                 <div className="form-group">
                                     <label className="form-label">Selecione a Obra</label>
