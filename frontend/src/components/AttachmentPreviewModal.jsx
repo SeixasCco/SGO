@@ -3,7 +3,7 @@ import React from 'react';
 const AttachmentPreviewModal = ({ attachmentPath, invoiceNumber, onClose }) => {
     if (!attachmentPath) return null;
 
-    const attachmentUrl = `http://localhost:5145/api/contractinvoices/attachment/${attachmentPath}`;
+    const attachmentUrl = `http://localhost:5145/uploads/${attachmentPath}`;
     const extension = attachmentPath.split('.').pop()?.toLowerCase();
     const fileName = attachmentPath.split('/').pop();
 

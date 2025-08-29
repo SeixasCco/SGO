@@ -7,8 +7,9 @@ import AddExpenseModal from '../components/AddExpenseModal';
 import FormGroup from '../components/common/FormGroup';
 import StyledInput from '../components/common/StyledInput';
 import { useCompany } from '../context/CompanyContext';
+import AttachmentPreviewModal from '../components/AttachmentPreviewModal';
 
-const AdminExpenseRow = ({ expense, formatCurrency, onDelete }) => (
+const AdminExpenseRow = ({ expense, formatCurrency, onDelete , onPreview}) => (
     <div className="expense-row-card">
         <div className="expense-info">
             <div className="expense-description">{expense.description}</div>
@@ -20,14 +21,12 @@ const AdminExpenseRow = ({ expense, formatCurrency, onDelete }) => (
         <div className="expense-amount">{formatCurrency(expense.amount)}</div>
         <div className="expense-attachment">
             {expense.attachmentPath && (
-                <a
-                    href={`http://localhost:5145/api/attachments/${expense.attachmentPath.replace('/uploads/', '')}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                <button
+                    onClick={() => onPreview(expense.attachmentPath)}
                     className="attachment-link"
                 >
                     📎 Anexo
-                </a>
+                </button>
             )}
         </div>
         <div className="expense-actions">
@@ -53,7 +52,8 @@ const AdminExpensesPage = () => {
         startDate: '',
         endDate: '',
         costCenterId: ''
-    });
+    });   
+    const [previewAttachmentPath, setPreviewAttachmentPath] = useState(null);
 
     const fetchCostCenters = useCallback(() => {
         axios.get('http://localhost:5145/api/costcenters')
@@ -78,6 +78,10 @@ const AdminExpensesPage = () => {
             })
             .finally(() => setLoading(false));
     }, [selectedCompany]);
+
+    const handlePreview = (attachmentPath) => {
+        setPreviewAttachmentPath(attachmentPath);
+    };
 
     useEffect(() => {
         let filtered = expenses;
@@ -139,6 +143,14 @@ const AdminExpensesPage = () => {
                 />
             )}
 
+            {previewAttachmentPath && (
+                <AttachmentPreviewModal
+                    attachmentPath={previewAttachmentPath}
+                    invoiceNumber={''}
+                    onClose={() => setPreviewAttachmentPath(null)}
+                />
+            )}
+
             <div className="section-header">
                 <h2 className="section-title">
                     🏢 Despesas da Matriz
@@ -192,6 +204,7 @@ const AdminExpensesPage = () => {
                                 expense={expense}
                                 formatCurrency={formatCurrency}
                                 onDelete={handleDeleteExpense}
+                                onPreview={handlePreview}
                             />
                         ))}
                     </div>

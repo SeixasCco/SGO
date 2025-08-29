@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import FormGroup from '../components/common/FormGroup';
 import StyledInput from '../components/common/StyledInput';
 import { expenseFormMap } from '../config/expenseFormMap';
+import AttachmentPreviewModal from '../components/AttachmentPreviewModal';
 
 const EditExpensePage = () => {
     const { id } = useParams();
@@ -16,9 +17,13 @@ const EditExpensePage = () => {
     const [error, setError] = useState('');
     const [submitting, setSubmitting] = useState(false);
 
-    // Declaração dos states para os campos dinâmicos
     const [specificFields, setSpecificFields] = useState([]);
     const [detailsData, setDetailsData] = useState({});
+    const [previewAttachmentPath, setPreviewAttachmentPath] = useState(null);
+
+    const StyledTextarea = (props) => (
+        <textarea className="form-textarea" {...props} />
+    );
 
     const fetchExpenseData = useCallback(() => {
         setLoading(true);
@@ -70,7 +75,6 @@ const EditExpensePage = () => {
         e.preventDefault();
         setSubmitting(true);
 
-        // Validação dos dados antes de enviar
         if (!formData.description?.trim()) {
             toast.error('Descrição é obrigatória.');
             setSubmitting(false);
@@ -83,32 +87,27 @@ const EditExpensePage = () => {
             return;
         }
 
-        // Construção do objeto para envio
         const expenseDto = {
             id: formData.id,
             description: formData.description.trim(),
             amount: parseFloat(formData.amount),
             date: formData.date,
+            observations: formData.observations,
             attachmentPath: formData.attachmentPath || null,
             detailsJson: Object.keys(detailsData).length > 0 ? JSON.stringify(detailsData) : null
         };
 
-        // Adicionar projectId apenas se existir e for válido
         if (formData.projectId && formData.projectId !== "00000000-0000-0000-0000-000000000000") {
             expenseDto.projectId = formData.projectId;
         }
 
-        // Adicionar contractId apenas se existir e for válido
         if (formData.contractId && formData.contractId !== "00000000-0000-0000-0000-000000000000") {
             expenseDto.contractId = formData.contractId;
         }
 
-        // Adicionar costCenterId se existir
         if (formData.costCenterId) {
             expenseDto.costCenterId = formData.costCenterId;
         }
-
-        console.log('Enviando dados:', expenseDto); // Debug
 
         const promise = axios.put(`http://localhost:5145/api/projectexpenses/${id}`, expenseDto, {
             headers: {
@@ -119,15 +118,15 @@ const EditExpensePage = () => {
         toast.promise(promise, {
             loading: 'Atualizando despesa...',
             success: () => {
-                const destination = formData.projectId && formData.projectId !== "00000000-0000-0000-0000-000000000000" 
-                    ? `/project/${formData.projectId}` 
+                const destination = formData.projectId && formData.projectId !== "00000000-0000-0000-0000-000000000000"
+                    ? `/project/${formData.projectId}`
                     : '/admin';
                 navigate(destination);
                 return 'Despesa atualizada com sucesso!';
             },
             error: (err) => {
                 console.error('Erro ao atualizar despesa:', err.response?.data || err);
-                return err.response?.data?.errors 
+                return err.response?.data?.errors
                     ? `Erro de validação: ${Object.values(err.response.data.errors).flat().join(', ')}`
                     : 'Falha ao atualizar a despesa.';
             }
@@ -141,11 +140,18 @@ const EditExpensePage = () => {
     if (!formData) return <div className="empty-state"><h3>Despesa não encontrada.</h3></div>;
 
     const backLink = formData.projectId && formData.projectId !== "00000000-0000-0000-0000-000000000000"
-        ? `/project/${formData.projectId}` 
+        ? `/project/${formData.projectId}`
         : '/admin';
 
     return (
         <div className="page-container">
+            {previewAttachmentPath && (
+                <AttachmentPreviewModal
+                    attachmentPath={previewAttachmentPath}
+                    invoiceNumber={formData.invoiceNumber}
+                    onClose={() => setPreviewAttachmentPath(null)}
+                />
+            )}
             <div className="page-header">
                 <div className="page-header-content">
                     <div>
@@ -163,15 +169,15 @@ const EditExpensePage = () => {
             <div className="page-content">
                 {projectInfo && (
                     <div className="info-card info-card-green" style={{ marginBottom: '32px' }}>
-                        <h3 className="info-card-title" style={{fontSize: '1.1rem'}}>Informações da Obra</h3>
+                        <h3 className="info-card-title" style={{ fontSize: '1.1rem' }}>Informações da Obra</h3>
                         <div className="form-grid">
-                             <div>
+                            <div>
                                 <span className="info-card-label">Nome:</span>
-                                <div className="info-card-value" style={{fontSize: '1rem'}}>{projectInfo.contractor} - {projectInfo.name}</div>
+                                <div className="info-card-value" style={{ fontSize: '1rem' }}>{projectInfo.contractor} - {projectInfo.name}</div>
                             </div>
-                             <div>
+                            <div>
                                 <span className="info-card-label">CNO:</span>
-                                <div className="info-card-value" style={{fontSize: '1rem'}}>{projectInfo.cno}</div>
+                                <div className="info-card-value" style={{ fontSize: '1rem' }}>{projectInfo.cno}</div>
                             </div>
                         </div>
                     </div>
@@ -179,8 +185,8 @@ const EditExpensePage = () => {
 
                 <div className="card" style={{ maxWidth: '900px', margin: '0 auto' }}>
                     <div className="expense-header-display">
-                         <div className="expense-header-icon">💰</div>
-                         <div>
+                        <div className="expense-header-icon">💰</div>
+                        <div>
                             <h2 className="expense-header-title">{formData.description}</h2>
                             <div className="expense-header-badges">
                                 <span className="badge warning">{formatCurrency(formData.amount)}</span>
@@ -194,47 +200,58 @@ const EditExpensePage = () => {
                         <div className="form-grid">
                             <div style={{ gridColumn: '1 / -1' }}>
                                 <FormGroup label="Descrição da Despesa">
-                                    <StyledInput 
-                                        type="text" 
-                                        name="description" 
-                                        value={formData.description || ''} 
-                                        onChange={handleCommonChange} 
-                                        required 
+                                    <StyledInput
+                                        type="text"
+                                        name="description"
+                                        value={formData.description || ''}
+                                        onChange={handleCommonChange}
+                                        required
                                     />
                                 </FormGroup>
                             </div>
                             <FormGroup label="Valor (R$)">
-                                <StyledInput 
-                                    type="number" 
-                                    step="0.01" 
-                                    name="amount" 
-                                    value={formData.amount || ''} 
-                                    min="0.01" 
-                                    onChange={handleCommonChange} 
-                                    required 
+                                <StyledInput
+                                    type="number"
+                                    step="0.01"
+                                    name="amount"
+                                    value={formData.amount || ''}
+                                    min="0.01"
+                                    onChange={handleCommonChange}
+                                    required
                                 />
                             </FormGroup>
                             <FormGroup label="Data da Despesa">
-                                <StyledInput 
-                                    type="date" 
-                                    name="date" 
-                                    value={formData.date || ''} 
-                                    onChange={handleCommonChange} 
-                                    required 
+                                <StyledInput
+                                    type="date"
+                                    name="date"
+                                    value={formData.date || ''}
+                                    onChange={handleCommonChange}
+                                    required
                                 />
                             </FormGroup>
                             <FormGroup label="Centro de Custo">
-                                 <StyledInput 
-                                    type="text" 
-                                    value={formData.costCenter?.name || 'Não informado'} 
-                                    disabled 
+                                <StyledInput
+                                    type="text"
+                                    value={formData.costCenter?.name || 'Não informado'}
+                                    disabled
                                 />
                             </FormGroup>
+                            <div style={{ gridColumn: '1 / -1', marginTop: '16px' }}>
+                                <FormGroup label="Observações">
+                                    <StyledTextarea
+                                        name="observations"
+                                        value={formData.observations || ''}
+                                        onChange={handleCommonChange}
+                                        rows="3"
+                                        placeholder="Adicione observações sobre a despesa..."
+                                    />
+                                </FormGroup>
+                            </div>
                         </div>
-                        
+
                         {specificFields.length > 0 && (
                             <div className="form-section" style={{ padding: '20px', marginTop: '24px' }}>
-                                <h3 className="section-divider" style={{marginTop: 0, fontSize: '1rem'}}>Detalhes Específicos</h3>
+                                <h3 className="section-divider" style={{ marginTop: 0, fontSize: '1rem' }}>Detalhes Específicos</h3>
                                 <div className="form-grid">
                                     {specificFields.map(field => (
                                         <FormGroup key={field.name} label={field.label}>
@@ -249,14 +266,14 @@ const EditExpensePage = () => {
                                     ))}
                                 </div>
                             </div>
-                        )}
+                        )}                       
 
                         {formData.attachmentPath && (
                             <div className="info-card info-card-blue" style={{ marginTop: '24px' }}>
-                                <h4 className="info-card-title" style={{fontSize: '1rem'}}>Anexo da Despesa</h4>
-                                <a href={`http://localhost:5145${formData.attachmentPath}`} target="_blank" rel="noopener noreferrer" className="form-button">
+                                <h4 className="info-card-title" style={{ fontSize: '1rem' }}>Anexo da Despesa</h4>
+                                <button type="button" onClick={() => setPreviewAttachmentPath(formData.attachmentPath)} className="form-button">
                                     Visualizar Anexo
-                                </a>
+                                </button>
                             </div>
                         )}
 

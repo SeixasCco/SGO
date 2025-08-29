@@ -78,7 +78,7 @@ const CompanyManager = () => {
                     </h3>
                     <form onSubmit={handleSubmit}>
                         <div className="form-grid">
-                            <FormGroup label="Nome da Empresa">
+                            <FormGroup label="Razão Social">
                                 <StyledInput type="text" name="name" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} required />
                             </FormGroup>
                             <FormGroup label="CNPJ">
@@ -98,7 +98,7 @@ const CompanyManager = () => {
                     <table className="data-table">
                         <thead>
                             <tr>
-                                <th>Nome da Empresa</th>
+                                <th>Razão Social</th>
                                 <th>CNPJ</th>
                                 <th style={{ textAlign: 'center' }}>Ações</th>
                             </tr>

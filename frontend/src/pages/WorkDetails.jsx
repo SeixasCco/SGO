@@ -3,18 +3,16 @@ import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
-// Componentes comuns
 import StatusBadge from '../components/common/StatusBadge';
 import InfoCard from '../components/common/InfoCard';
 import ContractCard from '../components/common/ContractCard';
 import ExpenseRow from '../components/common/ExpenseRow';
 
-// Componentes específicos
 import AddContractModal from '../components/AddContractModal';
 import TeamManager from '../components/TeamManager';
 import AddExpenseModal from '../components/AddExpenseModal';
+import AttachmentPreviewModal from '../components/AttachmentPreviewModal'; 
 
-// Estilos
 import "../styles/forms.css";
 
 const WorkDetails = () => {
@@ -28,6 +26,7 @@ const WorkDetails = () => {
     const [allocations, setAllocations] = useState([]);
     const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
     const [loadingContracts, setLoadingContracts] = useState(false);
+    const [previewAttachment, setPreviewAttachment] = useState(null);
 
     const fetchProjectDetails = useCallback(() => {
         setLoading(true);
@@ -66,6 +65,10 @@ const WorkDetails = () => {
                 console.error("Erro ao buscar dados da equipe:", error);
             });
     }, [id]);
+
+    const handlePreview = (attachmentPath) => {
+        setPreviewAttachment({ path: attachmentPath, invoiceNumber: '' });
+    };
 
     const handleTeamUpdate = useCallback(() => {
         fetchTeamData();
@@ -145,6 +148,14 @@ const WorkDetails = () => {
                     }}
                     projectId={id}
                     contractId={contracts.length > 0 ? contracts[0].id : null}
+                />
+            )}
+
+            {previewAttachment && (
+                <AttachmentPreviewModal
+                    attachmentPath={previewAttachment.path}
+                    invoiceNumber={previewAttachment.invoiceNumber}
+                    onClose={() => setPreviewAttachment(null)}
                 />
             )}
 
@@ -324,6 +335,7 @@ const WorkDetails = () => {
                                             onEdit={(id) => window.location.href = `/expense/edit/${id}`}
                                             onDelete={handleDeleteExpense}
                                             formatCurrency={formatCurrency}
+                                            onPreview={handlePreview}
                                         />
                                     ))}
                                 </div>

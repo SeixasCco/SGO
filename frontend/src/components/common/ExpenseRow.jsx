@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-const ExpenseRow = ({ expense, onDelete, formatCurrency }) => (
+const ExpenseRow = ({ expense, onDelete, formatCurrency, onPreview }) => (
     <div className="expense-row">
         <div className="expense-info">
             <div className="expense-description">{expense.description}</div>
@@ -14,16 +14,15 @@ const ExpenseRow = ({ expense, onDelete, formatCurrency }) => (
 
         <div className="expense-amount">{formatCurrency(expense.amount)}</div>
 
-        <div className="expense-attachment">
+       <div className="expense-attachment">
             {expense.attachmentPath && (
-                <a
-                    href={`http://localhost:5145/api/attachments/${expense.attachmentPath.replace('/uploads/', '')}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                <button
+                    onClick={() => onPreview(expense.attachmentPath)}
                     className="attachment-link"
+                    style={{ border: 'none', background: 'none', cursor: 'pointer', padding: 0 }}
                 >
                     📎 Anexo
-                </a>
+                </button>
             )}
         </div>
        

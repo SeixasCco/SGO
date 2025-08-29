@@ -1126,7 +1126,6 @@ body {
   color: #6366f1;
 }
 
-/* Responsive adjustments for auth */
 @media (max-width: 768px) {
   .nav-user-info {
     gap: 8px;
@@ -1141,6 +1140,28 @@ body {
   }
   
   .nav-links {
-    display: none; /* Esconder links em mobile - pode implementar menu hamburguer depois */
+    display: none; 
   }
 }
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000; 
+ 
+  transition: none !important;
+  transform: none !important;
+  animation: none !important;  
+
+  backface-visibility: hidden;
+  perspective: 1000px;
+  will-change: auto;
+}
+
