@@ -1,251 +1,238 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import ExpenseCharts from './ExpenseCharts';
-import FormGroup from '../components/common/FormGroup';
-import StyledInput from '../components/common/StyledInput';
+import { useCompany } from '../context/CompanyContext';
+import toast from 'react-hot-toast';
+import { useReactToPrint } from 'react-to-print';
+import * as XLSX from 'xlsx';
+
+const ReportFilters = ({ filters, setFilters, projects, costCenters, onGenerate, loading }) => {
+    const handleFilterChange = (field, value) => {
+        setFilters(prev => ({ ...prev, [field]: value }));
+    };
+
+    return (
+        <div className="filters-section">
+            <div className="form-grid">
+                <div className="form-group">
+                    <label>Data Inicial</label>
+                    <input type="date" className="form-input" value={filters.startDate} onChange={e => handleFilterChange('startDate', e.target.value)} />
+                </div>
+                <div className="form-group">
+                    <label>Data Final</label>
+                    <input type="date" className="form-input" value={filters.endDate} onChange={e => handleFilterChange('endDate', e.target.value)} />
+                </div>
+                <div className="form-group">
+                    <label>Obra / Projeto</label>
+                    <select className="form-select" value={filters.projectId} onChange={e => handleFilterChange('projectId', e.target.value)}>
+                        <option value="">Todas as Obras</option>
+                        {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                    </select>
+                </div>
+                <div className="form-group">
+                    <label>Centro de Custo</label>
+                    <select className="form-select" value={filters.costCenterId} onChange={e => handleFilterChange('costCenterId', e.target.value)}>
+                        <option value="">Todos</option>
+                        {costCenters.map(cc => <option key={cc.id} value={cc.id}>{cc.name}</option>)}
+                    </select>
+                </div>
+            </div>
+            <div style={{ marginTop: '16px', display: 'flex', justifyContent: 'flex-end' }}>
+                <button onClick={onGenerate} className="form-button">
+                    🔍 Gerar Relatório
+                </button>
+            </div>
+        </div>
+    );
+};
 
 const ReportsPage = () => {
-    const navigate = useNavigate();
+    const { selectedCompany } = useCompany();
+    const [reportData, setReportData] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [projects, setProjects] = useState([]);
-    const [reportData, setReportData] = useState([]);
-    const [summary, setSummary] = useState({});
+    const [costCenters, setCostCenters] = useState([]);
 
     const [filters, setFilters] = useState({
         startDate: '',
         endDate: '',
-        projectIds: [],
-        reportType: 'detailed'
+        projectId: '',
+        costCenterId: ''
     });
 
+    const reportComponentRef = useRef();
+
     useEffect(() => {
-        fetchProjects();
-    }, []);
+        const fetchDataForFilters = async () => {
+            if (!selectedCompany) return;
+            try {
+                const [projectsRes, costCentersRes] = await Promise.all([
+                    axios.get('http://localhost:5145/api/projects', { params: { companyId: selectedCompany.id } }),
+                    axios.get('http://localhost:5145/api/costcenters')
+                ]);
+                setProjects(projectsRes.data);
+                setCostCenters(costCentersRes.data);
+            } catch (err) {
+                toast.error("Falha ao carregar dados para os filtros.");
+            }
+        };
+        fetchDataForFilters();
+    }, [selectedCompany]);
 
-    const fetchProjects = async () => {
-        try {
-            const response = await axios.get('http://localhost:5145/api/projects');
-            setProjects(response.data);
-        } catch (error) {
-            console.error('Erro ao buscar projetos:', error);
+    const handleGenerateReport = async () => {
+        if (!selectedCompany) {
+            toast.error("Por favor, selecione uma empresa.");
+            return;
         }
-    };
 
-    const fetchReportData = async () => {
         setLoading(true);
         setError(null);
+        setReportData(null);
+
         try {
-            const params = new URLSearchParams();
-            if (filters.startDate) params.append('startDate', filters.startDate);
-            if (filters.endDate) params.append('endDate', filters.endDate);
-            filters.projectIds.forEach(id => params.append('projectIds', id));
+            const params = {
+                companyId: selectedCompany.id,
+                startDate: filters.startDate || null,
+                endDate: filters.endDate || null,
+                projectId: filters.projectId || null,
+                costCenterId: filters.costCenterId || null,
+            };
 
-            const response = await axios.get(`http://localhost:5145/api/reports/expenses?${params}`);
-            
-            const expensesList = response.data.detailedExpenses || [];
-            setReportData(expensesList);
-            
-            const total = expensesList.reduce((sum, item) => sum + item.amount, 0);
-            const byProject = expensesList.reduce((acc, item) => {
-                const key = item.projectName;
-                acc[key] = (acc[key] || 0) + item.amount;
-                return acc;
-            }, {});
-
-            setSummary({
-                totalExpenses: total,
-                totalRecords: expensesList.length,
-                byProject,
-                averageExpense: expensesList.length > 0 ? total / expensesList.length : 0
-            });
-
+            const response = await axios.get('http://localhost:5145/api/reports/expenses', { params });
+            setReportData(response.data);
         } catch (error) {
-            setError('Erro ao carregar relatório de despesas');
-            console.error(error);
+            const errorMessage = error.response?.data?.message || 'Erro ao carregar relatório.';
+            setError(errorMessage);
+            toast.error(errorMessage);
         } finally {
             setLoading(false);
         }
     };
 
-    const handleProjectFilter = (projectId) => {
-        setFilters(prev => ({
-            ...prev,
-            projectIds: prev.projectIds.includes(projectId)
-                ? prev.projectIds.filter(id => id !== projectId)
-                : [...prev.projectIds, projectId]
+    const handlePrint = useReactToPrint({
+        content: () => reportComponentRef.current,
+        documentTitle: `Relatorio_Despesas_${selectedCompany?.name.replace(/\s/g, '_')}`
+    });
+
+    const handleExportExcel = () => {
+        if (!reportData) return;
+
+        const dataToExport = reportData.detailedExpenses.map(item => ({
+            'Data': formatDate(item.date),
+            'Descrição Principal': item.mainDescription,
+            'Centro de Custo': item.costCenterName,
+            'Obra/Projeto': item.projectName,
+            'Detalhes': item.formattedDetails,
+            'Valor': item.amount
         }));
-    };
 
-    const exportToExcel = async () => {
-        try {
-            const params = new URLSearchParams();
-            if (filters.startDate) params.append('startDate', filters.startDate);
-            if (filters.endDate) params.append('endDate', filters.endDate);
-            filters.projectIds.forEach(id => params.append('projectIds', id));
+        const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Despesas");
 
-            const response = await axios.get(`http://localhost:5145/api/reports/expenses/excel?${params}`, {
-                responseType: 'blob'
-            });
+        const summaryData = [
+            ['Total de Despesas', reportData.summary.totalExpenses],
+            [],
+            ['Resumo por Centro de Custo']
+        ];
+        Object.entries(reportData.summary.byCostCenter).forEach(([name, value]) => {
+            summaryData.push([name, value]);
+        });
+        const summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
+        XLSX.utils.book_append_sheet(workbook, summarySheet, "Resumo");
 
-            const url = window.URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', `relatorio-despesas-${new Date().toISOString().split('T')[0]}.xlsx`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        } catch (error) {
-            alert('Erro ao exportar relatório');
-        }
+        XLSX.writeFile(workbook, `Relatorio_Despesas_${selectedCompany?.name.replace(/\s/g, '_')}.xlsx`);
     };
 
     const formatCurrency = (value) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value || 0);
-    const formatDate = (dateString) => new Date(dateString).toLocaleDateString('pt-BR');
+    const formatDate = (dateString) => dateString ? new Date(dateString).toLocaleDate - String('pt-BR', { timeZone: 'UTC' }) : 'N/A';
 
     return (
         <div className="page-container">
-            {/* Header */}
             <div className="page-header">
-                <div className="page-header-content">
-                    <div>
-                        <h1 className="page-title">📊 Relatórios Gerenciais</h1>
-                        <p className="page-subtitle">Análise completa de despesas por obra • Atualizado em tempo real</p>
+                <h1 className="page-title">Relatórios de Despesas</h1>
+                {reportData && (
+                    <div className='page-header-actions'>
+                        <button onClick={handleExportExcel} className="form-button-secondary">Exportar Excel</button>
+                        <button onClick={handlePrint} className="form-button">Imprimir</button>
                     </div>
-                    <div className="page-header-actions">
-                        <button onClick={exportToExcel} disabled={reportData.length === 0} className="form-button">
-                            📑 Exportar Excel
-                        </button>
-                        <button onClick={() => navigate('/')} className="form-button-secondary">
-                            ← Voltar
-                        </button>
-                    </div>
-                </div>
+                )}
             </div>
 
             <div className="page-content">
-                {/* Seção de Filtros */}
                 <div className="card">
-                    <h3 className="card-header">🔍 Filtros de Pesquisa</h3>
-                    <div className="form-grid">
-                        <FormGroup label="📅 Data Inicial">
-                            <StyledInput type="date" value={filters.startDate} onChange={(e) => setFilters(prev => ({ ...prev, startDate: e.target.value }))} />
-                        </FormGroup>
-                        <FormGroup label="📅 Data Final">
-                            <StyledInput type="date" value={filters.endDate} onChange={(e) => setFilters(prev => ({ ...prev, endDate: e.target.value }))} />
-                        </FormGroup>
-                        <FormGroup label="📋 Tipo de Relatório">
-                             <select value={filters.reportType} onChange={(e) => setFilters(prev => ({ ...prev, reportType: e.target.value }))} className="form-select">
-                                <option value="detailed">Detalhado por Despesa</option>
-                                <option value="summary">Resumo por Obra</option>
-                                <option value="by-project">Agrupado por Projeto</option>
-                            </select>
-                        </FormGroup>
-                    </div>
-
-                    <FormGroup label="🏗️ Filtrar por Obras">
-                        <div className="filter-button-group">
-                            {projects.map((project) => (
-                                <button
-                                    key={project.id}
-                                    onClick={() => handleProjectFilter(project.id)}
-                                    className={`filter-button ${filters.projectIds.includes(project.id) ? 'active' : ''}`}
-                                >
-                                    {project.name}
-                                </button>
-                            ))}
-                        </div>
-                    </FormGroup>
-                    
-                    <button onClick={fetchReportData} disabled={loading} className="form-button">
-                        {loading ? '⏳ Carregando...' : '🔍 Gerar Relatório'}
-                    </button>
+                    <ReportFilters
+                        filters={filters}
+                        setFilters={setFilters}
+                        projects={projects}
+                        costCenters={costCenters}
+                        onGenerate={handleGenerateReport}
+                    />
                 </div>
 
-                {/* Cards de Resumo */}
-                {Object.keys(summary).length > 0 && (
-                    <div className="summary-grid">
-                        <div className="summary-card">
-                            <div className="summary-card-icon">💰</div>
-                            <div className="summary-card-value" style={{color: '#059669'}}>{formatCurrency(summary.totalExpenses)}</div>
-                            <div className="summary-card-label">Total de Despesas</div>
-                        </div>
-                        <div className="summary-card">
-                            <div className="summary-card-icon">📊</div>
-                            <div className="summary-card-value" style={{color: '#3b82f6'}}>{summary.totalRecords}</div>
-                            <div className="summary-card-label">Lançamentos</div>
-                        </div>
-                        <div className="summary-card">
-                            <div className="summary-card-icon">📈</div>
-                            <div className="summary-card-value" style={{color: '#8b5cf6'}}>{formatCurrency(summary.averageExpense)}</div>
-                            <div className="summary-card-label">Média por Lançamento</div>
-                        </div>
-                        <div className="summary-card">
-                            <div className="summary-card-icon">🏗️</div>
-                            <div className="summary-card-value" style={{color: '#f59e0b'}}>{Object.keys(summary.byProject || {}).length}</div>
-                            <div className="summary-card-label">Obras com Despesas</div>
-                        </div>
+                {loading && <div className="loading-state" style={{ marginTop: '32px' }}>Gerando relatório...</div>}
+                {error && <div className="error-state" style={{ marginTop: '32px' }}><h3>{error}</h3></div>}
+
+                {!loading && !error && !reportData && (
+                    <div className="empty-state" style={{ marginTop: '32px' }}>
+                        <div className="empty-state-icon">📊</div>
+                        <h3>Selecione os filtros para começar</h3>
+                        <p>Escolha o período e outros filtros para gerar seu relatório de despesas.</p>
                     </div>
                 )}
-                
-                {/* Tabela de Dados */}
-                {reportData.length > 0 && (
-                    <div className="card">
-                         <h3 className="card-header">📋 Detalhamento de Despesas</h3>
-                         <div className="report-table">
-                            <div className="report-table-header">
-                                <div>DATA</div>
-                                <div>OBRA</div>
-                                <div>CENTRO DE CUSTO</div>
-                                <div>DESCRIÇÃO</div>
-                                <div style={{textAlign: 'right'}}>VALOR</div>
-                                <div style={{textAlign: 'center'}}>ANEXO</div>
-                            </div>
-                            <div className="report-table-body">
-                                {reportData.map((item, index) => (
-                                    <div className="report-table-row" key={index}>
-                                        <div>{formatDate(item.date)}</div>
-                                        <div>{item.projectName}</div>
-                                        <div>{item.costCenterName}</div>
-                                        <div>{item.description}</div>
-                                        <div className="currency">{formatCurrency(item.amount)}</div>
-                                        <div style={{textAlign: 'center'}}>
-                                            {item.attachmentPath 
-                                                ? <span className="badge success">📎 Sim</span> 
-                                                : <span className="badge error">❌ Não</span>
-                                            }
+
+                {reportData && (
+                    <div ref={reportComponentRef} className="card" style={{ marginTop: '32px', padding: '24px' }}>
+                        {/* 1. Cabeçalho do Relatório */}
+                        <div className="report-header" style={{ borderBottom: '2px solid #e2e8f0', paddingBottom: '16px', marginBottom: '24px' }}>
+                            <h2 style={{ margin: 0, fontSize: '1.5rem' }}>{reportData.companyName}</h2>
+                            <p style={{ margin: 0, color: '#64748b' }}>CNPJ: {reportData.companyCnpj}</p>
+                            <p style={{ margin: '4px 0', color: '#64748b' }}>
+                                Período de Apuração: <strong>{formatDate(reportData.filterStartDate)}</strong> a <strong>{formatDate(reportData.filterEndDate)}</strong>
+                            </p>
+                            <small style={{ color: '#9ca3af' }}>Relatório gerado em: {new Date(reportData.generatedAt).toLocaleString('pt-BR')}</small>
+                        </div>
+
+                        {/* 2. Corpo do Relatório (Linhas) */}
+                        <div className="report-body">
+                            {reportData.detailedExpenses.length > 0 ? reportData.detailedExpenses.map((item, index) => (
+                                <div key={index} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #f1f5f9', padding: '12px 4px', gap: '16px' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                                        <div style={{ fontSize: '0.9rem', width: '90px', textAlign: 'center' }}>
+                                            <strong>{formatDate(item.date)}</strong>
+                                        </div>
+                                        <div>
+                                            <p style={{ fontWeight: 600, margin: 0 }}>{item.mainDescription}</p>
+                                            <p style={{ fontSize: '0.8rem', color: '#64748b', margin: '2px 0 4px 0' }}>
+                                                {item.costCenterName} • {item.projectName}
+                                            </p>
+                                            {item.formattedDetails && <small style={{ color: '#9ca3af', fontStyle: 'italic' }}>{item.formattedDetails}</small>}
                                         </div>
                                     </div>
+                                    <div style={{ fontWeight: 700, textAlign: 'right', color: '#dc2626', fontSize: '1rem', minWidth: '150px' }}>
+                                        {formatCurrency(item.amount)}
+                                    </div>
+                                </div>
+                            )) : <p>Nenhuma despesa encontrada para os filtros selecionados.</p>}
+                        </div>
+
+                        {/* 3. Rodapé com Totais */}
+                        <div className="report-footer" style={{ marginTop: '32px', paddingTop: '24px', borderTop: '2px solid #e2e8f0' }}>
+                            <h3 style={{ marginBottom: '16px' }}>Resumo do Período</h3>
+                            <div style={{ maxWidth: '400px', marginLeft: 'auto' }}>
+                                {reportData.summary.byCostCenter && Object.entries(reportData.summary.byCostCenter).map(([name, value]) => (
+                                    <div key={name} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: '#475569', padding: '4px 0' }}>
+                                        <span>{name}:</span>
+                                        <span style={{ fontWeight: 500 }}>{formatCurrency(value)}</span>
+                                    </div>
                                 ))}
+                                
+                                <div style={{ fontSize: '1.2rem', fontWeight: 700, display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #cbd5e1', marginTop: '16px', paddingTop: '16px' }}>
+                                    <span>TOTAL GERAL:</span>
+                                    <span>{formatCurrency(reportData.summary.totalExpenses)}</span>
+                                </div>
                             </div>
-                         </div>
-                    </div>
-                )}
-
-                <ExpenseCharts reportData={reportData} summary={summary} />
-
-                {/* Estados de Vazio, Loading e Erro */}
-                {!loading && reportData.length === 0 && Object.keys(summary).length === 0 && (
-                    <div className="card empty-state">
-                        <div className="empty-state-icon">📊</div>
-                        <h3>Nenhum relatório gerado ainda</h3>
-                        <p>Configure os filtros acima e clique em "Gerar Relatório" para visualizar as informações.</p>
-                    </div>
-                )}
-                {loading && (
-                    <div className="card empty-state">
-                        <div className="empty-state-icon">⏳</div>
-                        <h3>Gerando relatório...</h3>
-                        <p>Processando dados de despesas, aguarde um momento.</p>
-                    </div>
-                )}
-                 {error && (
-                    <div className="card error-state">
-                        <div className="empty-state-icon">❌</div>
-                        <h3>Erro ao carregar relatório</h3>
-                        <p>{error}</p>
-                        <button onClick={fetchReportData} className="form-button error">Tentar Novamente</button>
+                        </div>
                     </div>
                 )}
             </div>
