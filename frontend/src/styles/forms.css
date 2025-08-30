@@ -2129,3 +2129,16 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     color: #a16207;         
     border-color: #fde047;     
 }
+
+.expense-details-line {
+    font-size: 0.85rem;
+    color: #475569;
+    margin-top: 4px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 16px; 
+}
+
+.expense-detail-item strong {
+    color: #1e293b;
+}

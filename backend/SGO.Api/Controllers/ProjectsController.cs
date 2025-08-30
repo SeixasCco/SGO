@@ -109,8 +109,7 @@ namespace SGO.Api.Controllers
             {
                 return NotFound();
             }
-
-            // Início da lógica reimplementada
+            
             var payrollCostCenter = await _context.CostCenters.FirstOrDefaultAsync(cc => cc.Name == "Folhas de pagamento");
             if (payrollCostCenter == null)
             {
@@ -196,7 +195,10 @@ namespace SGO.Api.Controllers
                     Amount = e.Amount,
                     CostCenterName = e.CostCenter?.Name ?? "N/A",
                     IsVirtual = e.IsAutomaticallyCalculated,
-                    AttachmentPath = e.AttachmentPath
+                    AttachmentPath = e.AttachmentPath,
+                    DetailsJson = e.DetailsJson,
+                    ProjectIdentifier = updatedProject.CNO ?? updatedProject.Cnpj,
+                    Observations = e.Observations 
                 }).ToList()
             };
 
