@@ -5,23 +5,25 @@ import FormGroup from './common/FormGroup';
 import StyledInput from './common/StyledInput';
 import AllocationCard from './common/AllocationCard';
 
-const TeamManager = ({ projectId, allocations, onTeamUpdate }) => {
+const TeamManager = ({ project, allocations, onTeamUpdate }) => {
     const [availableEmployees, setAvailableEmployees] = useState([]);
     const [selectedEmployee, setSelectedEmployee] = useState('');
     const todayString = new Date().toISOString().split('T')[0];
     const [startDate, setStartDate] = useState(todayString);
 
     useEffect(() => {
-        axios.get('http://localhost:5145/api/employees/available')
-            .then(res => setAvailableEmployees(res.data || []))
-            .catch(() => toast.error('Erro ao buscar funcionários.'));
-    }, []);
+        if (project && project.companyId) {
+            axios.get(`http://localhost:5145/api/employees/available?companyId=${project.companyId}`)
+                .then(res => setAvailableEmployees(res.data || []))
+                .catch(() => toast.error('Erro ao buscar funcionários.'));
+        }
+    }, [project]);
 
     const handleAddMember = () => {
         if (!selectedEmployee) {
             return toast.error("Selecione um funcionário.");
         }
-        const promise = axios.post(`http://localhost:5145/api/projects/${projectId}/team/${selectedEmployee}`, { startDate });
+        const promise = axios.post(`http://localhost:5145/api/projects/${project.id}/team/${selectedEmployee}`, { startDate });
         toast.promise(promise, {
             loading: 'Alocando funcionário...',
             success: () => {
@@ -35,7 +37,7 @@ const TeamManager = ({ projectId, allocations, onTeamUpdate }) => {
 
     const handleEndAllocation = (allocationId) => {
         if (window.confirm("Tem certeza que deseja dar baixa nesta alocação?")) {
-            const promise = axios.put(`http://localhost:5145/api/projects/${projectId}/team/${allocationId}/end`);
+            const promise = axios.put(`http://localhost:5145/api/projects/${project.id}/team/${allocationId}/end`);
             toast.promise(promise, {
                 loading: 'Dando baixa...',
                 success: 'Baixa realizada com sucesso!',
@@ -46,7 +48,7 @@ const TeamManager = ({ projectId, allocations, onTeamUpdate }) => {
 
     const handleDeleteAllocation = (allocationId) => {
         if (window.confirm("ATENÇÃO: Excluir permanentemente o registro de alocação?")) {
-            const promise = axios.delete(`http://localhost:5145/api/projects/${projectId}/team/${allocationId}`);
+            const promise = axios.delete(`http://localhost:5145/api/projects/${project.id}/team/${allocationId}`);
             toast.promise(promise, {
                 loading: 'Excluindo...',
                 success: 'Alocação excluída!',

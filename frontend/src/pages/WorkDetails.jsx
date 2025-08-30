@@ -317,7 +317,7 @@ const WorkDetails = () => {
                 {/* TAB: EQUIPE */}
                 {activeTab === 'team' && (
                     <TeamManager
-                        projectId={id}
+                        project={project}
                         allocations={allocations}
                         onTeamUpdate={handleTeamUpdate}
                     />

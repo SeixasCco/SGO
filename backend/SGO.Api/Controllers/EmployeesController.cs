@@ -69,10 +69,15 @@ namespace SGO.Api.Controllers
             return Ok(employeeDto);
         }
 
-        // GET: api/employees/available
+        // GET: api/employees/available?companyId={companyId}
         [HttpGet("available")]
-        public async Task<ActionResult<IEnumerable<EmployeeDto>>> GetAvailableEmployees()
+        public async Task<ActionResult<IEnumerable<EmployeeDto>>> GetAvailableEmployees([FromQuery] Guid companyId)
         {
+            if (companyId == Guid.Empty)
+            {
+                return BadRequest("O ID da empresa é obrigatório para filtrar funcionários disponíveis.");
+            }
+
             var assignedEmployeeIds = await _context.ProjectEmployees
                                                     .Where(pe => pe.EndDate == null)
                                                     .Select(pe => pe.EmployeeId)
@@ -80,7 +85,7 @@ namespace SGO.Api.Controllers
                                                     .ToListAsync();
 
             return await _context.Employees
-                                 .Where(e => e.IsActive && !assignedEmployeeIds.Contains(e.Id))
+                                 .Where(e => e.CompanyId == companyId && e.IsActive && !assignedEmployeeIds.Contains(e.Id))
                                  .Select(e => new EmployeeDto
                                  {
                                      Id = e.Id,
