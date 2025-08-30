@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
 import { useCompany } from '../context/CompanyContext';
 import PageContainer from '../components/common/PageContainer';
-import BreadCrumb from '../components/common/BreadCrumb';
+import BreadCrumb from '../components/common/BreadCrumb'; 
 import FormGroup from '../components/common/FormGroup';
 import StyledInput from '../components/common/StyledInput';
 import LoadingState from '../components/common/LoadingState';
 
-// Componentes estilizados
 const StyledTextarea = (props) => (
     <textarea className="form-textarea" {...props} />
 );
@@ -29,15 +28,8 @@ const EditWorkPage = () => {
 
     useEffect(() => {
         const fetchWorkData = () => {
-            const promise = axios.get(`http://localhost:5145/api/projects/${id}`, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                }
-            });
-
-            toast.promise(promise, {
-                loading: 'Carregando dados da obra...',
-                success: (response) => {
+            axios.get(`http://localhost:5145/api/projects/${id}`)
+                .then(response => {
                     const data = response.data;
                     const formattedStartDate = data.startDate ? new Date(data.startDate).toISOString().split('T')[0] : '';
                     const formattedEndDate = data.endDate ? new Date(data.endDate).toISOString().split('T')[0] : '';
@@ -47,18 +39,18 @@ const EditWorkPage = () => {
                         startDate: formattedStartDate,
                         endDate: formattedEndDate,
                     });
-                    return 'Dados carregados!';
-                },
-                error: 'Falha ao buscar dados da obra.'
-            });
+                })
+                .catch(err => {
+                    toast.error('Falha ao buscar dados da obra.');
+                });
         };
-
         fetchWorkData();
     }, [id]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prevState => ({ ...prevState, [name]: value }));
+        const finalValue = name === 'status' ? parseInt(value, 10) : value;
+        setFormData(prevState => ({ ...prevState, [name]: finalValue }));
     };
 
     const handleSubmit = (e) => {
@@ -70,17 +62,12 @@ const EditWorkPage = () => {
         setSubmitting(true);
         const projectDto = { ...formData, id: id, endDate: formData.endDate || null };
 
-        const promise = axios.put(`http://localhost:5145/api/projects/${id}`, projectDto, {
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
-        });
+        const promise = axios.put(`http://localhost:5145/api/projects/${id}`, projectDto);
 
         toast.promise(promise, {
             loading: 'Salvando alterações...',
-            success: () => {
-                setTimeout(() => navigate(`/projects/${id}`), 1500);
+            success: () => {               
+                setTimeout(() => navigate(`/project/${id}`), 1000);
                 return 'Obra atualizada com sucesso!';
             },
             error: 'Falha ao atualizar a obra.'
@@ -92,17 +79,24 @@ const EditWorkPage = () => {
     }
 
     return (
-        <PageContainer>
+        <PageContainer>           
             <BreadCrumb
                 items={[
                     { label: 'Obras', path: '/projects' },
-                    { label: formData.name, path: `/projects/${id}` },
+                    { label: formData.name, path: `/work/details/${id}` },
                     { label: 'Editar' }
                 ]}
             />
+            
+            <div className="page-header">
+                <h1 className="page-title">✏️ Editando Obra: {formData.name}</h1>
+                <Link to={`/work/details/${id}`} className="form-button-secondary">
+                    ↩️ Voltar para a Obra
+                </Link>
+            </div>
+
             <div className="card">
-                <h3 className="card-header">✏️ Editar Obra</h3>
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={handleSubmit}>                    
                     <h3 className="section-divider">📋 Informações Básicas</h3>
                     <div className="form-grid">
                         <FormGroup label="Matriz *">
@@ -119,6 +113,18 @@ const EditWorkPage = () => {
                         <FormGroup label="Nome da Obra *">
                             <StyledInput type="text" name="name" value={formData.name} onChange={handleChange} required />
                         </FormGroup>
+                        
+                        <FormGroup label="Status da Obra *">
+                            <StyledSelect name="status" value={formData.status} onChange={handleChange} required>
+                                <option value="1">Planejamento</option>
+                                <option value="2">Ativa</option>
+                                <option value="3">Pausada</option>
+                                <option value="4">Concluída</option>
+                                <option value="5">Aditivo</option>
+                                <option value="6">Cancelada</option>
+                            </StyledSelect>
+                        </FormGroup>
+                        
                         <FormGroup label="CNPJ *">
                             <StyledInput type="text" name="cnpj" value={formData.cnpj} onChange={handleChange} required />
                         </FormGroup>
@@ -143,7 +149,7 @@ const EditWorkPage = () => {
                         </FormGroup>
                         <div style={{gridColumn: '1 / -1'}}>
                             <FormGroup label="Endereço">
-                                <StyledInput type="text" name="address" value={formData.address} onChange={handleChange} />
+                                <StyledInput type="text" name="address" value={formData.address || ''} onChange={handleChange} />
                             </FormGroup>
                         </div>
                     </div>
@@ -154,7 +160,7 @@ const EditWorkPage = () => {
                             <StyledInput type="date" name="startDate" value={formData.startDate} onChange={handleChange} required />
                         </FormGroup>
                         <FormGroup label="Data Fim">
-                            <StyledInput type="date" name="endDate" value={formData.endDate} onChange={handleChange} />
+                            <StyledInput type="date" name="endDate" value={formData.endDate || ''} onChange={handleChange} />
                         </FormGroup>
                     </div>
 

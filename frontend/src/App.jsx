@@ -1,5 +1,3 @@
-// frontend/src/App.jsx - Versão atualizada com usuário no canto direito
-
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, Outlet, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
@@ -123,8 +121,7 @@ function App() {
       />
       <Router>
         <AuthProvider>
-          <Routes>
-            {/* Rota de Login (não protegida) */}
+          <Routes>            
             <Route path="/login" element={<LoginPage />} />
             
             {/* Rotas Protegidas */}

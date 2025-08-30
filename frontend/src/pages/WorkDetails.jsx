@@ -180,21 +180,17 @@ const WorkDetails = () => {
                             </span>
                         </div>
                     </div>
-                    {/* ATENÇÃO: Verifique se a sua rota de edição é '/project/edit/:id' ou '/projects/:id/edit' */}
-                    <Link to={`/projects/${project.id}/edit`}>
-                        <button className="form-button">
-                            ✏️ Editar Obra
-                        </button>
+                    <Link to={`/project/edit/${id}`} className="form-button">
+                        ✏️ Editar Obra
                     </Link>
                 </div>
 
                 <div className="form-grid">
-                    {/* --- CAMPOS ADICIONADOS AQUI --- */}
                     <InfoCard
                         title="MATRIZ"
                         value={project.companyName}
                         icon="🏢"
-                        colorClass="info-card-purple" 
+                        colorClass="info-card-purple"
                     />
                     <InfoCard
                         title="CNPJ DA OBRA"
@@ -202,13 +198,12 @@ const WorkDetails = () => {
                         icon="📄"
                         colorClass="info-card-blue"
                     />
-                     <InfoCard
+                    <InfoCard
                         title="CONTRATANTE"
                         value={project.contractor}
                         icon="🤝"
                         colorClass="info-card-orange"
                     />
-                    {/* --- FIM DA ADIÇÃO --- */}
                     <InfoCard
                         title="CNO"
                         value={project.cno}
