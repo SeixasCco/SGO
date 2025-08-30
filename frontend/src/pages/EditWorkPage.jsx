@@ -1,181 +1,216 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
-import toast from 'react-hot-toast';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useCompany } from '../context/CompanyContext'; 
+import PageContainer from '../components/common/PageContainer';
+import BreadCrumb from '../components/common/BreadCrumb';
 
-import FormGroup from '../components/common/FormGroup';
-import StyledInput from '../components/common/StyledInput';
-import StatusBadge from '../components/common/StatusBadge';
+const StyledInput = React.forwardRef((props, ref) => (
+    <input className="form-input" ref={ref} {...props} />
+));
 
-const StyledTextarea = (props) => (
-    <textarea className="form-textarea" {...props} />
-);
+const StyledSelect = React.forwardRef((props, ref) => (
+    <select className="form-select" ref={ref} {...props} />
+));
+
+const StyledTextarea = React.forwardRef((props, ref) => (
+    <textarea className="form-textarea" ref={ref} {...props} />
+));
+
 
 const EditWorkPage = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const [formData, setFormData] = useState(null);
+    const { companies } = useCompany(); 
+    const [formData, setFormData] = useState({
+        name: '',
+        cnpj: '',
+        cno: '',
+        contractor: '',
+        serviceTaker: '',
+        responsible: '',
+        city: '',
+        state: '',
+        status: 1,
+        startDate: '',
+        endDate: '',
+        address: '',
+        description: '',      
+        companyId: '' 
+    });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [submitting, setSubmitting] = useState(false);
-
-    const fetchProjectData = useCallback(() => {
-        axios.get(`http://localhost:5145/api/projects/${id}`)
-            .then(response => {
-                const project = response.data;
-                setFormData({
-                    name: project.name || '',
-                    contractor: project.contractor || '',
-                    cno: project.cno || '',
-                    serviceTaker: project.serviceTaker || '',
-                    responsible: project.responsible || '',
-                    city: project.city || '',
-                    state: project.state || '',
-                    address: project.address || '',
-                    description: project.description || '',
-                    startDate: project.startDate ? project.startDate.split('T')[0] : '',
-                    endDate: project.endDate ? project.endDate.split('T')[0] : '',
-                    status: project.status || 2
-                });
-            })
-            .catch(() => {
-                setError('Não foi possível carregar os dados da obra.');
-                toast.error('Erro ao carregar os dados da obra.');
-            })
-            .finally(() => setLoading(false));
-    }, [id]);
+    const [success, setSuccess] = useState('');
 
     useEffect(() => {
-        fetchProjectData();
-    }, [fetchProjectData]);
+        const fetchWorkData = async () => {
+            try {
+                const response = await fetch(`/api/projects/${id}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                if (!response.ok) {
+                    throw new Error('Falha ao buscar dados da obra');
+                }
+                const data = await response.json();                
+              
+                const formattedStartDate = data.startDate ? new Date(data.startDate).toISOString().split('T')[0] : '';
+                const formattedEndDate = data.endDate ? new Date(data.endDate).toISOString().split('T')[0] : '';
+
+                setFormData({
+                    ...data,
+                    startDate: formattedStartDate,
+                    endDate: formattedEndDate
+                });
+            } catch (err) {
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchWorkData();
+    }, [id]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prevState => ({ ...prevState, [name]: value }));
+        const finalValue = e.target.type === 'select-one' ? parseInt(value, 10) : value;
+        setFormData(prevState => ({
+            ...prevState,
+            [name]: finalValue
+        }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        setSubmitting(true);
+        setError('');
+        setSuccess('');
 
-        const projectDto = { ...formData, endDate: formData.endDate || null };
+        if (!formData.companyId) {
+            setError("Por favor, selecione uma matriz.");
+            return;
+        }
+        
+        const dataToSend = {
+            ...formData,
+            id: id
+        };
 
-        const promise = axios.put(`http://localhost:5145/api/projects/${id}`, projectDto);
+        try {
+            const response = await fetch(`/api/projects/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify(dataToSend)
+            });
 
-        toast.promise(promise, {
-            loading: 'Atualizando dados da obra...',
-            success: () => {
-                navigate('/projects');
-                return 'Obra atualizada com sucesso!';
-            },
-            error: 'Falha ao atualizar a obra.'
-        }).finally(() => setSubmitting(false));
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Falha ao atualizar a obra');
+            }
+
+            setSuccess('Obra atualizada com sucesso!');
+            setTimeout(() => navigate(`/projects/${id}`), 2000);
+
+        } catch (err) {
+            setError(err.message);
+        }
     };
-
-    if (loading) return <div className="loading-state">Carregando dados para edição...</div>;
-    if (error) return <div className="error-state"><h3>{error}</h3></div>;
-    if (!formData) return <div className="empty-state"><h3>Obra não encontrada.</h3></div>;
+    
+    if (loading) return <PageContainer>Carregando...</PageContainer>;
 
     return (
-        <div className="page-container">
-            <div className="page-header">
-                <div className="page-header-content">
-                     <div>
-                        <Link to="/projects" className="breadcrumb-link">
-                            ← Voltar para Lista de Obras
-                        </Link>
-                        <h1 className="page-title">✏️ Editando Obra</h1>
-                        <p className="page-subtitle">
-                            <strong>{formData.name}</strong>
-                            <StatusBadge status={parseInt(formData.status)} />
-                        </p>
+        <PageContainer>
+            <BreadCrumb
+                items={[
+                    { label: 'Obras', path: '/projects' },
+                    { label: formData.name, path: `/projects/${id}` },
+                    { label: 'Editar' }
+                ]}
+            />
+            <h1 className="text-2xl font-bold mb-4">Editar Obra</h1>
+            
+            <form onSubmit={handleSubmit} className="space-y-4 max-w-4xl mx-auto">
+                {error && <div className="p-3 bg-red-100 border border-red-400 text-red-700 rounded">{error}</div>}
+                {success && <div className="p-3 bg-green-100 border border-green-400 text-green-700 rounded">{success}</div>}
+               
+                <div>
+                    <label htmlFor="companyId" className="block text-sm font-medium text-gray-700">Matriz</label>
+                    <StyledSelect
+                        id="companyId"
+                        name="companyId"
+                        value={formData.companyId}
+                        onChange={handleChange}
+                        required
+                    >
+                        <option value="">Selecione uma Matriz</option>
+                        {companies.map(company => (
+                            <option key={company.id} value={company.id}>
+                                {company.name}
+                            </option>
+                        ))}
+                    </StyledSelect>
+                </div>              
+
+                <div>
+                    <label htmlFor="name" className="block text-sm font-medium text-gray-700">Nome da Obra</label>
+                    <StyledInput type="text" id="name" name="name" value={formData.name} onChange={handleChange} required />
+                </div>
+                <div>
+                    <label htmlFor="cnpj" className="block text-sm font-medium text-gray-700">CNPJ</label>
+                    <StyledInput type="text" id="cnpj" name="cnpj" value={formData.cnpj} onChange={handleChange} required />
+                </div>                
+                
+                <div>
+                    <label htmlFor="responsible" className="block text-sm font-medium text-gray-700">Responsável</label>
+                    <StyledInput type="text" id="responsible" name="responsible" value={formData.responsible} onChange={handleChange} />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label htmlFor="contractor" className="block text-sm font-medium text-gray-700">Contratante</label>
+                        <StyledInput type="text" id="contractor" name="contractor" value={formData.contractor} onChange={handleChange} />
+                    </div>
+                    <div>
+                        <label htmlFor="serviceTaker" className="block text-sm font-medium text-gray-700">Tomador de Serviço</label>
+                        <StyledInput type="text" id="serviceTaker" name="serviceTaker" value={formData.serviceTaker} onChange={handleChange} />
                     </div>
                 </div>
-            </div>
-
-            <div className="page-content">
-                <div className="card">
-                    <div className="work-header-display">
-                        <div className="work-header-icon">🏗️</div>
-                        <div>
-                            <h2 className="work-header-title">{formData.serviceTaker} - {formData.contractor} - {formData.name}</h2>
-                            <p className="work-header-subtitle">📍 {formData.city}/{formData.state}</p>
-                            <span className="work-header-cno">🔢 CNO: {formData.cno}</span>
-                        </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label htmlFor="city" className="block text-sm font-medium text-gray-700">Cidade</label>
+                        <StyledInput type="text" id="city" name="city" value={formData.city} onChange={handleChange} />
                     </div>
-
-                    <form onSubmit={handleSubmit}>
-                        <h3 className="section-divider">📋 Informações Básicas</h3>
-                        <div className="form-grid">
-                            <FormGroup label="CNO (Número da Obra)">
-                                <StyledInput type="text" name="cno" value={formData.cno} onChange={handleChange} required />
-                            </FormGroup>
-                            <FormGroup label="Nome da Obra">
-                                <StyledInput type="text" name="name" value={formData.name} onChange={handleChange} required />
-                            </FormGroup>
-                             <FormGroup label="Contratante">
-                                <StyledInput type="text" name="contractor" value={formData.contractor} onChange={handleChange} required />
-                            </FormGroup>
-                             <FormGroup label="Tomador do Serviço">
-                                <StyledInput type="text" name="serviceTaker" value={formData.serviceTaker} onChange={handleChange} required />
-                            </FormGroup>
-                             <FormGroup label="Responsável pela Obra">
-                                <StyledInput type="text" name="responsible" value={formData.responsible} onChange={handleChange} required />
-                            </FormGroup>
-                        </div>
-
-                        <h3 className="section-divider">📍 Localização</h3>
-                         <div className="form-grid">
-                             <FormGroup label="Cidade">
-                                <StyledInput type="text" name="city" value={formData.city} onChange={handleChange} required />
-                            </FormGroup>
-                             <FormGroup label="Estado (UF)">
-                                <StyledInput type="text" name="state" value={formData.state} onChange={handleChange} maxLength="2" required />
-                            </FormGroup>
-                            <div style={{gridColumn: '1 / -1'}}>
-                                <FormGroup label="Endereço Completo (Opcional)">
-                                    <StyledInput type="text" name="address" value={formData.address} onChange={handleChange} />
-                                </FormGroup>
-                            </div>
-                        </div>
-
-                        <h3 className="section-divider">📅 Cronograma e Status</h3>
-                        <div className="form-grid">
-                             <FormGroup label="Data de Início">
-                                <StyledInput type="date" name="startDate" value={formData.startDate} onChange={handleChange} required />
-                            </FormGroup>
-                             <FormGroup label="Data de Fim (Opcional)">
-                                <StyledInput type="date" name="endDate" value={formData.endDate} onChange={handleChange} />
-                            </FormGroup>
-                             <FormGroup label="Status da Obra">
-                                <select name="status" value={formData.status} onChange={handleChange} required className="form-select">
-                                    <option value={1}>Planejamento</option>
-                                    <option value={2}>Ativa</option>
-                                    <option value={3}>Pausada</option>
-                                    <option value={4}>Concluída</option>
-                                    <option value={5}>Aditivo</option>
-                                    <option value={6}>Cancelada</option>
-                                </select>
-                            </FormGroup>
-                        </div>
-                        
-                        <h3 className="section-divider">📝 Descrição</h3>
-                        <FormGroup label="Descrição da Obra (Opcional)">
-                            <StyledTextarea name="description" value={formData.description} onChange={handleChange} rows="4" />
-                        </FormGroup>
-                        
-                        <div className="modal-footer" style={{marginTop: '32px'}}>
-                             <Link to="/projects" className="form-button-secondary">
-                                Cancelar
-                            </Link>
-                             <button type="submit" disabled={submitting} className="form-button">
-                                {submitting ? '⏳ Salvando...' : '💾 Salvar Alterações'}
-                            </button>
-                        </div>
-                    </form>
+                    <div>
+                        <label htmlFor="state" className="block text-sm font-medium text-gray-700">Estado</label>
+                        <StyledInput type="text" id="state" name="state" value={formData.state} onChange={handleChange} />
+                    </div>
                 </div>
-            </div>
-        </div>
+                 <div>
+                    <label htmlFor="address" className="block text-sm font-medium text-gray-700">Endereço</label>
+                    <StyledInput type="text" id="address" name="address" value={formData.address} onChange={handleChange} />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label htmlFor="startDate" className="block text-sm font-medium text-gray-700">Data de Início</label>
+                        <StyledInput type="date" id="startDate" name="startDate" value={formData.startDate} onChange={handleChange} />
+                    </div>
+                    <div>
+                        <label htmlFor="endDate" className="block text-sm font-medium text-gray-700">Data de Fim</label>
+                        <StyledInput type="date" id="endDate" name="endDate" value={formData.endDate} onChange={handleChange} />
+                    </div>
+                </div>
+                <div>
+                    <label htmlFor="description" className="block text-sm font-medium text-gray-700">Descrição</label>
+                    <StyledTextarea id="description" name="description" value={formData.description} onChange={handleChange} rows="4" />
+                </div>
+
+                <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
+                    Salvar Alterações
+                </button>
+            </form>
+        </PageContainer>
     );
 };
 

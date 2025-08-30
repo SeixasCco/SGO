@@ -12,8 +12,8 @@ using SGO.Infrastructure;
 namespace SGO.Infrastructure.Migrations
 {
     [DbContext(typeof(SgoDbContext))]
-    [Migration("20250825010210_UpdateAndSeedCostCenters")]
-    partial class UpdateAndSeedCostCenters
+    [Migration("20250830120316_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,27 @@ namespace SGO.Infrastructure.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("SGO.Core.Company", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Cnpj")
+                        .IsRequired()
+                        .HasMaxLength(18)
+                        .HasColumnType("character varying(18)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Companies");
+                });
 
             modelBuilder.Entity("SGO.Core.Contract", b =>
                 {
@@ -82,22 +103,31 @@ namespace SGO.Infrastructure.Migrations
                     b.Property<Guid>("ContractId")
                         .HasColumnType("uuid");
 
-                    b.Property<decimal>("DeductionsValue")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime>("DepositDate")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<decimal>("GrossValue")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("InssValue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("InvoiceNumber")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<decimal>("IssValue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("IssueDate")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<decimal>("NetValue")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                    b.Property<DateTime>("PaymentDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -277,6 +307,9 @@ namespace SGO.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<Guid>("CompanyId")
+                        .HasColumnType("uuid");
+
                     b.Property<DateTime?>("EndDate")
                         .HasColumnType("timestamp with time zone");
 
@@ -298,6 +331,8 @@ namespace SGO.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CompanyId");
 
                     b.ToTable("Employees");
                 });
@@ -339,14 +374,22 @@ namespace SGO.Infrastructure.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("CNO")
-                        .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(12)
+                        .HasColumnType("character varying(12)");
 
                     b.Property<string>("City")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<Guid>("CompanyId")
+                    b.Property<string>("Cnpj")
+                        .IsRequired()
+                        .HasMaxLength(18)
+                        .HasColumnType("character varying(18)");
+
+                    b.Property<int>("CompanyId")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("CompanyId1")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Contractor")
@@ -388,6 +431,8 @@ namespace SGO.Infrastructure.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CompanyId1");
 
                     b.ToTable("Projects");
                 });
@@ -447,6 +492,9 @@ namespace SGO.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("DetailsJson")
+                        .HasColumnType("jsonb");
+
                     b.Property<string>("InvoiceNumber")
                         .HasColumnType("text");
 
@@ -459,11 +507,8 @@ namespace SGO.Infrastructure.Migrations
                     b.Property<DateTime?>("PaymentDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid>("ProjectId")
+                    b.Property<Guid?>("ProjectId")
                         .HasColumnType("uuid");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
 
                     b.Property<string>("SupplierName")
                         .HasColumnType("text");
@@ -501,6 +546,17 @@ namespace SGO.Infrastructure.Migrations
                     b.Navigation("Contract");
                 });
 
+            modelBuilder.Entity("SGO.Core.Employee", b =>
+                {
+                    b.HasOne("SGO.Core.Company", "Company")
+                        .WithMany("Employees")
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Company");
+                });
+
             modelBuilder.Entity("SGO.Core.ExpenseAttachment", b =>
                 {
                     b.HasOne("SGO.Core.ProjectExpense", null)
@@ -508,6 +564,17 @@ namespace SGO.Infrastructure.Migrations
                         .HasForeignKey("ProjectExpenseId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("SGO.Core.Project", b =>
+                {
+                    b.HasOne("SGO.Core.Company", "Company")
+                        .WithMany()
+                        .HasForeignKey("CompanyId1")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Company");
                 });
 
             modelBuilder.Entity("SGO.Core.ProjectEmployee", b =>
@@ -543,15 +610,18 @@ namespace SGO.Infrastructure.Migrations
 
                     b.HasOne("SGO.Core.Project", "Project")
                         .WithMany("Expenses")
-                        .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ProjectId");
 
                     b.Navigation("Contract");
 
                     b.Navigation("CostCenter");
 
                     b.Navigation("Project");
+                });
+
+            modelBuilder.Entity("SGO.Core.Company", b =>
+                {
+                    b.Navigation("Employees");
                 });
 
             modelBuilder.Entity("SGO.Core.Contract", b =>

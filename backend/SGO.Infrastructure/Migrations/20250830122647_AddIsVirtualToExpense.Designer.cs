@@ -12,8 +12,8 @@ using SGO.Infrastructure;
 namespace SGO.Infrastructure.Migrations
 {
     [DbContext(typeof(SgoDbContext))]
-    [Migration("20250822133040_AddDatesToProjectEmployee")]
-    partial class AddDatesToProjectEmployee
+    [Migration("20250830122647_AddIsVirtualToExpense")]
+    partial class AddIsVirtualToExpense
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,27 @@ namespace SGO.Infrastructure.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("SGO.Core.Company", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Cnpj")
+                        .IsRequired()
+                        .HasMaxLength(18)
+                        .HasColumnType("character varying(18)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Companies");
+                });
 
             modelBuilder.Entity("SGO.Core.Contract", b =>
                 {
@@ -76,14 +97,43 @@ namespace SGO.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("ContractId")
+                    b.Property<string>("AttachmentPath")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("ContractId")
                         .HasColumnType("uuid");
+
+                    b.Property<decimal>("GrossValue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("InssValue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("InvoiceNumber")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<decimal>("IssValue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("IssueDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal>("NetValue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("PaymentDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ContractId");
 
-                    b.ToTable("ContractInvoice");
+                    b.ToTable("ContractInvoices");
                 });
 
             modelBuilder.Entity("SGO.Core.CostCenter", b =>
@@ -92,7 +142,7 @@ namespace SGO.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("CompanyId")
+                    b.Property<Guid?>("CompanyId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Name")
@@ -102,6 +152,153 @@ namespace SGO.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("CostCenters");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("c1b7c9b0-1000-4000-8000-000000000001"),
+                            Name = "Alimentação/ mercado"
+                        },
+                        new
+                        {
+                            Id = new Guid("c1b7c9b0-1000-4000-8000-000000000002"),
+                            Name = "Combustível"
+                        },
+                        new
+                        {
+                            Id = new Guid("c1b7c9b0-1000-4000-8000-000000000003"),
+                            Name = "Despesas de aluguel"
+                        },
+                        new
+                        {
+                            Id = new Guid("c1b7c9b0-1000-4000-8000-000000000004"),
+                            Name = "Despesas de luz, água e internet"
+                        },
+                        new
+                        {
+                            Id = new Guid("c1b7c9b0-1000-4000-8000-000000000005"),
+                            Name = "Diesel"
+                        },
+                        new
+                        {
+                            Id = new Guid("c1b7c9b0-1000-4000-8000-000000000006"),
+                            Name = "EPI's e uniformes"
+                        },
+                        new
+                        {
+                            Id = new Guid("c1b7c9b0-1000-4000-8000-000000000007"),
+                            Name = "Exames e Clínicas (admissionais, periódicos, demissionais)"
+                        },
+                        new
+                        {
+                            Id = new Guid("c1b7c9b0-1000-4000-8000-000000000008"),
+                            Name = "Farmácia e medicamentos"
+                        },
+                        new
+                        {
+                            Id = new Guid("c1b7c9b0-1000-4000-8000-000000000009"),
+                            Name = "Ferramentas/ ferragens"
+                        },
+                        new
+                        {
+                            Id = new Guid("c1b7c9b0-1000-4000-8000-000000000023"),
+                            Name = "Folhas de 13º"
+                        },
+                        new
+                        {
+                            Id = new Guid("c1b7c9b0-1000-4000-8000-000000000024"),
+                            Name = "Folhas de Adiantamento Salarial"
+                        },
+                        new
+                        {
+                            Id = new Guid("c1b7c9b0-1000-4000-8000-000000000025"),
+                            Name = "Folhas de férias"
+                        },
+                        new
+                        {
+                            Id = new Guid("c1b7c9b0-1000-4000-8000-000000000010"),
+                            Name = "Folhas de pagamento"
+                        },
+                        new
+                        {
+                            Id = new Guid("c1b7c9b0-1000-4000-8000-000000000011"),
+                            Name = "Honorários administrativos"
+                        },
+                        new
+                        {
+                            Id = new Guid("c1b7c9b0-1000-4000-8000-000000000012"),
+                            Name = "Honorários de contabilidade"
+                        },
+                        new
+                        {
+                            Id = new Guid("c1b7c9b0-1000-4000-8000-000000000013"),
+                            Name = "Honorários jurídicos"
+                        },
+                        new
+                        {
+                            Id = new Guid("c1b7c9b0-1000-4000-8000-000000000014"),
+                            Name = "Hospedagens"
+                        },
+                        new
+                        {
+                            Id = new Guid("c1b7c9b0-1000-4000-8000-000000000015"),
+                            Name = "Locação de Container"
+                        },
+                        new
+                        {
+                            Id = new Guid("c1b7c9b0-1000-4000-8000-000000000017"),
+                            Name = "Locação de Munck/ Guindaste"
+                        },
+                        new
+                        {
+                            Id = new Guid("c1b7c9b0-1000-4000-8000-000000000016"),
+                            Name = "Locação de PTA"
+                        },
+                        new
+                        {
+                            Id = new Guid("c1b7c9b0-1000-4000-8000-000000000018"),
+                            Name = "Mecânica e manutenções"
+                        },
+                        new
+                        {
+                            Id = new Guid("c1b7c9b0-1000-4000-8000-000000000019"),
+                            Name = "Passagens de folga de campo"
+                        },
+                        new
+                        {
+                            Id = new Guid("c1b7c9b0-1000-4000-8000-000000000020"),
+                            Name = "Passagens de funcionários (admissão e rescisão)"
+                        },
+                        new
+                        {
+                            Id = new Guid("c1b7c9b0-1000-4000-8000-000000000021"),
+                            Name = "Pedágios"
+                        },
+                        new
+                        {
+                            Id = new Guid("c1b7c9b0-1000-4000-8000-000000000026"),
+                            Name = "Serviços de Engenharia (ART, Projetos)"
+                        },
+                        new
+                        {
+                            Id = new Guid("c1b7c9b0-1000-4000-8000-000000000022"),
+                            Name = "Serviços de treinamento"
+                        },
+                        new
+                        {
+                            Id = new Guid("c1b7c9b0-1000-4000-8000-000000000027"),
+                            Name = "Tributos (guias de INSS. FGTS, DCTFWeb, Impostos)"
+                        },
+                        new
+                        {
+                            Id = new Guid("c1b7c9b0-1000-4000-8000-000000000028"),
+                            Name = "Veículos (multas, licenciamentos, taxas)"
+                        },
+                        new
+                        {
+                            Id = new Guid("c1b7c9b0-1000-4000-8000-000000000029"),
+                            Name = "Verbas rescisórias"
+                        });
                 });
 
             modelBuilder.Entity("SGO.Core.Employee", b =>
@@ -134,6 +331,8 @@ namespace SGO.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CompanyId");
 
                     b.ToTable("Employees");
                 });
@@ -175,14 +374,22 @@ namespace SGO.Infrastructure.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("CNO")
-                        .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(12)
+                        .HasColumnType("character varying(12)");
 
                     b.Property<string>("City")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<Guid>("CompanyId")
+                    b.Property<string>("Cnpj")
+                        .IsRequired()
+                        .HasMaxLength(18)
+                        .HasColumnType("character varying(18)");
+
+                    b.Property<int>("CompanyId")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("CompanyId1")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Contractor")
@@ -225,12 +432,15 @@ namespace SGO.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CompanyId1");
+
                     b.ToTable("Projects");
                 });
 
             modelBuilder.Entity("SGO.Core.ProjectEmployee", b =>
                 {
-                    b.Property<Guid>("ProjectId")
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<Guid>("EmployeeId")
@@ -239,14 +449,19 @@ namespace SGO.Infrastructure.Migrations
                     b.Property<DateTime?>("EndDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uuid");
+
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.HasKey("ProjectId", "EmployeeId");
+                    b.HasKey("Id");
 
                     b.HasIndex("EmployeeId");
 
-                    b.ToTable("ProjectEmployee");
+                    b.HasIndex("ProjectId");
+
+                    b.ToTable("ProjectEmployees");
                 });
 
             modelBuilder.Entity("SGO.Core.ProjectExpense", b =>
@@ -264,7 +479,7 @@ namespace SGO.Infrastructure.Migrations
                     b.Property<Guid>("CompanyId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("ContractId")
+                    b.Property<Guid?>("ContractId")
                         .HasColumnType("uuid");
 
                     b.Property<Guid>("CostCenterId")
@@ -277,8 +492,17 @@ namespace SGO.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("DetailsJson")
+                        .HasColumnType("jsonb");
+
                     b.Property<string>("InvoiceNumber")
                         .HasColumnType("text");
+
+                    b.Property<bool>("IsAutomaticallyCalculated")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsVirtual")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Observations")
                         .HasColumnType("text");
@@ -286,11 +510,8 @@ namespace SGO.Infrastructure.Migrations
                     b.Property<DateTime?>("PaymentDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid>("ProjectId")
+                    b.Property<Guid?>("ProjectId")
                         .HasColumnType("uuid");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
 
                     b.Property<string>("SupplierName")
                         .HasColumnType("text");
@@ -319,9 +540,24 @@ namespace SGO.Infrastructure.Migrations
 
             modelBuilder.Entity("SGO.Core.ContractInvoice", b =>
                 {
-                    b.HasOne("SGO.Core.Contract", null)
+                    b.HasOne("SGO.Core.Contract", "Contract")
                         .WithMany("Invoices")
-                        .HasForeignKey("ContractId");
+                        .HasForeignKey("ContractId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Contract");
+                });
+
+            modelBuilder.Entity("SGO.Core.Employee", b =>
+                {
+                    b.HasOne("SGO.Core.Company", "Company")
+                        .WithMany("Employees")
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Company");
                 });
 
             modelBuilder.Entity("SGO.Core.ExpenseAttachment", b =>
@@ -333,10 +569,21 @@ namespace SGO.Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("SGO.Core.Project", b =>
+                {
+                    b.HasOne("SGO.Core.Company", "Company")
+                        .WithMany()
+                        .HasForeignKey("CompanyId1")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Company");
+                });
+
             modelBuilder.Entity("SGO.Core.ProjectEmployee", b =>
                 {
                     b.HasOne("SGO.Core.Employee", "Employee")
-                        .WithMany()
+                        .WithMany("ProjectEmployees")
                         .HasForeignKey("EmployeeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -356,9 +603,7 @@ namespace SGO.Infrastructure.Migrations
                 {
                     b.HasOne("SGO.Core.Contract", "Contract")
                         .WithMany("Expenses")
-                        .HasForeignKey("ContractId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ContractId");
 
                     b.HasOne("SGO.Core.CostCenter", "CostCenter")
                         .WithMany()
@@ -368,9 +613,7 @@ namespace SGO.Infrastructure.Migrations
 
                     b.HasOne("SGO.Core.Project", "Project")
                         .WithMany("Expenses")
-                        .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ProjectId");
 
                     b.Navigation("Contract");
 
@@ -379,11 +622,21 @@ namespace SGO.Infrastructure.Migrations
                     b.Navigation("Project");
                 });
 
+            modelBuilder.Entity("SGO.Core.Company", b =>
+                {
+                    b.Navigation("Employees");
+                });
+
             modelBuilder.Entity("SGO.Core.Contract", b =>
                 {
                     b.Navigation("Expenses");
 
                     b.Navigation("Invoices");
+                });
+
+            modelBuilder.Entity("SGO.Core.Employee", b =>
+                {
+                    b.Navigation("ProjectEmployees");
                 });
 
             modelBuilder.Entity("SGO.Core.Project", b =>

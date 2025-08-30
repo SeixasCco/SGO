@@ -9,4 +9,5 @@ public class ExpenseListItemDto
     public decimal Amount { get; set; }
     public bool HasAttachment { get; set; }
     public string? AttachmentPath { get; set; }
+    public bool IsVirtual { get; set; }
 }

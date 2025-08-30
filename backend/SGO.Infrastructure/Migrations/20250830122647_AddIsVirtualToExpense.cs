@@ -5,23 +5,24 @@
 namespace SGO.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class AddAttachmentPathToExpense : Migration
+    public partial class AddIsVirtualToExpense : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
-                name: "AttachmentPath",
+            migrationBuilder.AddColumn<bool>(
+                name: "IsVirtual",
                 table: "ProjectExpenses",
-                type: "text",
-                nullable: true);
+                type: "boolean",
+                nullable: false,
+                defaultValue: false);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "AttachmentPath",
+                name: "IsVirtual",
                 table: "ProjectExpenses");
         }
     }

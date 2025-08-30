@@ -1,245 +1,134 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SGO.Api.Dtos;
 using SGO.Core;
 using SGO.Infrastructure;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Ganss.Xss; 
+using Ganss.Xss;
+using System;
 
 namespace SGO.Api.Controllers
 {
-    [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
+    [ApiController]
     public class ProjectsController : ControllerBase
     {
         private readonly SgoDbContext _context;
         private readonly IHtmlSanitizer _sanitizer;
-        public ProjectsController(SgoDbContext context)
+
+        public ProjectsController(SgoDbContext context, IHtmlSanitizer sanitizer)
         {
             _context = context;
-            _sanitizer = new HtmlSanitizer(); 
+            _sanitizer = sanitizer;
         }
 
         // GET: api/projects
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ProjectSummaryDto>>> GetAllProjects([FromQuery] ProjectFilterDto filters)
+        public async Task<ActionResult<IEnumerable<ProjectDetailsDto>>> GetProjects([FromQuery] ProjectFilterDto filter)
         {
             var query = _context.Projects.AsQueryable();
 
-            if (!string.IsNullOrEmpty(filters.City))
+            if (filter.CompanyId.HasValue)
             {
-                query = query.Where(p => p.City.Contains(filters.City));
+                query = query.Where(p => p.CompanyId == filter.CompanyId.Value);
             }
 
-            if (!string.IsNullOrEmpty(filters.ServiceTaker))
-            {
-                query = query.Where(p => p.ServiceTaker.Contains(filters.ServiceTaker));
-            }
-
-            if (filters.StartDate.HasValue)
-            {
-                query = query.Where(p => p.StartDate >= filters.StartDate.Value.ToUniversalTime());
-            }
-
-            if (filters.EndDate.HasValue)
-            {
-                query = query.Where(p => p.EndDate <= filters.EndDate.Value.ToUniversalTime());
-            }
-
-            if (filters.Status.HasValue)
-            {
-                query = query.Where(p => (int)p.Status == filters.Status.Value);
-            }
-
-            var projectsData = await query
-                .Select(p => new
+            var projects = await query
+                .Include(p => p.Company)
+                .Select(p => new ProjectDetailsDto
                 {
-                    Project = p,
-                    Contracts = p.Contracts,
-                    Expenses = p.Expenses,
-                    Allocations = p.ProjectEmployees.Select(pe => new
-                    {
-                        pe.StartDate,
-                        pe.EndDate,
-                        pe.Employee.Salary
-                    })
+                    Id = p.Id,
+                    Name = p.Name,
+                    Cnpj = p.Cnpj,
+                    Status = p.Status,
+                    StartDate = p.StartDate,
+                    EndDate = p.EndDate,
+                    CompanyId = p.CompanyId,
+                    CompanyName = p.Company.Name
                 })
                 .ToListAsync();
 
-            var projectSummaries = projectsData.Select(data =>
-            {
-                var laborCost = data.Allocations
-                    .Where(a => a.StartDate > DateTime.MinValue)
-                    .Sum(a => (a.Salary / 30m) * (decimal)(((a.EndDate?.Date ?? DateTime.UtcNow.Date) - a.StartDate.Date).TotalDays + 1));
-
-                var manualExpensesValue = data.Expenses
-                    .Where(e => !e.IsAutomaticallyCalculated)
-                    .Sum(e => (decimal?)e.Amount) ?? 0;
-
-                var totalExpenses = manualExpensesValue + Math.Round(laborCost, 2);
-
-                return new ProjectSummaryDto
-                {
-                    Id = data.Project.Id,
-                    Name = data.Project.Name,
-                    Contractor = data.Project.Contractor,
-                    City = data.Project.City,
-                    State = data.Project.State,
-                    CNO = data.Project.CNO ?? "N/A",
-                    Responsible = data.Project.Responsible,
-                    Status = (int)data.Project.Status,
-                    StatusText = GetStatusText(data.Project.Status),
-
-                    TeamSize = data.Allocations.Count(a => a.EndDate == null),
-                    TotalContractsValue = data.Contracts.Sum(c => c.TotalValue),
-                    TotalExpensesValue = totalExpenses
-                };
-            });
-
-            return Ok(projectSummaries);
-        }
-        private static string GetStatusText(ProjectStatus status)
-        {
-            return status switch
-            {
-                ProjectStatus.Planning => "🟡 Planejamento",
-                ProjectStatus.Active => "🟢 Ativa",
-                ProjectStatus.OnHold => "🟠 Pausada",
-                ProjectStatus.Completed => "✅ Concluída",
-                ProjectStatus.Additive => "🔄 Aditivo",
-                ProjectStatus.Cancelled => "❌ Cancelada",
-                _ => "❓ Indefinido"
-            };
+            return Ok(projects);
         }
 
-        // GET: api/projects/{id}   
+        // GET: api/projects/{id}
         [HttpGet("{id}")]
         public async Task<ActionResult<ProjectDetailsDto>> GetProjectById(Guid id)
         {
             var project = await _context.Projects
+                .Include(p => p.Company)
                 .Include(p => p.Contracts)
+                    .ThenInclude(c => c.Invoices)
                 .Include(p => p.Expenses)
                     .ThenInclude(e => e.CostCenter)
-                .Include(p => p.ProjectEmployees)
-                    .ThenInclude(pe => pe.Employee)
-                .FirstOrDefaultAsync(p => p.Id == id);
+                .Where(p => p.Id == id)
+                .FirstOrDefaultAsync();
 
-            if (project == null) return NotFound();
-
-            var payrollCostCenter = await _context.CostCenters
-                .FirstOrDefaultAsync(cc => cc.Name == "Folhas de pagamento");
-
-            if (payrollCostCenter == null)
+            if (project == null)
             {
-                return StatusCode(500, "Centro de Custo 'Folha de pagamento' não encontrado no banco de dados.");
+                return NotFound();
             }
-
-            var laborCost = project.ProjectEmployees
-                .Where(pe => pe.StartDate > DateTime.MinValue)
-                .Sum(pe => (pe.Employee.Salary / 30m) * (decimal)(((pe.EndDate?.Date ?? DateTime.UtcNow.Date) - pe.StartDate.Date).TotalDays + 1));
-
-            var automatedExpense = project.Expenses
-                .FirstOrDefault(e => e.IsAutomaticallyCalculated);
-
-            if (laborCost > 0)
-            {
-                if (automatedExpense != null)
-                {
-                    automatedExpense.Amount = Math.Round(laborCost, 2);
-                    automatedExpense.Date = DateTime.UtcNow;
-                    automatedExpense.CostCenterId = payrollCostCenter.Id;
-                }
-                else
-                {
-                    automatedExpense = new ProjectExpense
-                    {
-                        Id = Guid.NewGuid(),
-                        ProjectId = project.Id,
-                        ContractId = project.Contracts.FirstOrDefault()?.Id,
-                        Description = "Custo de Mão de Obra (Calculado)",
-                        Amount = Math.Round(laborCost, 2),
-                        Date = DateTime.UtcNow,
-                        CostCenterId = payrollCostCenter.Id,
-                        IsAutomaticallyCalculated = true
-                    };
-                    _context.ProjectExpenses.Add(automatedExpense);
-                }
-                await _context.SaveChangesAsync();
-            }
-            else if (automatedExpense != null)
-            {
-                _context.ProjectExpenses.Remove(automatedExpense);
-                await _context.SaveChangesAsync();
-            }
-
-            var updatedExpenses = await _context.ProjectExpenses
-                .Where(e => e.ProjectId == id)
-                .Include(e => e.CostCenter)
-                .ToListAsync();
-
-            var allExpensesDto = updatedExpenses.Select(e => new ExpenseDto
-            {
-                Id = e.Id,
-                Date = e.Date,
-                Description = e.Description,
-                Amount = e.Amount,
-                CostCenterName = e.CostCenter?.Name ?? "N/A",
-                AttachmentPath = e.AttachmentPath,
-                IsVirtual = e.IsAutomaticallyCalculated
-            }).ToList();
-
+            
             var projectDto = new ProjectDetailsDto
             {
                 Id = project.Id,
-                CNO = project.CNO ?? "N/A",
                 Name = project.Name,
+                Cnpj = project.Cnpj,
+                Status = project.Status,
+                StartDate = project.StartDate,
+                EndDate = project.EndDate,
+                CompanyId = project.CompanyId,
+                CompanyName = project.Company.Name,
+                Address = project.Address,
+                Description = project.Description,
+                IsAdditive = project.IsAdditive,
+                OriginalProjectId = project.OriginalProjectId,
+                Responsible = project.Responsible,
                 Contractor = project.Contractor,
                 ServiceTaker = project.ServiceTaker,
-                Responsible = project.Responsible,
                 City = project.City,
                 State = project.State,
-                StartDate = project.StartDate,
-                Address = project.Address ?? "N/A",
-                Description = project.Description ?? "N/A",
-                Status = (int)project.Status,
-                EndDate = project.EndDate,
-                Expenses = allExpensesDto.OrderByDescending(e => e.IsVirtual).ThenByDescending(e => e.Date).ToList(),
-                Contracts = project.Contracts.Select(c => new ContractDto
+                CNO = project.CNO,
+                Contracts = project.Contracts,
+                Expenses = project.Expenses.Select(e => new ExpenseListItemDto
                 {
-                    Id = c.Id,
-                    ContractNumber = c.ContractNumber,
-                    TotalValue = c.TotalValue
-                }).ToList(),
+                    Id = e.Id,
+                    Date = e.Date,
+                    Description = e.Description,
+                    Amount = e.Amount,
+                    CostCenterName = e.CostCenter.Name,
+                    IsVirtual = e.IsVirtual,
+                    AttachmentPath = e.AttachmentPath
+                }).ToList()
             };
 
             return Ok(projectDto);
         }
+
+        // POST: api/projects
         [HttpPost]
-        public async Task<ActionResult<Project>> CreateProject([FromBody] CreateProjectDto projectDto)
+        public async Task<ActionResult<Project>> CreateProject([FromBody] CreateProjectDto createProjectDto)
         {
             var project = new Project
             {
-                Id = Guid.NewGuid(),
-
-                Cnpj = _sanitizer.Sanitize(projectDto.Cnpj),
-                Address = _sanitizer.Sanitize(projectDto.Address),
-                Description = _sanitizer.Sanitize(projectDto.Description),
-                CNO = _sanitizer.Sanitize(projectDto.CNO),
-                Name = _sanitizer.Sanitize(projectDto.Name),
-                Contractor = _sanitizer.Sanitize(projectDto.Contractor),
-                ServiceTaker = _sanitizer.Sanitize(projectDto.ServiceTaker),
-                Responsible = _sanitizer.Sanitize(projectDto.Responsible),
-                City = _sanitizer.Sanitize(projectDto.City),
-                State = _sanitizer.Sanitize(projectDto.State),
-
-                StartDate = projectDto.StartDate.ToUniversalTime(),
-                EndDate = projectDto.EndDate?.ToUniversalTime(),
-                Status = ProjectStatus.Active
+                CompanyId = createProjectDto.CompanyId,
+                Name = _sanitizer.Sanitize(createProjectDto.Name),
+                Cnpj = _sanitizer.Sanitize(createProjectDto.Cnpj),
+                CNO = createProjectDto.CNO != null ? _sanitizer.Sanitize(createProjectDto.CNO) : null,
+                Contractor = _sanitizer.Sanitize(createProjectDto.Contractor),
+                ServiceTaker = _sanitizer.Sanitize(createProjectDto.ServiceTaker),
+                Responsible = _sanitizer.Sanitize(createProjectDto.Responsible),
+                City = _sanitizer.Sanitize(createProjectDto.City),
+                State = _sanitizer.Sanitize(createProjectDto.State),
+                Status = createProjectDto.Status,
+                StartDate = createProjectDto.StartDate,
+                EndDate = createProjectDto.EndDate,
+                Address = createProjectDto.Address != null ? _sanitizer.Sanitize(createProjectDto.Address) : null,
+                Description = createProjectDto.Description != null ? _sanitizer.Sanitize(createProjectDto.Description) : null,
+                IsAdditive = createProjectDto.IsAdditive,
+                OriginalProjectId = createProjectDto.OriginalProjectId
             };
 
             _context.Projects.Add(project);
@@ -250,26 +139,38 @@ namespace SGO.Api.Controllers
 
         // PUT: api/projects/{id}
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateProject(Guid id, [FromBody] UpdateProjectDto projectDto)
+        public async Task<IActionResult> UpdateProject(Guid id, [FromBody] UpdateProjectDto updateProjectDto)
         {
+            if (id != updateProjectDto.Id)
+            {
+                return BadRequest("Project ID mismatch");
+            }
+
             var project = await _context.Projects.FindAsync(id);
+
             if (project == null)
             {
                 return NotFound();
-            }            
+            }
 
-            project.Name = _sanitizer.Sanitize(projectDto.Name);
-            project.Contractor =  _sanitizer.Sanitize(projectDto.Contractor);
-            project.CNO = _sanitizer.Sanitize(projectDto.CNO);
-            project.Cnpj =  _sanitizer.Sanitize(projectDto.Cnpj);
-            project.Responsible = _sanitizer.Sanitize(projectDto.Responsible);          
-            project.City = projectDto.City; _sanitizer.Sanitize(projectDto.City);
-            project.State = projectDto.State; _sanitizer.Sanitize(projectDto.State);
-            project.Address = projectDto.Address; _sanitizer.Sanitize(projectDto.Address);
-            project.Description = projectDto.Description; _sanitizer.Sanitize(projectDto.Description);
-            project.StartDate = projectDto.StartDate.ToUniversalTime();
-            project.EndDate = projectDto.EndDate?.ToUniversalTime();
-            project.Status = (ProjectStatus)projectDto.Status;
+            project.CompanyId = updateProjectDto.CompanyId;
+            project.Name = _sanitizer.Sanitize(updateProjectDto.Name);
+            project.Cnpj = _sanitizer.Sanitize(updateProjectDto.Cnpj);
+            project.CNO = updateProjectDto.CNO != null ? _sanitizer.Sanitize(updateProjectDto.CNO) : null;
+            project.Contractor = _sanitizer.Sanitize(updateProjectDto.Contractor);
+            project.ServiceTaker = _sanitizer.Sanitize(updateProjectDto.ServiceTaker);
+            project.Responsible = _sanitizer.Sanitize(updateProjectDto.Responsible);
+            project.City = _sanitizer.Sanitize(updateProjectDto.City);
+            project.State = _sanitizer.Sanitize(updateProjectDto.State);
+            project.Status = updateProjectDto.Status;
+            project.StartDate = updateProjectDto.StartDate;
+            project.EndDate = updateProjectDto.EndDate;
+            project.Address = updateProjectDto.Address != null ? _sanitizer.Sanitize(updateProjectDto.Address) : null;
+            project.Description = updateProjectDto.Description != null ? _sanitizer.Sanitize(updateProjectDto.Description) : null;
+            project.IsAdditive = updateProjectDto.IsAdditive;
+            project.OriginalProjectId = updateProjectDto.OriginalProjectId;
+
+            _context.Entry(project).State = EntityState.Modified;
 
             try
             {
@@ -277,7 +178,7 @@ namespace SGO.Api.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!_context.Projects.Any(p => p.Id == id))
+                if (!ProjectExists(id))
                 {
                     return NotFound();
                 }
@@ -294,23 +195,10 @@ namespace SGO.Api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProject(Guid id)
         {
-            var project = await _context.Projects
-                                        .Include(p => p.Contracts)
-                                        .Include(p => p.ProjectEmployees)
-                                        .FirstOrDefaultAsync(p => p.Id == id);
+            var project = await _context.Projects.FindAsync(id);
             if (project == null)
             {
                 return NotFound();
-            }
-
-            if (project.Contracts.Any())
-            {
-                return BadRequest("Esta obra não pode ser excluída pois possui contratos vinculados.");
-            }
-
-            if (project.ProjectEmployees.Any(pe => pe.EndDate == null))
-            {
-                return BadRequest("Esta obra não pode ser excluída pois possui funcionários alocados ativamente.");
             }
 
             _context.Projects.Remove(project);
@@ -318,7 +206,10 @@ namespace SGO.Api.Controllers
 
             return NoContent();
         }
+        
+        private bool ProjectExists(Guid id)
+        {
+            return _context.Projects.Any(e => e.Id == id);
+        }
     }
-
-
 }

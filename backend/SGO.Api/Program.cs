@@ -3,7 +3,7 @@ using SGO.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-
+using Ganss.Xss;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -52,7 +52,7 @@ builder.Services.AddDbContext<SgoDbContext>(options =>
         o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery))
 );
 
-
+builder.Services.AddSingleton<IHtmlSanitizer, HtmlSanitizer>();
 
 var app = builder.Build();
 

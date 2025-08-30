@@ -13,7 +13,9 @@ public class Project
     }
 
     public Guid Id { get; set; }
-    public Guid CompanyId { get; set; }
+    public int CompanyId { get; set; }
+    
+    public virtual Company Company { get; set; } = default!;
 
     [Required]
     [MaxLength(18)]
@@ -23,7 +25,7 @@ public class Project
     public string Name { get; set; } = default!;
     public string Contractor { get; set; } = default!;
     public string ServiceTaker { get; set; } = default!;
-    public string Responsible { get; set; } = string.Empty; 
+    public string Responsible { get; set; } = string.Empty;
     public string City { get; set; } = default!;
     public string State { get; set; } = default!;
     public ProjectStatus Status { get; set; }
@@ -42,9 +44,9 @@ public class Project
     public ICollection<Contract> Contracts { get; set; }
 
     public ICollection<ProjectExpense> Expenses { get; set; }
-    
+
     public ICollection<ProjectEmployee> ProjectEmployees { get; set; }
-    
+
 }
 
 public enum ProjectStatus

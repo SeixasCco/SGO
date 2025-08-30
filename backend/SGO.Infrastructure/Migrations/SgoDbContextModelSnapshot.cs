@@ -383,7 +383,10 @@ namespace SGO.Infrastructure.Migrations
                         .HasMaxLength(18)
                         .HasColumnType("character varying(18)");
 
-                    b.Property<Guid>("CompanyId")
+                    b.Property<int>("CompanyId")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("CompanyId1")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Contractor")
@@ -425,6 +428,8 @@ namespace SGO.Infrastructure.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CompanyId1");
 
                     b.ToTable("Projects");
                 });
@@ -493,6 +498,9 @@ namespace SGO.Infrastructure.Migrations
                     b.Property<bool>("IsAutomaticallyCalculated")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("IsVirtual")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Observations")
                         .HasColumnType("text");
 
@@ -556,6 +564,17 @@ namespace SGO.Infrastructure.Migrations
                         .HasForeignKey("ProjectExpenseId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("SGO.Core.Project", b =>
+                {
+                    b.HasOne("SGO.Core.Company", "Company")
+                        .WithMany()
+                        .HasForeignKey("CompanyId1")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Company");
                 });
 
             modelBuilder.Entity("SGO.Core.ProjectEmployee", b =>
