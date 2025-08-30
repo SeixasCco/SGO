@@ -37,6 +37,7 @@ namespace SGO.Api.Controllers
                 {
                     Id = c.Id,
                     ContractNumber = c.ContractNumber,
+                    Title = c.Title,
                     TotalValue = c.TotalValue,
                     StartDate = c.StartDate,
                     EndDate = c.EndDate
@@ -68,6 +69,8 @@ namespace SGO.Api.Controllers
                 ContractNumber = _sanitizer.Sanitize(contractDto.ContractNumber.Trim()),
                 Title = _sanitizer.Sanitize(contractDto.Title),
                 TotalValue = contractDto.TotalValue,
+                DownPaymentValue = contractDto.DownPaymentValue,
+                RetentionValue = contractDto.RetentionValue,
                 StartDate = contractDto.StartDate.ToUniversalTime(),
                 EndDate = contractDto.EndDate?.ToUniversalTime(),
                 Status = ContractStatus.Active               
@@ -90,6 +93,8 @@ namespace SGO.Api.Controllers
             contract.ContractNumber = _sanitizer.Sanitize(contractDto.ContractNumber);
             contract.Title =  _sanitizer.Sanitize(contractDto.Title);
             contract.TotalValue = contractDto.TotalValue;
+            contract.DownPaymentValue = contractDto.DownPaymentValue;
+            contract.RetentionValue = contractDto.RetentionValue;
             contract.StartDate = contractDto.StartDate.ToUniversalTime();
             contract.EndDate = contractDto.EndDate?.ToUniversalTime();
             contract.Observations = contractDto.Observations;

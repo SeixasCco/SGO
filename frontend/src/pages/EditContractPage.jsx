@@ -59,6 +59,8 @@ const EditContractPage = () => {
             contractNumber: formData.contractNumber,
             title: formData.title,
             totalValue: parseFloat(formData.totalValue),
+            downPaymentValue: parseFloat(formData.downPaymentValue) || 0,
+            retentionValue: parseFloat(formData.retentionValue) || 0,
             startDate: formData.startDate,
             endDate: formData.endDate || null,
             observations: formData.observations || ''
@@ -142,6 +144,12 @@ const EditContractPage = () => {
                             </FormGroup>
                             <FormGroup label="Valor Total (R$)" helpText="Use ponto (.) para decimais.">
                                 <StyledInput type="number" step="0.01" name="totalValue" min="0" value={formData.totalValue} onChange={handleChange} required />
+                            </FormGroup>
+                            <FormGroup label="Valor Entrada (R$)">
+                                <StyledInput type="number" step="0.01" name="downPaymentValue" min="0" value={formData.downPaymentValue} onChange={handleChange} />
+                            </FormGroup>
+                            <FormGroup label="Valor Retenção (R$)">
+                                <StyledInput type="number" step="0.01" name="retentionValue" min="0" value={formData.retentionValue} onChange={handleChange} />
                             </FormGroup>
                         </div>
                         

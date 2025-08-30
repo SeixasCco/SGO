@@ -16,6 +16,8 @@ public class Contract
     public string ContractNumber { get; set; } = default!;
     public string Title { get; set; } = default!;
     public decimal TotalValue { get; set; }
+    public decimal DownPaymentValue { get; set; } 
+    public decimal RetentionValue { get; set; }   
     public ContractStatus Status { get; set; }
     public DateTime StartDate { get; set; }
     public DateTime? EndDate { get; set; }

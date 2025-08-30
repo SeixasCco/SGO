@@ -3,21 +3,17 @@ import { Link } from 'react-router-dom';
 
 const ContractCard = ({ contract, onDelete, formatCurrency }) => (
     <div className="contract-card">
-        <div className="contract-card-content">
-            <div className="contract-card-main">
-                <div className="contract-card-icon">📄</div>
-                <div className="contract-card-info">
-                    <h3 className="contract-card-title">{contract.contractNumber}</h3>
-                    <p className="contract-card-period">
-                        {new Date(contract.startDate).toLocaleDateString('pt-BR')} - 
-                        {contract.endDate ? new Date(contract.endDate).toLocaleDateString('pt-BR') : 'Em andamento'}
-                    </p>
-                </div>
-            </div>
+        <div className="contract-card-content" style={{ gridTemplateColumns: 'auto 1fr auto', alignItems: 'center' }}>
+            <div className="contract-card-icon">📄</div>
             
-            <div className="contract-card-value">
-                <div className="contract-card-value-label">VALOR TOTAL</div>
-                <div className="contract-card-value-amount">{formatCurrency(contract.totalValue)}</div>
+            <div className="contract-card-info">
+                <h3 className="contract-card-title" style={{ fontSize: '1.1rem', marginBottom: '8px' }}>
+                    {contract.title} - <span style={{ color: '#059669', fontWeight: '700' }}>{formatCurrency(contract.totalValue)}</span>
+                </h3>
+                <p className="contract-card-period" style={{ margin: 0 }}>
+                    <strong>Início:</strong> {new Date(contract.startDate).toLocaleDateString('pt-BR', { timeZone: 'UTC' })} | 
+                    <strong> Fim:</strong> {contract.endDate ? new Date(contract.endDate).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : 'Em andamento'}
+                </p>
             </div>
             
             <div className="contract-card-actions">
@@ -28,7 +24,10 @@ const ContractCard = ({ contract, onDelete, formatCurrency }) => (
                 </Link>
                 <button 
                     className="form-button form-button-danger"
-                    onClick={() => onDelete(contract.id)}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onDelete(contract.id);
+                    }}
                 >
                     🗑️ Deletar
                 </button>

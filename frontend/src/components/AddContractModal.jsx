@@ -26,6 +26,8 @@ const AddContractModal = ({ isOpen, onClose, projectId, projectName, onContractA
         contractNumber: '',
         title: '',
         totalValue: '',
+        downPaymentValue: '',
+        retentionValue: '',
         startDate: new Date().toISOString().split('T')[0],
         endDate: '',
         observations: ''
@@ -45,6 +47,8 @@ const AddContractModal = ({ isOpen, onClose, projectId, projectName, onContractA
             contractNumber: '',
             title: '',
             totalValue: '',
+            downPaymentValue: '',
+            retentionValue: '',
             startDate: new Date().toISOString().split('T')[0],
             endDate: '',
             observations: ''
@@ -68,6 +72,8 @@ const AddContractModal = ({ isOpen, onClose, projectId, projectName, onContractA
                 contractNumber: formData.contractNumber.trim(),
                 title: formData.title.trim(),
                 totalValue: parseFloat(formData.totalValue) || 0,
+                downPaymentValue: parseFloat(formData.downPaymentValue) || 0,
+                retentionValue: parseFloat(formData.retentionValue) || 0,
                 startDate: formData.startDate,
                 endDate: formData.endDate || null,
                 observations: formData.observations.trim() || null
@@ -145,6 +151,30 @@ const AddContractModal = ({ isOpen, onClose, projectId, projectName, onContractA
                                 value={formData.totalValue}
                                 onChange={handleChange}
                                 required
+                                placeholder="0.00"
+                            />
+                        </FormGroup>
+
+                        <FormGroup label="Valor Entrada (R$)">
+                           <StyledInput
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                name="downPaymentValue"
+                                value={formData.downPaymentValue}
+                                onChange={handleChange}
+                                placeholder="0.00"
+                            />
+                        </FormGroup>
+
+                        <FormGroup label="Valor Retenção (R$)">
+                           <StyledInput
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                name="retentionValue"
+                                value={formData.retentionValue}
+                                onChange={handleChange}
                                 placeholder="0.00"
                             />
                         </FormGroup>

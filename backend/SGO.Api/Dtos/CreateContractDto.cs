@@ -11,8 +11,14 @@ namespace SGO.Api.Dtos
 
         [Range(0, double.MaxValue, ErrorMessage = "O valor total do contrato não pode ser negativo.")]
         public decimal TotalValue { get; set; }
+
+        [Range(0, double.MaxValue, ErrorMessage = "O valor de entrada não pode ser negativo.")]
+        public decimal DownPaymentValue { get; set; }
+
+        [Range(0, double.MaxValue, ErrorMessage = "O valor de retenção não pode ser negativo.")]
+        public decimal RetentionValue { get; set; }
+
         public DateTime StartDate { get; set; }
         public DateTime? EndDate { get; set; }
     }
 }
-
