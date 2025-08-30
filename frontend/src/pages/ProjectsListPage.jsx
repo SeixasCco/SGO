@@ -73,7 +73,9 @@ const ProjectsListPage = () => {
             </div>
 
             <div className="page-content">
-                 { <ProjectFilters onFilter={fetchProjects} /> }
+                 {/* CORREÇÃO APLICADA AQUI */}
+                 <ProjectFilters onFilter={fetchProjects} />
+                 
                 {isFormVisible && (
                     <div className="card" style={{marginBottom: '32px'}}>
                         <AddWorkForm onWorkAdded={handleWorkAdded} />

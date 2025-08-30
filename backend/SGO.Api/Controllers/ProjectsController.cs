@@ -35,30 +35,59 @@ namespace SGO.Api.Controllers
                 query = query.Where(p => p.CompanyId == filter.CompanyId.Value);
             }
 
+            if (!string.IsNullOrEmpty(filter.Contractor))
+            {
+                query = query.Where(p => p.Contractor.Contains(filter.Contractor));
+            }
+            if (!string.IsNullOrEmpty(filter.Cnpj))
+            {
+                query = query.Where(p => p.Cnpj.Contains(filter.Cnpj));
+            }
+            if (!string.IsNullOrEmpty(filter.ServiceTaker))
+            {
+                query = query.Where(p => p.ServiceTaker.Contains(filter.ServiceTaker));
+            }
+            if (!string.IsNullOrEmpty(filter.Cno))
+            {
+                query = query.Where(p => p.CNO != null && p.CNO.Contains(filter.Cno));
+            }
+            if (filter.Status.HasValue)
+            {
+                query = query.Where(p => p.Status == filter.Status.Value);
+            }
+            if (filter.StartDate.HasValue)
+            {
+                query = query.Where(p => p.StartDate >= filter.StartDate.Value);
+            }
+            if (filter.EndDate.HasValue)
+            {
+                query = query.Where(p => p.EndDate <= filter.EndDate.Value);
+            }
+
             var projects = await query
-        .Include(p => p.Company)
-        .Select(p => new ProjectDetailsDto
-        {            
-            Id = p.Id,
-            Name = p.Name,
-            Cnpj = p.Cnpj,
-            Status = p.Status,
-            StartDate = p.StartDate,
-            EndDate = p.EndDate,
-            CompanyId = p.CompanyId,
-            CompanyName = p.Company.Name,
-            Address = p.Address,
-            Description = p.Description,
-            IsAdditive = p.IsAdditive,
-            OriginalProjectId = p.OriginalProjectId,
-            Responsible = p.Responsible,
-            Contractor = p.Contractor,
-            ServiceTaker = p.ServiceTaker,
-            City = p.City,
-            State = p.State,
-            CNO = p.CNO
-        })
-        .ToListAsync();
+                .Include(p => p.Company)
+                .Select(p => new ProjectDetailsDto
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Cnpj = p.Cnpj,
+                    Status = p.Status,
+                    StartDate = p.StartDate,
+                    EndDate = p.EndDate,
+                    CompanyId = p.CompanyId,
+                    CompanyName = p.Company.Name,
+                    Address = p.Address,
+                    Description = p.Description,
+                    IsAdditive = p.IsAdditive,
+                    OriginalProjectId = p.OriginalProjectId,
+                    Responsible = p.Responsible,
+                    Contractor = p.Contractor,
+                    ServiceTaker = p.ServiceTaker,
+                    City = p.City,
+                    State = p.State,
+                    CNO = p.CNO
+                })
+                .ToListAsync();
 
             return Ok(projects);
         }

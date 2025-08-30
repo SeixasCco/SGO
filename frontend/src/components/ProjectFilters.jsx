@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-
 import FormGroup from './common/FormGroup';
 import StyledInput from './common/StyledInput';
 
 const ProjectFilters = ({ onFilter }) => {
     const [filters, setFilters] = useState({
-        city: '',
+        contractor: '',
+        cnpj: '',
         serviceTaker: '',
+        cno: '',
         status: '',
         startDate: '',
         endDate: ''
@@ -17,7 +18,7 @@ const ProjectFilters = ({ onFilter }) => {
         setFilters(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleFilterClick = () => {       
+    const handleFilterClick = () => {              
         const cleanFilters = Object.fromEntries(
             Object.entries(filters).filter(([_, value]) => value !== '')
         );
@@ -25,7 +26,7 @@ const ProjectFilters = ({ onFilter }) => {
     };
 
     const handleClearFilters = () => {
-        const emptyFilters = { city: '', serviceTaker: '', status: '', startDate: '', endDate: '' };
+        const emptyFilters = { contractor: '', cnpj: '', serviceTaker: '', cno: '', status: '', startDate: '', endDate: '' };
         setFilters(emptyFilters);
         onFilter({}); 
     };
@@ -49,14 +50,25 @@ const ProjectFilters = ({ onFilter }) => {
                 )}
             </div>
 
-            <div className="section-body">
-                <div className="form-grid" style={{ gridTemplateColumns: '1fr 1fr 1fr 180px 180px' }}>
-                    <FormGroup label="🏙️ Cidade">
-                        <StyledInput type="text" name="city" placeholder="Ex: São Paulo..." value={filters.city} onChange={handleChange} />
+            <div className="section-body">              
+                <div className="form-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px' }}>
+                    
+                    {/* Linha 1 */}
+                    <FormGroup label="✍️ Contratante">
+                        <StyledInput type="text" name="contractor" placeholder="Nome do contratante..." value={filters.contractor} onChange={handleChange} />
+                    </FormGroup>
+
+                    <FormGroup label="📄 CNPJ">
+                        <StyledInput type="text" name="cnpj" placeholder="Digite o CNPJ..." value={filters.cnpj} onChange={handleChange} />
                     </FormGroup>
 
                     <FormGroup label="🏢 Tomador do Serviço">
-                        <StyledInput type="text" name="serviceTaker" placeholder="Ex: Empresa ABC..." value={filters.serviceTaker} onChange={handleChange} />
+                        <StyledInput type="text" name="serviceTaker" placeholder="Nome do tomador..." value={filters.serviceTaker} onChange={handleChange} />
+                    </FormGroup>
+
+                    {/* Linha 2 */}
+                    <FormGroup label="🏗️ CNO da Obra">
+                        <StyledInput type="text" name="cno" placeholder="Digite o CNO..." value={filters.cno} onChange={handleChange} />
                     </FormGroup>
 
                     <FormGroup label="📊 Status da Obra">
@@ -70,17 +82,20 @@ const ProjectFilters = ({ onFilter }) => {
                             <option value="6">Cancelada</option>
                         </select>
                     </FormGroup>
+                    
+                    <div></div> 
 
-                    <FormGroup label="📅 Data Início">
+                    {/* Linha 3 - Datas */}
+                    <FormGroup label="📅 Período Inicial">
                         <StyledInput type="date" name="startDate" value={filters.startDate} onChange={handleChange} />
                     </FormGroup>
 
-                    <FormGroup label="🏁 Data Fim">
+                    <FormGroup label="🏁 Período Final">
                         <StyledInput type="date" name="endDate" value={filters.endDate} onChange={handleChange} />
                     </FormGroup>
                 </div>
 
-                <div style={{ textAlign: 'center', marginTop: '16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '24px' }}>
                     <button onClick={handleFilterClick} className="form-button">
                         🔍 Aplicar Filtros
                     </button>

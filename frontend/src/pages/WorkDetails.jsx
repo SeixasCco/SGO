@@ -11,7 +11,7 @@ import ExpenseRow from '../components/common/ExpenseRow';
 import AddContractModal from '../components/AddContractModal';
 import TeamManager from '../components/TeamManager';
 import AddExpenseModal from '../components/AddExpenseModal';
-import AttachmentPreviewModal from '../components/AttachmentPreviewModal'; 
+import AttachmentPreviewModal from '../components/AttachmentPreviewModal';
 
 import "../styles/forms.css";
 
@@ -180,7 +180,8 @@ const WorkDetails = () => {
                             </span>
                         </div>
                     </div>
-                    <Link to={`/project/edit/${project.id}`}>
+                    {/* ATENÇÃO: Verifique se a sua rota de edição é '/project/edit/:id' ou '/projects/:id/edit' */}
+                    <Link to={`/projects/${project.id}/edit`}>
                         <button className="form-button">
                             ✏️ Editar Obra
                         </button>
@@ -188,6 +189,26 @@ const WorkDetails = () => {
                 </div>
 
                 <div className="form-grid">
+                    {/* --- CAMPOS ADICIONADOS AQUI --- */}
+                    <InfoCard
+                        title="MATRIZ"
+                        value={project.companyName}
+                        icon="🏢"
+                        colorClass="info-card-purple" 
+                    />
+                    <InfoCard
+                        title="CNPJ DA OBRA"
+                        value={project.cnpj}
+                        icon="📄"
+                        colorClass="info-card-blue"
+                    />
+                     <InfoCard
+                        title="CONTRATANTE"
+                        value={project.contractor}
+                        icon="🤝"
+                        colorClass="info-card-orange"
+                    />
+                    {/* --- FIM DA ADIÇÃO --- */}
                     <InfoCard
                         title="CNO"
                         value={project.cno}
