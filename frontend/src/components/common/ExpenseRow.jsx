@@ -27,7 +27,7 @@ const ExpenseRow = ({ expense, onDelete, formatCurrency, onPreview }) => (
         </div>
        
         <div className="expense-actions">
-            {!expense.isAutomaticallyCalculated && ( 
+            {!expense.isVirtual && ( 
                 <>
                     <Link to={`/expense/edit/${expense.id}`}>
                         <button className="action-button action-button-edit">✏️</button>

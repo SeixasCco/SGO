@@ -99,46 +99,103 @@ namespace SGO.Api.Controllers
             var project = await _context.Projects
                 .Include(p => p.Company)
                 .Include(p => p.Contracts)
-                    .ThenInclude(c => c.Invoices)
                 .Include(p => p.Expenses)
                     .ThenInclude(e => e.CostCenter)
-                .Where(p => p.Id == id)
-                .FirstOrDefaultAsync();
+                .Include(p => p.ProjectEmployees)
+                    .ThenInclude(pe => pe.Employee)
+                .FirstOrDefaultAsync(p => p.Id == id);
 
             if (project == null)
             {
                 return NotFound();
             }
 
+            // Início da lógica reimplementada
+            var payrollCostCenter = await _context.CostCenters.FirstOrDefaultAsync(cc => cc.Name == "Folhas de pagamento");
+            if (payrollCostCenter == null)
+            {
+                return StatusCode(500, "Centro de Custo 'Folhas de pagamento' não encontrado.");
+            }
+
+            var laborCost = project.ProjectEmployees
+                .Where(pe => pe.StartDate > DateTime.MinValue)
+                .Sum(pe => (pe.Employee.Salary / 30m) * (decimal)(((pe.EndDate?.Date ?? DateTime.UtcNow.Date) - pe.StartDate.Date).TotalDays + 1));
+
+            var automatedExpense = project.Expenses.FirstOrDefault(e => e.IsAutomaticallyCalculated);
+
+            if (laborCost > 0)
+            {
+                if (automatedExpense != null)
+                {
+                    automatedExpense.Amount = Math.Round(laborCost, 2);
+                    automatedExpense.Date = DateTime.UtcNow;
+                }
+                else
+                {
+                    automatedExpense = new ProjectExpense
+                    {
+                        Id = Guid.NewGuid(),
+                        ProjectId = project.Id,
+                        CompanyId = project.CompanyId,
+                        ContractId = project.Contracts.FirstOrDefault()?.Id,
+                        Description = "Custo de Mão de Obra (Calculado)",
+                        Amount = Math.Round(laborCost, 2),
+                        Date = DateTime.UtcNow,
+                        CostCenterId = payrollCostCenter.Id,
+                        IsAutomaticallyCalculated = true
+                    };
+                    _context.ProjectExpenses.Add(automatedExpense);
+                }
+                await _context.SaveChangesAsync();
+            }
+            else if (automatedExpense != null)
+            {
+                _context.ProjectExpenses.Remove(automatedExpense);
+                await _context.SaveChangesAsync();
+            }
+            
+            var updatedProject = await _context.Projects
+                .Include(p => p.Company)
+                .Include(p => p.Contracts)
+                .Include(p => p.Expenses)
+                    .ThenInclude(e => e.CostCenter)
+                .Where(p => p.Id == id)
+                .FirstOrDefaultAsync();
+
+            if (updatedProject == null)
+            {
+                return NotFound();
+            }
+
             var projectDto = new ProjectDetailsDto
             {
-                Id = project.Id,
-                Name = project.Name,
-                Cnpj = project.Cnpj,
-                Status = project.Status,
-                StartDate = project.StartDate,
-                EndDate = project.EndDate,
-                CompanyId = project.CompanyId,
-                CompanyName = project.Company.Name,
-                Address = project.Address,
-                Description = project.Description,
-                IsAdditive = project.IsAdditive,
-                OriginalProjectId = project.OriginalProjectId,
-                Responsible = project.Responsible,
-                Contractor = project.Contractor,
-                ServiceTaker = project.ServiceTaker,
-                City = project.City,
-                State = project.State,
-                CNO = project.CNO,
-                Contracts = project.Contracts,
-                Expenses = project.Expenses.Select(e => new ExpenseListItemDto
+                Id = updatedProject.Id,
+                Name = updatedProject.Name,
+                Cnpj = updatedProject.Cnpj,
+                Status = updatedProject.Status,
+                StartDate = updatedProject.StartDate,
+                EndDate = updatedProject.EndDate,
+                CompanyId = updatedProject.CompanyId,
+                CompanyName = updatedProject.Company.Name,
+                Address = updatedProject.Address,
+                Description = updatedProject.Description,
+                IsAdditive = updatedProject.IsAdditive,
+                OriginalProjectId = updatedProject.OriginalProjectId,
+                Responsible = updatedProject.Responsible,
+                Contractor = updatedProject.Contractor,
+                ServiceTaker = updatedProject.ServiceTaker,
+                City = updatedProject.City,
+                State = updatedProject.State,
+                CNO = updatedProject.CNO,
+                Contracts = updatedProject.Contracts,
+                Expenses = updatedProject.Expenses.Select(e => new ExpenseListItemDto
                 {
                     Id = e.Id,
                     Date = e.Date,
                     Description = e.Description,
                     Amount = e.Amount,
-                    CostCenterName = e.CostCenter.Name,
-                    IsVirtual = e.IsVirtual,
+                    CostCenterName = e.CostCenter?.Name ?? "N/A",
+                    IsVirtual = e.IsAutomaticallyCalculated,
                     AttachmentPath = e.AttachmentPath
                 }).ToList()
             };

@@ -72,7 +72,7 @@ namespace SGO.Api.Controllers
 
         // PUT: api/projects/{projectId}/team/{allocationId}/end
         [HttpPut("{allocationId}/end")]
-        public async Task<IActionResult> EndTeamMemberAllocation(Guid projectId, Guid allocationId)
+        public async Task<IActionResult> EndTeamMemberAllocation(Guid projectId, Guid allocationId, [FromBody] EndAllocationDto dto)
         {
             var allocation = await _context.ProjectEmployees
                 .FirstOrDefaultAsync(pe => pe.Id == allocationId && pe.ProjectId == projectId);
@@ -82,7 +82,7 @@ namespace SGO.Api.Controllers
                 return NotFound();
             }
 
-            allocation.EndDate = DateTime.UtcNow;
+            allocation.EndDate = dto.EndDate.ToUniversalTime();
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -104,5 +104,10 @@ namespace SGO.Api.Controllers
 
             return NoContent();
         }
+    }
+
+    public class EndAllocationDto
+    {
+        public DateTime EndDate { get; set; }
     }
 }

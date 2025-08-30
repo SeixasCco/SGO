@@ -190,7 +190,7 @@ const WorkDetails = () => {
                         title="MATRIZ"
                         value={project.companyName}
                         icon="🏢"
-                        colorClass="info-card-purple"
+                        colorClass="info-card-purple"                        
                     />
                     <InfoCard
                         title="CNPJ DA OBRA"

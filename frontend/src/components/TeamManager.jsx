@@ -10,6 +10,12 @@ const TeamManager = ({ project, allocations, onTeamUpdate }) => {
     const [selectedEmployee, setSelectedEmployee] = useState('');
     const todayString = new Date().toISOString().split('T')[0];
     const [startDate, setStartDate] = useState(todayString);
+    
+    // State para o modal de 'Dar Baixa'
+    const [isEndAllocationModalOpen, setIsEndAllocationModalOpen] = useState(false);
+    const [allocationToEnd, setAllocationToEnd] = useState(null); // Agora armazena o objeto de alocação completo
+    const [endDate, setEndDate] = useState(todayString);
+
 
     useEffect(() => {
         if (project && project.companyId) {
@@ -17,7 +23,7 @@ const TeamManager = ({ project, allocations, onTeamUpdate }) => {
                 .then(res => setAvailableEmployees(res.data || []))
                 .catch(() => toast.error('Erro ao buscar funcionários.'));
         }
-    }, [project]);
+    }, [project, allocations]);
 
     const handleAddMember = () => {
         if (!selectedEmployee) {
@@ -35,15 +41,29 @@ const TeamManager = ({ project, allocations, onTeamUpdate }) => {
         });
     };
 
-    const handleEndAllocation = (allocationId) => {
-        if (window.confirm("Tem certeza que deseja dar baixa nesta alocação?")) {
-            const promise = axios.put(`http://localhost:5145/api/projects/${project.id}/team/${allocationId}/end`);
-            toast.promise(promise, {
-                loading: 'Dando baixa...',
-                success: 'Baixa realizada com sucesso!',
-                error: (err) => err.response?.data?.message || 'Falha ao dar baixa.'
-            }).then(() => onTeamUpdate());
+    const handleOpenEndAllocationModal = (allocation) => {
+        setAllocationToEnd(allocation);
+        setEndDate(todayString); // Reseta a data para o dia atual ao abrir
+        setIsEndAllocationModalOpen(true);
+    };
+
+    const handleConfirmEndAllocation = () => {
+        // Validação da data
+        if (new Date(endDate) < new Date(allocationToEnd.startDate)) {
+            toast.error('A data de saída não pode ser anterior à data de início da alocação.');
+            return;
         }
+
+        const promise = axios.put(`http://localhost:5145/api/projects/${project.id}/team/${allocationToEnd.allocationId}/end`, { endDate });
+        toast.promise(promise, {
+            loading: 'Dando baixa...',
+            success: 'Baixa realizada com sucesso!',
+            error: (err) => err.response?.data?.message || 'Falha ao dar baixa.'
+        }).then(() => {
+            onTeamUpdate();
+            setIsEndAllocationModalOpen(false);
+            setAllocationToEnd(null);
+        });
     };
 
     const handleDeleteAllocation = (allocationId) => {
@@ -68,9 +88,37 @@ const TeamManager = ({ project, allocations, onTeamUpdate }) => {
     };
     const formatDate = (dateString) => dateString ? new Date(dateString).toLocaleDateString('pt-BR', {timeZone: 'UTC'}) : '--/--/----';
     const formatCurrency = (value) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+    
+    const minEndDate = allocationToEnd ? new Date(allocationToEnd.startDate).toISOString().split('T')[0] : '';
+
 
     return (
         <div className="card">
+            {isEndAllocationModalOpen && (
+                <div className="modal-overlay">
+                    <div className="modal-container" style={{maxWidth: '400px'}}>
+                        <div className="modal-header">
+                             <h2 className="modal-title">🗓️ Finalizar Alocação</h2>
+                             <button onClick={() => setIsEndAllocationModalOpen(false)} className="modal-close-button">✕</button>
+                        </div>
+                        <div className="modal-body">
+                             <FormGroup label="Informe a data de saída do funcionário:">
+                                <StyledInput 
+                                    type="date" 
+                                    value={endDate} 
+                                    onChange={(e) => setEndDate(e.target.value)}
+                                    min={minEndDate}
+                                 />
+                             </FormGroup>
+                        </div>
+                        <div className="modal-footer">
+                             <button onClick={() => setIsEndAllocationModalOpen(false)} className="form-button-secondary">Cancelar</button>
+                             <button onClick={handleConfirmEndAllocation} className="form-button">Confirmar Baixa</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <h3 className="card-header">👥 Equipe da Obra</h3>
             
             <div className="section-body">
@@ -102,7 +150,7 @@ const TeamManager = ({ project, allocations, onTeamUpdate }) => {
                             <AllocationCard 
                                 key={alloc.allocationId}
                                 allocation={alloc}
-                                onEnd={handleEndAllocation}
+                                onEnd={() => handleOpenEndAllocationModal(alloc)}
                                 onDelete={handleDeleteAllocation}
                                 calculateCost={calculateAllocationCost}
                                 formatDate={formatDate}
