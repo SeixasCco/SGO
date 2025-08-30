@@ -8,12 +8,14 @@ import FormGroup from '../components/common/FormGroup';
 import StyledInput from '../components/common/StyledInput';
 import { useCompany } from '../context/CompanyContext';
 import AttachmentPreviewModal from '../components/AttachmentPreviewModal';
+import ExpenseCardDetails from '../components/common/ExpenseCardDetails'; 
 
-const AdminExpenseRow = ({ expense, formatCurrency, onDelete , onPreview}) => (
-    <div className="expense-row-card">
+const AdminExpenseRow = ({ expense, formatCurrency, onDelete, onPreview }) => (
+    <div className="expense-row"> 
         <div className="expense-info">
             <div className="expense-description">{expense.description}</div>
-            <div className="expense-date">
+            <ExpenseCardDetails expense={expense} />
+            <div className="expense-date" style={{marginTop: '8px', fontSize: '0.8rem'}}>
                 📅 {new Date(expense.date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}
             </div>
         </div>

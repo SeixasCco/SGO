@@ -164,7 +164,9 @@ namespace SGO.Api.Controllers
                     CostCenterName = e.CostCenter.Name,
                     Amount = e.Amount,
                     HasAttachment = !string.IsNullOrEmpty(e.AttachmentPath),
-                    AttachmentPath = e.AttachmentPath
+                    AttachmentPath = e.AttachmentPath,
+                    DetailsJson = e.DetailsJson, 
+                    Observations = e.Observations                    
                 })
                 .ToListAsync();
 
