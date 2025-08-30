@@ -36,19 +36,29 @@ namespace SGO.Api.Controllers
             }
 
             var projects = await query
-                .Include(p => p.Company)
-                .Select(p => new ProjectDetailsDto
-                {
-                    Id = p.Id,
-                    Name = p.Name,
-                    Cnpj = p.Cnpj,
-                    Status = p.Status,
-                    StartDate = p.StartDate,
-                    EndDate = p.EndDate,
-                    CompanyId = p.CompanyId,
-                    CompanyName = p.Company.Name
-                })
-                .ToListAsync();
+        .Include(p => p.Company)
+        .Select(p => new ProjectDetailsDto
+        {            
+            Id = p.Id,
+            Name = p.Name,
+            Cnpj = p.Cnpj,
+            Status = p.Status,
+            StartDate = p.StartDate,
+            EndDate = p.EndDate,
+            CompanyId = p.CompanyId,
+            CompanyName = p.Company.Name,
+            Address = p.Address,
+            Description = p.Description,
+            IsAdditive = p.IsAdditive,
+            OriginalProjectId = p.OriginalProjectId,
+            Responsible = p.Responsible,
+            Contractor = p.Contractor,
+            ServiceTaker = p.ServiceTaker,
+            City = p.City,
+            State = p.State,
+            CNO = p.CNO
+        })
+        .ToListAsync();
 
             return Ok(projects);
         }
@@ -70,7 +80,7 @@ namespace SGO.Api.Controllers
             {
                 return NotFound();
             }
-            
+
             var projectDto = new ProjectDetailsDto
             {
                 Id = project.Id,
@@ -123,8 +133,10 @@ namespace SGO.Api.Controllers
                 City = _sanitizer.Sanitize(createProjectDto.City),
                 State = _sanitizer.Sanitize(createProjectDto.State),
                 Status = createProjectDto.Status,
-                StartDate = createProjectDto.StartDate,
-                EndDate = createProjectDto.EndDate,
+                StartDate = DateTime.SpecifyKind(createProjectDto.StartDate, DateTimeKind.Utc),
+                EndDate = createProjectDto.EndDate.HasValue
+                    ? DateTime.SpecifyKind(createProjectDto.EndDate.Value, DateTimeKind.Utc)
+                    : null,
                 Address = createProjectDto.Address != null ? _sanitizer.Sanitize(createProjectDto.Address) : null,
                 Description = createProjectDto.Description != null ? _sanitizer.Sanitize(createProjectDto.Description) : null,
                 IsAdditive = createProjectDto.IsAdditive,
@@ -163,8 +175,10 @@ namespace SGO.Api.Controllers
             project.City = _sanitizer.Sanitize(updateProjectDto.City);
             project.State = _sanitizer.Sanitize(updateProjectDto.State);
             project.Status = updateProjectDto.Status;
-            project.StartDate = updateProjectDto.StartDate;
-            project.EndDate = updateProjectDto.EndDate;
+            project.StartDate = DateTime.SpecifyKind(updateProjectDto.StartDate, DateTimeKind.Utc);
+            project.EndDate = updateProjectDto.EndDate.HasValue
+                ? DateTime.SpecifyKind(updateProjectDto.EndDate.Value, DateTimeKind.Utc)
+                : null;
             project.Address = updateProjectDto.Address != null ? _sanitizer.Sanitize(updateProjectDto.Address) : null;
             project.Description = updateProjectDto.Description != null ? _sanitizer.Sanitize(updateProjectDto.Description) : null;
             project.IsAdditive = updateProjectDto.IsAdditive;
@@ -206,7 +220,7 @@ namespace SGO.Api.Controllers
 
             return NoContent();
         }
-        
+
         private bool ProjectExists(Guid id)
         {
             return _context.Projects.Any(e => e.Id == id);

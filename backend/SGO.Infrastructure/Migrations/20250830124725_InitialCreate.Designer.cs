@@ -12,8 +12,8 @@ using SGO.Infrastructure;
 namespace SGO.Infrastructure.Migrations
 {
     [DbContext(typeof(SgoDbContext))]
-    [Migration("20250830122647_AddIsVirtualToExpense")]
-    partial class AddIsVirtualToExpense
+    [Migration("20250830124725_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -386,10 +386,7 @@ namespace SGO.Infrastructure.Migrations
                         .HasMaxLength(18)
                         .HasColumnType("character varying(18)");
 
-                    b.Property<int>("CompanyId")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid>("CompanyId1")
+                    b.Property<Guid>("CompanyId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Contractor")
@@ -432,7 +429,7 @@ namespace SGO.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CompanyId1");
+                    b.HasIndex("CompanyId");
 
                     b.ToTable("Projects");
                 });
@@ -573,7 +570,7 @@ namespace SGO.Infrastructure.Migrations
                 {
                     b.HasOne("SGO.Core.Company", "Company")
                         .WithMany()
-                        .HasForeignKey("CompanyId1")
+                        .HasForeignKey("CompanyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

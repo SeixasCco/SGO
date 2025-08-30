@@ -68,8 +68,7 @@ namespace SGO.Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    CompanyId = table.Column<int>(type: "integer", nullable: false),
-                    CompanyId1 = table.Column<Guid>(type: "uuid", nullable: false),
+                    CompanyId = table.Column<Guid>(type: "uuid", nullable: false),
                     Cnpj = table.Column<string>(type: "character varying(18)", maxLength: 18, nullable: false),
                     CNO = table.Column<string>(type: "character varying(12)", maxLength: 12, nullable: true),
                     Name = table.Column<string>(type: "text", nullable: false),
@@ -90,8 +89,8 @@ namespace SGO.Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_Projects", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Projects_Companies_CompanyId1",
-                        column: x => x.CompanyId1,
+                        name: "FK_Projects_Companies_CompanyId",
+                        column: x => x.CompanyId,
                         principalTable: "Companies",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -185,6 +184,7 @@ namespace SGO.Infrastructure.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     CompanyId = table.Column<Guid>(type: "uuid", nullable: false),
                     ProjectId = table.Column<Guid>(type: "uuid", nullable: true),
+                    IsVirtual = table.Column<bool>(type: "boolean", nullable: false),
                     DetailsJson = table.Column<string>(type: "jsonb", nullable: true),
                     ContractId = table.Column<Guid>(type: "uuid", nullable: true),
                     Description = table.Column<string>(type: "text", nullable: false),
@@ -322,9 +322,9 @@ namespace SGO.Infrastructure.Migrations
                 column: "ProjectId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Projects_CompanyId1",
+                name: "IX_Projects_CompanyId",
                 table: "Projects",
-                column: "CompanyId1");
+                column: "CompanyId");
         }
 
         /// <inheritdoc />

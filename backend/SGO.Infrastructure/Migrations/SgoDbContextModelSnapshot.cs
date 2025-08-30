@@ -383,10 +383,7 @@ namespace SGO.Infrastructure.Migrations
                         .HasMaxLength(18)
                         .HasColumnType("character varying(18)");
 
-                    b.Property<int>("CompanyId")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid>("CompanyId1")
+                    b.Property<Guid>("CompanyId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Contractor")
@@ -429,7 +426,7 @@ namespace SGO.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CompanyId1");
+                    b.HasIndex("CompanyId");
 
                     b.ToTable("Projects");
                 });
@@ -570,7 +567,7 @@ namespace SGO.Infrastructure.Migrations
                 {
                     b.HasOne("SGO.Core.Company", "Company")
                         .WithMany()
-                        .HasForeignKey("CompanyId1")
+                        .HasForeignKey("CompanyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
